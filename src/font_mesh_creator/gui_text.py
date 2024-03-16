@@ -4,6 +4,16 @@ from src.font_rendering.text_master import TextMaster
 class GUIText:
 
     def __init__(self, text: str, font_size: float, font, position: list[float], max_line_length: float, centered: bool):
+        """
+        Creates a GUIText instance and automatically loads it to the TextMaster class.
+
+        :param text: text message of type string that should be rendered to the screen
+        :param font_size: the size of the font in pixels
+        :param font: instance of the FontType class
+        :param position: 2D position on the screen [0;1]
+        :param max_line_length: the maximum length a line can have, before starting a new line [0;1]
+        :param centered: bool determining if the text should be centered in its rect
+        """
         self.__text_string = text
         self.__font_size = font_size
         self.__font = font

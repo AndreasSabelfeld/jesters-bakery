@@ -56,7 +56,7 @@ def main():
 
     # ~~~~~~~~~~~~~TEXT~~~~~~~~~~~~~~~~
     TextMaster(loader)
-    font = FontType(loader.load_texture("candara"), "res/candara.fnt")
+    """font = FontType(loader.load_texture("candara"), "res/candara.fnt")
     text1 = GUIText("a sample text!", 15, font, [0, 0.02], 1, False)
     text1.set_color(1, 0, 0)
     text1.set_border_width(0.7)
@@ -68,7 +68,7 @@ def main():
     text3 = GUIText("a sample text!", 20, font, [0, 0.2], 1, False)
     text3.set_color(1, 0, 0)
     text3.set_border_width(0.7)
-    text3.set_border_edge(0.1)
+    text3.set_border_edge(0.1)"""
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~~~~CRATE~~~~~~~~~~~~~~~~
@@ -167,6 +167,8 @@ def main():
     master_renderer.set_fog_density(0.0035)
     master_renderer.set_fog_gradient(5)
     master_renderer.get_shadow_map_texture()
+
+    gui_renderer = GuiRenderer(loader)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~MOUSE PICKER~~~~~~~~~~~~
@@ -174,12 +176,12 @@ def main():
     object_picker = ObjectRaycaster(camera, master_renderer.get_projection_matrix())
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    fbo = FBO(1920, 1080, multi_target=False, depth_buffer_type=FBO.DEPTH_TEXTURE)
+
     # ~~~~~~~~~~~~~GAME~~~~~~~~~~~~~~~~~
     carry = Carry(terrain_picker, object_picker)
-    os = CoffeeMachineOS(coffee_machine_screen, [])
+    os = CoffeeMachineOS(coffee_machine_screen, loader, fbo, gui_renderer)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    fbo = FBO(1920, 1080, multi_target=False, depth_buffer_type=FBO.DEPTH_TEXTURE)
 
     while glutGetWindow() != 0:
         # game logic
@@ -190,8 +192,8 @@ def main():
         fps = 1 / Time.get_delta_time()
 
         player.move(collider_entities)
-        text2.set_text_string(str(['%.2f' % elem for elem in player.get_position()]))
-        text3.set_text_string(str('%.2f' % fps))
+        """text2.set_text_string(str(['%.2f' % elem for elem in player.get_position()]))
+        text3.set_text_string(str('%.2f' % fps))"""
         if not os.get_is_interacting():
             camera.move()
         carry.movable_entities = collider_entities
@@ -199,13 +201,14 @@ def main():
 
         master_renderer.render_shadow_map(entities, sun)
 
-        fbo.bind_frame_buffer()
+        """fbo.bind_frame_buffer()
         master_renderer.render_scene(entities, [], terrains, lights, camera, display)
         TextMaster.render()
-        fbo.unbind_frame_buffer()
+        fbo.unbind_frame_buffer()"""
 
         os.check_for_interaction(player, camera)
-        coffee_machine_screen.get_model().set_texture(ModelTexture(fbo.get_color_texture()))
+        os.render_screen()
+        # coffee_machine_screen.get_model().set_texture(ModelTexture(fbo.get_color_texture()))
 
         master_renderer.render_scene(entities, [], terrains, lights, camera, display)
         TextMaster.render()

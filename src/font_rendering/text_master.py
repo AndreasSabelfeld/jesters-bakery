@@ -3,7 +3,7 @@ from src.font_rendering.font_renderer import FontRenderer
 
 
 class TextMaster:
-
+    """Singleton class keeps track off all Text objects."""
     __loader = None
     __renderer = None
     __texts = dict()

@@ -5,11 +5,18 @@ from src.toolbox.maths import Maths
 
 
 class GuiRenderer:
-
+    """
+    2D orthographic texture renderer. Rendered textures will appear in front of everything.
+    """
     __positions = [-1, 1, -1, -1, 1, 1, 1, -1]
     __quad = None
 
     def __init__(self, loader):
+        """
+        creates GuiRenderer instance
+
+        :param loader: Loader object
+        """
         if GuiRenderer.__quad is None:
             GuiRenderer.__quad = loader.load_gui_to_vao(GuiRenderer.__positions, 2)
         self.__shader = GuiShader()
