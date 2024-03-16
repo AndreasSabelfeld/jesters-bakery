@@ -1,0 +1,28 @@
+#version 400
+
+in vec3 texture_coords;
+out vec4 out_Color;
+
+uniform samplerCube cube_map_1;
+uniform samplerCube cube_map_2;
+uniform float blend_factor;
+uniform vec3 fog_color;
+
+const float lower_limit = 0.0;
+const float upper_limit = 30.0;
+
+const float levels = 10.0;
+
+void main(void){
+    vec4 texture_1 = texture(cube_map_1, texture_coords);
+    vec4 texture_2 = texture(cube_map_2, texture_coords);
+    vec4 final_color = mix(texture_1, texture_2, blend_factor);
+
+    float amount = (final_color.r + final_color.g + final_color.b) / 3.0;
+    amount = floor(amount * levels) / levels;
+    final_color.rgb = amount * fog_color;
+
+    float factor = (texture_coords.y - lower_limit) / (upper_limit - lower_limit);
+    factor = clamp(factor, 0.0, 1.0);
+    out_Color = mix(vec4(fog_color, 1.0), final_color, factor);
+}

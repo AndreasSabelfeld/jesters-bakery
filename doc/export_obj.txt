@@ -1,0 +1,15 @@
+HOW TO EXPORT A BLENDER MODEL TO USE IT IN THIS ENGINE:
+
+Step 1:
+    File > Export > Wavefront (.obj)
+
+Step 2:
+    Check the following settings:
+    - Include Normals
+    - Include UVs
+    - Triangulate Faces
+
+Step 3:
+    Select these two:
+        Forward:    -Z Forward
+        Up:         Y Up
