@@ -56,7 +56,7 @@ def main():
 
     # ~~~~~~~~~~~~~TEXT~~~~~~~~~~~~~~~~
     TextMaster(loader)
-    """font = FontType(loader.load_texture("candara"), "res/candara.fnt")
+    font = FontType(loader.load_texture("candara"), "res/candara.fnt")
     text1 = GUIText("a sample text!", 15, font, [0, 0.02], 1, False)
     text1.set_color(1, 0, 0)
     text1.set_border_width(0.7)
@@ -68,7 +68,7 @@ def main():
     text3 = GUIText("a sample text!", 20, font, [0, 0.2], 1, False)
     text3.set_color(1, 0, 0)
     text3.set_border_width(0.7)
-    text3.set_border_edge(0.1)"""
+    text3.set_border_edge(0.1)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~~~~CRATE~~~~~~~~~~~~~~~~
@@ -180,7 +180,7 @@ def main():
 
     # ~~~~~~~~~~~~~GAME~~~~~~~~~~~~~~~~~
     carry = Carry(terrain_picker, object_picker)
-    os = CoffeeMachineOS(coffee_machine_screen, loader, fbo, gui_renderer)
+    coffee_os = CoffeeMachineOS(coffee_machine_screen, loader, fbo, gui_renderer)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     while glutGetWindow() != 0:
@@ -192,26 +192,20 @@ def main():
         fps = 1 / Time.get_delta_time()
 
         player.move(collider_entities)
-        """text2.set_text_string(str(['%.2f' % elem for elem in player.get_position()]))
-        text3.set_text_string(str('%.2f' % fps))"""
-        if not os.get_is_interacting():
+        text2.set_text_string(str(['%.2f' % elem for elem in player.get_position()]))
+        text3.set_text_string(str('%.2f' % fps))
+        if not coffee_os.get_is_interacting():
             camera.move()
         carry.movable_entities = collider_entities
         carry.update()
 
         master_renderer.render_shadow_map(entities, sun)
 
-        """fbo.bind_frame_buffer()
-        master_renderer.render_scene(entities, [], terrains, lights, camera, display)
-        TextMaster.render()
-        fbo.unbind_frame_buffer()"""
-
-        os.check_for_interaction(player, camera)
-        os.render_screen()
-        # coffee_machine_screen.get_model().set_texture(ModelTexture(fbo.get_color_texture()))
+        coffee_os.check_for_interaction(player, camera)
+        coffee_os.render_screen()
 
         master_renderer.render_scene(entities, [], terrains, lights, camera, display)
-        TextMaster.render()
+        TextMaster.render_not_specified(coffee_os.get_texts())
 
         glutSwapBuffers()         # needs to be called AFTER finished drawing
         glutMainLoopEvent()       # used to run openGL manually in a loop instead of glutMainLoop()

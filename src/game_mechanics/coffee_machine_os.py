@@ -42,14 +42,14 @@ class CoffeeMachineOS:
         self.__font = FontType(loader.load_texture("candara"), "res/candara.fnt")
         self.__product_entries = None
         self.__create_products()
-        self.__create_texts()
+        self.__texts = self.__create_texts()
 
     def render_screen(self) -> None:
         self.__fbo.bind_frame_buffer()
         guis = [self.__background_texture]
         guis.extend([product.get_icon() for product in self.__product_entries])
         self.__gui_renderer.render(guis)
-        TextMaster.render()
+        TextMaster.render_specified(self.__texts)
         self.__fbo.unbind_frame_buffer()
         self.__render_target.get_model().set_texture(ModelTexture(self.__fbo.get_color_texture()))
 
@@ -144,7 +144,8 @@ class CoffeeMachineOS:
             product.get_icon().set_position([(self.__icon_offset + 1/self.__rows*2 * (i % 4)) - 1,
                                              1 - (self.__icon_offset + 1/self.__columns*2 * (i // 4))])
 
-    def __create_texts(self) -> None:
+    def __create_texts(self) -> list:
+        texts = []
         for product in self.__product_entries:
             tmp_text = GUIText(product.get_name(),
                                25,
@@ -156,3 +157,8 @@ class CoffeeMachineOS:
             tmp_text.set_color(1, 0, 0)
             tmp_text.set_border_width(0.7)
             tmp_text.set_border_edge(0.1)
+            texts.append(tmp_text)
+        return texts
+
+    def get_texts(self) -> list:
+        return self.__texts

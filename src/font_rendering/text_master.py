@@ -13,8 +13,26 @@ class TextMaster:
         TextMaster.__loader = loader
 
     @classmethod
-    def render(cls):
+    def render(cls) -> None:
         cls.__renderer.render(cls.__texts)
+
+    @classmethod
+    def render_specified(cls, gui_texts: list) -> None:
+        specified_texts = {}
+        for key in cls.__texts.keys():
+            intersection = [value for value in cls.__texts[key] if value in gui_texts]
+            specified_texts.update({key: intersection})
+
+        cls.__renderer.render(specified_texts)
+
+    @classmethod
+    def render_not_specified(cls, gui_texts: list) -> None:
+        unspecified_texts = {}
+        for key in cls.__texts.keys():
+            difference = [value for value in cls.__texts[key] if value not in gui_texts]
+            unspecified_texts.update({key: difference})
+
+        cls.__renderer.render(unspecified_texts)
 
     @classmethod
     def load_text(cls, text) -> None:
