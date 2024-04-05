@@ -86,6 +86,9 @@ class GUIText:
     def get_number_of_lines(self) -> int:
         return self.__number_of_lines
 
+    def set_position(self, position: list[float]):
+        self.__position = position
+
     def get_position(self) -> list[float]:
         return self.__position
 

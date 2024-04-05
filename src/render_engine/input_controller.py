@@ -9,6 +9,7 @@ class KeyboardInput:
     """Class handling all the inputs from the opened OpenGL window"""
     __polygon_mode = False
     __keys_held = dict()
+    __cooldowns = dict()
 
     __scroll = 0
     __last_direction = 0
@@ -19,6 +20,18 @@ class KeyboardInput:
     __dx = 0.0
 
     __window_size = [0, 0]
+
+    @classmethod
+    def on_key_down(cls, key_to_check) -> bool:
+        if key_to_check not in cls.__cooldowns.keys():
+            cls.__cooldowns.update({key_to_check: False})
+        # if key is held down for the first frame
+        if cls.__keys_held.get(key_to_check) and not cls.__cooldowns.get(key_to_check):
+            cls.__cooldowns.update({key_to_check: True})  # key is on cooldown
+            return True
+        if not cls.__keys_held.get(key_to_check) and cls.__cooldowns.get(key_to_check):
+            cls.__cooldowns.update({key_to_check: False})  # key can be pressed again
+        return False
 
     @classmethod
     def key_down(cls, player_input, *args):
@@ -139,9 +152,12 @@ class ControllerInput(object):
         self._monitor_thread.daemon = True
         self._monitor_thread.start()
 
+    def restart_monitor_thread(self):
+        self._monitor_thread.start()
+
     @classmethod
     def _monitor_controller(cls):
-        while True:
+        while cls.is_using_controller:
             events = get_gamepad()
             for event in events:
                 if event.code == 'ABS_Y':

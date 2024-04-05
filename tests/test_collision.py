@@ -205,7 +205,7 @@ def main():
         coffee_os.render_screen()
 
         master_renderer.render_scene(entities, [], terrains, lights, camera, display)
-        TextMaster.render_not_specified(coffee_os.get_texts())
+        TextMaster.render_not_specified(coffee_os.get_all_texts())
 
         glutSwapBuffers()         # needs to be called AFTER finished drawing
         glutMainLoopEvent()       # used to run openGL manually in a loop instead of glutMainLoop()

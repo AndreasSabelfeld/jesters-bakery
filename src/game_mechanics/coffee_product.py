@@ -1,4 +1,7 @@
+from src.font_mesh_creator.font_type import FontType
+from src.font_mesh_creator.gui_text import GUIText
 from src.guis.gui_texture import GuiTexture
+from src.game_mechanics.coffe_page import CoffeePage
 
 
 class CoffeeProduct:
@@ -14,7 +17,9 @@ class CoffeeProduct:
 
     ICON_SIZE = 128  # pixels
 
-    def __init__(self, name: str, icon: GuiTexture, brew_length: float, container_type: int) -> None:
+    all_texts = []
+
+    def __init__(self, name: str, icon: GuiTexture, brew_length: float, container_type: int, loader) -> None:
         """
         Creates a new CoffeeProduct instance
 
@@ -27,6 +32,21 @@ class CoffeeProduct:
         self.__icon = icon
         self.__brew_length = brew_length
         self.__container_type = container_type
+        self.__font = FontType(loader.load_texture("candara"), "res/candara.fnt")
+        self.__icon_size = 0.175    # same as in CoffeeMachineOS class
+        self.__text_offset = 0.08   # same as in CoffeeMachineOS class
+        self.__text = GUIText(self.__name,
+                              25,
+                              self.__font,
+                              [(self.__icon.get_position()[0] + 1) / 2 - self.__icon_size / 2,
+                               (1 - self.__icon.get_position()[1]) / 2 + self.__text_offset],
+                              self.__icon_size,
+                              True)
+        self.__text.set_color(1, 0, 0)
+        self.__text.set_border_width(0.7)
+        self.__text.set_border_edge(0.1)
+        CoffeePage.add_product(self)
+        CoffeeProduct.all_texts.append(self.__text)
 
     def get_name(self) -> str:
         return self.__name
@@ -39,3 +59,6 @@ class CoffeeProduct:
 
     def get_container_type(self) -> int:
         return self.__container_type
+
+    def get_text(self) -> GUIText:
+        return self.__text

@@ -26,6 +26,8 @@ class GuiRenderer:
         glBindVertexArray(self.__quad.get_vao_id())
         glEnableVertexAttribArray(0)
         glDisable(GL_DEPTH_TEST)
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         for gui in guis:
             glActiveTexture(GL_TEXTURE0)
             glBindTexture(GL_TEXTURE_2D, gui.get_texture())
@@ -33,6 +35,7 @@ class GuiRenderer:
             self.__shader.load_transformation(matrix)
             glDrawArrays(GL_TRIANGLE_STRIP, 0, self.__quad.get_vertex_count())
         glEnable(GL_DEPTH_TEST)
+        glDisable(GL_BLEND)
         glDisableVertexAttribArray(0)
         glBindVertexArray(0)
         self.__shader.stop()

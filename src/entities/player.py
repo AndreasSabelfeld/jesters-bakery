@@ -69,8 +69,9 @@ class ThirdPersonPlayer(Player):
         self.__speed_vector = vec3()
         self.__collision_detection = Detection(vec3(1, 1, 1))
         self.__collision_recursion_depth = 0
-        # self.__controller = ControllerInput(False)
-        # self.__controller.set_sensitivity(7)
+        self.__controller = ControllerInput(False)
+        self.__controller.set_sensitivity(7)
+        self.__player_under_control = True
         super().__init__(model, position, rot_x, rot_y, rot_z, scale)
         Player.set_instance(self)
 
@@ -137,7 +138,10 @@ class ThirdPersonPlayer(Player):
         self.__collision_recursion_depth += 1
         return self.collide_with_world(new_base_point, new_velocity_vector, entities)
 
-    def move(self, collider_entities=None):
+    def move(self, collider_entities=None) -> None:
+        if not self.__player_under_control:
+            return
+
         self.__speed_vector = [0, 0, 0]
         self.__check_inputs()
         # super().increase_rotation(0, self.__current_turn_speed * Time.get_delta_time(), 0)
@@ -178,6 +182,9 @@ class ThirdPersonPlayer(Player):
 
     def get_speed_vector(self) -> vec3:
         return self.__speed_vector
+
+    def set_player_under_control(self, is_under_control: bool) -> None:
+        self.__player_under_control = is_under_control
 
     def __check_inputs(self):
         """Private function getting inputs from the input controller"""

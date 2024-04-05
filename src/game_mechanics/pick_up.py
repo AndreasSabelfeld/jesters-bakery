@@ -19,9 +19,6 @@ class Carry:
         self.__forward_distance = 3
         self.__sideways_distance = 2
 
-        self.__right_cooldown = False
-        self.__left_cooldown = False
-
     def update(self) -> None:
         keys_held = KeyboardInput.get_keys_held()
         relevant_entities = [_ for _ in self.movable_entities if
@@ -31,56 +28,47 @@ class Carry:
         if self.__is_carrying_left:
             self.__move_left()
 
-        # giant if-else-mess incoming
-        if keys_held.get(b'e'):
-            if not self.__right_cooldown:
-                self.__right_cooldown = True
-                if self.__is_carrying_right:
-                    # copy the list and remove the carrying object to prevent collision detection with itself
-                    entity = self.__object_picker.update(relevant_entities)
-                    if entity is not None:
+        if KeyboardInput.on_key_down(b'e'):
+            if self.__is_carrying_right:
+                # copy the list and remove the carrying object to prevent collision detection with itself
+                entity = self.__object_picker.update(relevant_entities)
+                if entity is not None:
+                    self.__is_carrying_right = False
+                    self.__carrying_object_right.set_position(self.__object_picker.get_current_object_point())
+                    self.__carrying_object_right = None
+                else:
+                    self.__terrain_picker.update()
+                    terrain = self.__terrain_picker.get_current_terrain_point()
+                    if terrain is not None:
                         self.__is_carrying_right = False
-                        self.__carrying_object_right.set_position(self.__object_picker.get_current_object_point())
+                        self.__carrying_object_right.set_position(terrain)
                         self.__carrying_object_right = None
-                    else:
-                        self.__terrain_picker.update()
-                        terrain = self.__terrain_picker.get_current_terrain_point()
-                        if terrain is not None:
-                            self.__is_carrying_right = False
-                            self.__carrying_object_right.set_position(terrain)
-                            self.__carrying_object_right = None
-                else:
-                    entity = self.__object_picker.update(relevant_entities)
-                    if entity is not None:
-                        self.__is_carrying_right = True
-                        self.__carrying_object_right = entity
-        else:
-            self.__right_cooldown = False
+            else:
+                entity = self.__object_picker.update(relevant_entities)
+                if entity is not None:
+                    self.__is_carrying_right = True
+                    self.__carrying_object_right = entity
 
-        if keys_held.get(b'q'):
-            if not self.__left_cooldown:
-                self.__left_cooldown = True
-                if self.__is_carrying_left:
-                    # copy the list and remove the carrying object to prevent collision detection with itself
-                    entity = self.__object_picker.update(relevant_entities)
-                    if entity is not None:
-                        self.__is_carrying_left = False
-                        self.__carrying_object_left.set_position(self.__object_picker.get_current_object_point())
-                        self.__carrying_object_left = None
-                    else:
-                        self.__terrain_picker.update()
-                        terrain = self.__terrain_picker.get_current_terrain_point()
-                        if terrain is not None:
-                            self.__is_carrying_left = False
-                            self.__carrying_object_left.set_position(terrain)
-                            self.__carrying_object_left = None
+        if KeyboardInput.on_key_down(b'q'):
+            if self.__is_carrying_left:
+                # copy the list and remove the carrying object to prevent collision detection with itself
+                entity = self.__object_picker.update(relevant_entities)
+                if entity is not None:
+                    self.__is_carrying_left = False
+                    self.__carrying_object_left.set_position(self.__object_picker.get_current_object_point())
+                    self.__carrying_object_left = None
                 else:
-                    entity = self.__object_picker.update(relevant_entities)
-                    if entity is not None:
-                        self.__is_carrying_left = True
-                        self.__carrying_object_left = entity
-        else:
-            self.__left_cooldown = False
+                    self.__terrain_picker.update()
+                    terrain = self.__terrain_picker.get_current_terrain_point()
+                    if terrain is not None:
+                        self.__is_carrying_left = False
+                        self.__carrying_object_left.set_position(terrain)
+                        self.__carrying_object_left = None
+            else:
+                entity = self.__object_picker.update(relevant_entities)
+                if entity is not None:
+                    self.__is_carrying_left = True
+                    self.__carrying_object_left = entity
 
     def __move_right(self):
         self.__terrain_picker.update()
