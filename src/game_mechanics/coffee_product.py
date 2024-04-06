@@ -33,10 +33,10 @@ class CoffeeProduct:
         self.__brew_length = brew_length
         self.__container_type = container_type
         self.__font = FontType(loader.load_texture("candara"), "res/candara.fnt")
-        self.__icon_size = 0.175    # same as in CoffeeMachineOS class
-        self.__text_offset = 0.08   # same as in CoffeeMachineOS class
+        self.__icon_size = 0.125    # same as in CoffeeMachineOS class
+        self.__text_offset = 0.04   # same as in CoffeeMachineOS class
         self.__text = GUIText(self.__name,
-                              25,
+                              18,
                               self.__font,
                               [(self.__icon.get_position()[0] + 1) / 2 - self.__icon_size / 2,
                                (1 - self.__icon.get_position()[1]) / 2 + self.__text_offset],
@@ -59,6 +59,9 @@ class CoffeeProduct:
 
     def get_container_type(self) -> int:
         return self.__container_type
+
+    def get_font(self) -> FontType:
+        return self.__font
 
     def get_text(self) -> GUIText:
         return self.__text

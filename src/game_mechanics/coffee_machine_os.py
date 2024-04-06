@@ -33,18 +33,22 @@ class CoffeeMachineOS:
         self.__gui_renderer = gui_renderer
 
         self.__icon_offset = 0.25
-        self.__text_offset = 0.08
-        self.__icon_size = 0.175
+        self.__text_offset = 0.04
+        self.__icon_size = 0.125
         self.__rows = 4
+        self.__size_adjustment = 2
         self.__columns = self.__rows
         self.__background_texture = GuiTexture(loader.load_texture("coffee_machine_background"), [0, 0], [1, 1])
         self.__selected_texture = GuiTexture(loader.load_texture("selected_test"), [0, 0], [self.__icon_size * 1.1,
                                                                                             self.__icon_size * 1.1])
+        self.__cancel_texture = GuiTexture(loader.load_texture("cancel_test"), [-2, -2], [0.05, 0.05])
         self.__selected_position = [0, 0]  # x y, top-left corner is 0, 0
         self.__current_page = 0
         self.__product_entries = None
         self.__create_products()
         self.__texts = self.get_page_texts()
+
+        self.__brewing_queue = []
 
     def render_screen(self) -> None:
         self.__move_cursor()
@@ -53,7 +57,8 @@ class CoffeeMachineOS:
         self.__update_positions_of_products()
         self.__product_entries = CoffeePage.get_instances()[self.__current_page].get_products()
         guis.extend([product.get_icon() for product in self.__product_entries])
-        guis.append(self.__selected_texture)
+        guis.extend(self.__brewing_queue)
+        guis.extend([self.__selected_texture, self.__cancel_texture])
         self.__gui_renderer.render(guis)
         self.__texts = self.get_page_texts()
         TextMaster.render_specified(self.__texts)
@@ -68,14 +73,30 @@ class CoffeeMachineOS:
             if KeyboardInput.on_key_down(b'a'):
                 self.__selected_position[0] -= 1 if self.__selected_position[0] > 0 else 0
             if KeyboardInput.on_key_down(b's'):
-                self.__selected_position[1] += 1 if self.__selected_position[1] < 3 else 0
+                self.__selected_position[1] += 1 if self.__selected_position[1] < 4 else 0
             if KeyboardInput.on_key_down(b'd'):
                 if self.__selected_position[0] < 4 * len(CoffeePage.get_instances()) - 1:
                     self.__selected_position[0] += 1
+            if KeyboardInput.on_key_down(b'\r'):    # enter key
+                if self.__selected_position[1] == 4:
+                    self.__remove_beverage_from_queue()
+                else:
+                    index = self.__selected_position[1] * 4 + self.__selected_position[0] % 4
+                    if index < len(self.__product_entries):
+                        self.__add_beverage_to_queue(self.__product_entries[index])
+
         self.__current_page = self.__selected_position[0] // 4
-        # selected texture loops back from x-position 4 to 1, but internally the position is being counted further
-        self.__selected_texture.set_position([(self.__icon_offset + 1/self.__rows*2 * (self.__selected_position[0] % 4)) - 1,
-                                             1 - (self.__icon_offset + 1/self.__columns*2 * self.__selected_position[1])])
+
+        # if the last row is selected, the brewing queue cancel button should appear
+        if self.__selected_position[1] == 4:
+            self.__selected_texture.set_position([-2, -2])  # out of bounds
+            self.__cancel_texture.set_position([self.__icon_offset - 0.95, -0.70])
+        else:
+            # else move the cancel button out of bounds
+            self.__cancel_texture.set_position([-2, -2])
+            # selected texture loops back from x-position 4 to 1, but internally the position is being counted further
+            self.__selected_texture.set_position([(self.__icon_offset + 1/(self.__rows + self.__size_adjustment)*2 * (self.__selected_position[0] % 4)) - 1,
+                                                 1 - (self.__icon_offset + 1/(self.__columns + self.__size_adjustment)*2 * self.__selected_position[1])])
 
     def check_for_interaction(self, player, camera) -> None:
         distance = sqrt((self.__render_target.get_position()[0] - player.get_position()[0])**2 +
@@ -128,10 +149,26 @@ class CoffeeMachineOS:
     def __update_positions_of_products(self) -> None:
         self.__product_entries = CoffeePage.get_instances()[self.__current_page].get_products()
         for i, product in enumerate(self.__product_entries):
-            product.get_icon().set_position([(self.__icon_offset + 1 / self.__rows * 2 * (i % 4)) - 1,
-                                             1 - (self.__icon_offset + 1 / self.__columns * 2 * (i // 4))])
+            product.get_icon().set_position([(self.__icon_offset + 1 / (self.__rows + self.__size_adjustment) * 2 * (i % 4)) - 1,
+                                             1 - (self.__icon_offset + 1 / (self.__columns + self.__size_adjustment) * 2 * (i // 4))])
             product.get_text().set_position([(product.get_icon().get_position()[0] + 1) / 2 - self.__icon_size / 2,
                                              (1 - product.get_icon().get_position()[1]) / 2 + self.__text_offset])
+
+    def __add_beverage_to_queue(self, beverage: CoffeeProduct) -> None:
+        if len(self.__brewing_queue) >= 7:
+            return
+        self.__brewing_queue.append(GuiTexture(beverage.get_icon().get_texture(),
+                                               [(len(self.__brewing_queue) * self.__icon_size * 2 + self.__icon_offset) - 1, -0.75],
+                                               [self.__icon_size * 0.9, self.__icon_size * 0.9]))
+
+    def __remove_beverage_from_queue(self) -> None:
+        if self.__brewing_queue:
+            self.__brewing_queue.pop(0)
+            self.__update_queue()
+
+    def __update_queue(self) -> None:
+        for i in range(len(self.__brewing_queue)):
+            self.__brewing_queue[i].set_position([(i * self.__icon_size * 2 + self.__icon_offset) - 1, -0.75])
 
     def get_page_texts(self) -> list:
         self.__product_entries = CoffeePage.get_instances()[self.__current_page].get_products()
