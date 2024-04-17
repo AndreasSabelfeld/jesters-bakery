@@ -16,7 +16,11 @@ class Plane:
     @classmethod
     def from_triangle(cls, p1: vec3, p2: vec3, p3: vec3):
         normal = (p2 - p1).cross(p3 - p1)
-        normal = normal.normalize()
+        try:
+            normal = normal.normalize()
+        except ZeroDivisionError:
+            # I don't know what exactly in a 3D model causes the normal to be non-existent...
+            pass
         return cls(p1, normal)
 
     def is_front_facing_to(self, direction: list[float]):

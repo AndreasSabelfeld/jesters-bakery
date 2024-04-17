@@ -12,7 +12,7 @@ class CoffeeMachineOS:
 
     BACKGROUND_TEXTURE_SIZE = [1920, 1080]
 
-    def __init__(self, render_target, loader, fbo, gui_renderer) -> None:
+    def __init__(self, render_target, loader, obj_loader, fbo, gui_renderer) -> None:
         """
         Creates new CoffeeMachineOS instance.
 
@@ -29,6 +29,7 @@ class CoffeeMachineOS:
         self.__original_camera_angles = None
 
         self.__loader = loader
+        self.__obj_loader = obj_loader
         self.__fbo = fbo
         self.__gui_renderer = gui_renderer
 
@@ -117,7 +118,7 @@ class CoffeeMachineOS:
         self.__original_camera_pos = camera.get_position()
         self.__original_camera_angles = [camera.get_yaw(), camera.get_pitch(), camera.get_roll()]
         offset = vec3(0, 2.5, 3.5)
-        rot_mat = mat3().rotation(self.__render_target.get_rot_x(), vec3(1, 1, 1))
+        rot_mat = mat3().rotation(self.__render_target.get_rot_y(), vec3(0, 1, 0))
         offset = rot_mat * offset
 
         position = vec3(self.__render_target.get_position()) + offset
@@ -144,7 +145,8 @@ class CoffeeMachineOS:
                                      [self.__icon_size, self.__icon_size]),
                           7,
                           container_type=CoffeeProduct.COFFEE_CUP,
-                          loader=self.__loader)
+                          loader=self.__loader,
+                          obj_loader=self.__obj_loader)
 
     def __update_positions_of_products(self) -> None:
         self.__product_entries = CoffeePage.get_instances()[self.__current_page].get_products()

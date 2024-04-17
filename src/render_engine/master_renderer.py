@@ -5,6 +5,7 @@ from src.skybox.skybox_renderer import SkyboxRenderer
 from src.normal_mapping.normal_mapping_renderer import NormalMappingRenderer
 from src.shadows.shadow_map_master_renderer import ShadowMapMasterRenderer
 from src.shadows.shadow_box import ShadowBox
+from src.game_mechanics.game_object import GameObject
 from .entity_renderer import EntityRenderer
 from .terrain_renderer import TerrainRenderer
 from .display_manager import DisplayManager
@@ -122,6 +123,10 @@ class MasterRenderer:
         self.__terrains.append(terrain)
 
     def process_entity(self, entity) -> None:
+        if isinstance(entity, GameObject):
+            if entity.has_child():
+                self.process_entity(entity.get_child())
+            entity = entity.get_entity()
         entity_model = entity.get_model()
         batch = self.__entities.get(entity_model)
         if batch is not None:

@@ -1,4 +1,5 @@
 from src.collision.collision_packet import CollisionPacket
+from src.game_mechanics.game_object import GameObject
 from src.collision.utility import convert_to_ellipsoid_space
 from src.pycgtypes import vec3, mat4
 from functools import lru_cache
@@ -30,9 +31,12 @@ class Detection:
         return vertices
 
     def detect_object(self, entity) -> vec3 | None:
+        if isinstance(entity, GameObject):
+            if entity.has_child():
+                self.detect_object(entity.get_child())
+            entity = entity.get_entity()
         vertices = self.get_all_tris(entity)
         indices = entity.get_model().get_raw_model().get_indices()
-
         for i in range(len(indices)//3):
             self.__packet.check_triangle(vertices[indices[3*i+0]],
                                          vertices[indices[3*i+1]],
