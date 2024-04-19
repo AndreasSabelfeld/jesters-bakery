@@ -2,7 +2,7 @@ from tests import test_cube, test_island, test_forest, test_cel_shading, test_te
 
 
 def main():
-    lvl = 6
+    lvl = 7
     match lvl:
         case 0: test_island.main()
         case 1: test_forest.main()

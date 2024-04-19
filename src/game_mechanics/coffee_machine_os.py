@@ -11,6 +11,7 @@ from src.pycgtypes import vec3, mat3
 class CoffeeMachineOS:
 
     BACKGROUND_TEXTURE_SIZE = [1920, 1080]
+    __NAME = "COFFEE_MACHINE"
 
     def __init__(self, render_target, loader, obj_loader, fbo, gui_renderer) -> None:
         """
@@ -48,6 +49,13 @@ class CoffeeMachineOS:
         self.__product_entries = None
         self.__create_products()
         self.__texts = self.get_page_texts()
+
+        self.__positioned_coffees = [None, None, None]      # tea, coffee1, coffee2
+        y, z = 0.35, 2.1
+        self.__offset_positions = (vec3(-0.75, y, z) * self.__render_target.get_scale(),
+                                   vec3(0, y, z) * self.__render_target.get_scale(),
+                                   vec3(-0.25, y, z) * self.__render_target.get_scale(),
+                                   vec3(0.25, y, z) * self.__render_target.get_scale())
 
         self.__brewing_queue = []
 
@@ -117,7 +125,7 @@ class CoffeeMachineOS:
     def move_in_front_screen(self, camera) -> None:
         self.__original_camera_pos = camera.get_position()
         self.__original_camera_angles = [camera.get_yaw(), camera.get_pitch(), camera.get_roll()]
-        offset = vec3(0, 2.5, 3.5)
+        offset = vec3(0, 2.5, 3.5) * self.__render_target.get_scale()
         rot_mat = mat3().rotation(self.__render_target.get_rot_y(), vec3(0, 1, 0))
         offset = rot_mat * offset
 
@@ -143,10 +151,10 @@ class CoffeeMachineOS:
                           GuiTexture(self.__loader.load_texture("product_icon_test"),
                                      [0, 0],
                                      [self.__icon_size, self.__icon_size]),
-                          7,
+                          brew_length=7,
+                          allows_double=False,
                           container_type=CoffeeProduct.COFFEE_CUP,
-                          loader=self.__loader,
-                          obj_loader=self.__obj_loader)
+                          loader=self.__loader)
 
     def __update_positions_of_products(self) -> None:
         self.__product_entries = CoffeePage.get_instances()[self.__current_page].get_products()
@@ -185,3 +193,34 @@ class CoffeeMachineOS:
 
     def get_text_offset(self) -> float:
         return self.__text_offset
+
+    def set_coffee(self, index: int, entity) -> None:
+        if index <= 2:
+            self.__positioned_coffees[index] = entity
+            match index:
+                case 0: entity.set_position(vec3(self.__render_target.get_position()) + self.__offset_positions[index])
+                case 1: entity.set_position(vec3(self.__render_target.get_position()) + self.__offset_positions[index])
+                case 2:
+                    self.get_coffee(1).set_position(vec3(self.__render_target.get_position()) + self.__offset_positions[index])
+                    entity.set_position(vec3(self.__render_target.get_position()) + self.__offset_positions[index + 1])
+
+    def get_coffee(self, index: int):
+        if index <= 2:
+            return self.__positioned_coffees[index]
+
+    def get_coffee_list(self) -> list:
+        """Returns a copy of the list of coffees"""
+        return self.__positioned_coffees.copy()
+
+    def remove_coffee(self, index: int):
+        if index <= 2:
+            self.__positioned_coffees[index] = None
+            if self.get_coffee(1) is None and self.get_coffee(2) is not None:
+                self.set_coffee(1, self.get_coffee(2))
+                self.remove_coffee(2)
+            if self.get_coffee(2) is None and self.get_coffee(1) is not None:
+                self.get_coffee(1).set_position(vec3(self.__render_target.get_position()) + self.__offset_positions[1])
+
+    @classmethod
+    def get_name(cls) -> str:
+        return cls.__NAME

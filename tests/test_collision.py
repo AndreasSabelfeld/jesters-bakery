@@ -109,42 +109,6 @@ def main():
     static_barrel_model = TexturedModel(barrel_model, barrel_texture)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    # ~~~~~~~~~COFFEE MACHINE~~~~~~~~~~~
-    coffee_machine_model = obj_loader.load_obj_model("coffee_machine", loader)
-    coffee_machine_texture = ModelTexture(loader.load_texture("coffee_machine_texture"))
-    coffee_machine_texture.set_shine_damper(10)
-    coffee_machine_texture.set_reflectivity(0.5)
-    static_coffee_machine_model = TexturedModel(coffee_machine_model, coffee_machine_texture)
-
-    coffee_machine_screen_model = obj_loader.load_obj_model("coffee_machine_screen", loader)
-    coffee_machine_screen_texture = ModelTexture(loader.load_texture("white"))
-    coffee_machine_screen_texture.set_shine_damper(10)
-    coffee_machine_screen_texture.set_reflectivity(0.5)
-    static_coffee_machine_screen_model = TexturedModel(coffee_machine_screen_model, coffee_machine_screen_texture)
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    # ~~~~~~~~~~COFFEE CUPS~~~~~~~~~~~~~
-    small_coffee_model = obj_loader.load_obj_model("small_coffee_cup", loader)
-    small_coffee_texture = ModelTexture(loader.load_texture("coffee_cup_texture"))
-    small_coffee_texture.set_shine_damper(10)
-    small_coffee_texture.set_reflectivity(0.5)
-    static_small_coffee_model = TexturedModel(small_coffee_model, small_coffee_texture)
-
-    big_coffee_model = obj_loader.load_obj_model("big_coffee_cup", loader)
-    static_big_coffee_model = TexturedModel(big_coffee_model, small_coffee_texture)
-
-    tea_pot_model = obj_loader.load_obj_model("tea_pot", loader)
-    static_tea_pot_model = TexturedModel(tea_pot_model, small_coffee_texture)
-    tea_pot_lid_model = obj_loader.load_obj_model("tea_pot_lid", loader)
-    static_tea_pot_lid_model = TexturedModel(tea_pot_lid_model, small_coffee_texture)
-
-    small_glass_model = obj_loader.load_obj_model("small_glass", loader)
-    static_small_glass_model = TexturedModel(small_glass_model, small_coffee_texture)
-
-    big_glass_model = obj_loader.load_obj_model("big_glass", loader)
-    static_big_glass_model = TexturedModel(big_glass_model, small_coffee_texture)
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     # ~~~~~~~~~~~~TERRAIN~~~~~~~~~~~~~~~
     background_texture = TerrainTexture(loader.load_texture("grass"))
     r_texture = TerrainTexture(loader.load_texture("mud"))
@@ -164,32 +128,12 @@ def main():
     colliders = []
 
     # ~~~~~~~~~~~~~ENTITIES~~~~~~~~~~~~~
-    grass_block = Entity(static_grass_model, [50, 27.39, 50], 0, 0, 0, 1)
+    grass_block = Entity(static_grass_model, [50, 27.39, 50], 0, 0, 0, 10)
     crate = Entity(static_crate_model, [80, 35, 50], 0, 0, 0, 0.01)
     boulder = Entity(static_boulder_model, [80, 27.39, 70], 0, 0, 0, 0.1)
     barrel = Entity(static_barrel_model, [80, 27.39, 90], 0, 0, 0, 1)
 
-    coffee_machine = Entity(static_coffee_machine_model, [70, 29.39, 50], 0, 0, 0, 1)
-    coffee_machine_screen = Entity(static_coffee_machine_screen_model, [70, 29.39, 50], 0, 0, 0, 1)
-    coffee_machine_game_object = GameObject(coffee_machine, coffee_machine_screen)
-
-    small_coffee = Entity(static_small_coffee_model, [70 + 2, 29.39, 50], 0, 0, 0, 1)
-    small_coffee_game_object = GameObject(small_coffee)
-
-    big_coffee = Entity(static_big_coffee_model, [70 + 4, 29.39, 50], 0, 0, 0, 1)
-    big_coffee_game_object = GameObject(big_coffee)
-
-    tea_pot = Entity(static_tea_pot_model, [70 + 6, 29.39, 50], 0, 0, 0, 1)
-    tea_pot_lid = Entity(static_tea_pot_lid_model, [70 + 6, 29.39, 50], 0, 0, 0, 1)
-
-    small_glass = Entity(static_small_glass_model, [70 + 8, 29.39, 50], 0, 0, 0, 1)
-    small_glass_game_object = GameObject(small_glass)
-
-    big_glass = Entity(static_big_glass_model, [70 + 10, 29.39, 50], 0, 0, 0, 1)
-    big_glass_game_object = GameObject(big_glass)
-
-    entities = [grass_block, crate, boulder, coffee_machine_game_object, small_coffee_game_object, big_coffee_game_object, tea_pot,
-                tea_pot_lid, small_glass_game_object, big_glass_game_object]
+    entities = [grass_block]
     collider_entities = entities.copy()
 
     # ~~~~~~~~~~~~LIGHTS~~~~~~~~~~~~~~~~
@@ -223,10 +167,7 @@ def main():
 
     # ~~~~~~~~~~~~~GAME~~~~~~~~~~~~~~~~~
     carry = Carry(terrain_picker, object_picker)
-    coffee_os = CoffeeMachineOS(coffee_machine_screen, loader, obj_loader, fbo, gui_renderer)
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    i = 0
     while glutGetWindow() != 0:
         # game logic
         Time.set_current_time(Time.time_current_time())
@@ -236,33 +177,21 @@ def main():
         fps = 1 / Time.get_delta_time()
 
         player.move(collider_entities)
+        camera.move()
         text2.set_text_string(str(['%.2f' % elem for elem in player.get_position()]))
         text3.set_text_string(str('%.2f' % fps))
-        if not coffee_os.get_is_interacting():
-            camera.move()
         carry.movable_entities = collider_entities
         carry.update()
-        small_coffee_game_object.set_child(Entity(CoffeeProduct.COFFEE_LVLS[i % 4],
-                                                small_coffee_game_object.get_entity().get_position(),
-                                                0, 0, 0, 1))
-        big_coffee_game_object.set_child(Entity(CoffeeProduct.CAPPUCCINO_LVLS[i % 4],
-                                                big_coffee_game_object.get_entity().get_position(),
-                                                0, 0, 0, 1))
-        big_glass_game_object.set_child(Entity(CoffeeProduct.BIG_GLASS_LVLS[i % 4],
-                                               big_glass_game_object.get_entity().get_position(),
-                                               0, 0, 0, 1))
-        small_glass_game_object.set_child(Entity(CoffeeProduct.SMALL_GLASS_LVLS[i % 4],
-                                               small_glass_game_object.get_entity().get_position(),
-                                               0, 0, 0, 1))
-        i += 1
 
         master_renderer.render_shadow_map(entities, sun)
 
-        coffee_os.check_for_interaction(player, camera)
-        coffee_os.render_screen()
+        object_picker.update(collider_entities)
+        if b'f' in KeyboardInput.get_keys_held():
+            ent = Entity(static_grass_model, object_picker.get_current_object_point(), 0, 0, 0, 1)
+            entities.append(ent)
 
         master_renderer.render_scene(entities, [], terrains, lights, camera, display)
-        TextMaster.render_not_specified(coffee_os.get_all_texts())
+        TextMaster.render()
 
         glutSwapBuffers()         # needs to be called AFTER finished drawing
         glutMainLoopEvent()       # used to run openGL manually in a loop instead of glutMainLoop()

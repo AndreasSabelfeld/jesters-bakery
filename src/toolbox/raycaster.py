@@ -5,6 +5,7 @@ from src.terrain.terrain import Terrain
 from src.collision.detection import Detection
 from src.collision.utility import convert_to_ellipsoid_space, convert_to_r3_space
 from src.pycgtypes import vec3
+from math import sqrt
 
 
 class Raycaster:
@@ -128,9 +129,9 @@ class ObjectRaycaster(Raycaster):
         ray = vec3(self.get_current_ray()).normalize() * self.__RAY_RANGE
         self.__collision_detection.get_packet().r3_velocity = ray
 
-        e_space_position = convert_to_ellipsoid_space(self.__collision_detection.get_packet().e_radius,
+        e_space_position = convert_to_ellipsoid_space(vec3(1),
                                                       self.__collision_detection.get_packet().r3_position)
-        e_space_velocity = convert_to_ellipsoid_space(self.__collision_detection.get_packet().e_radius,
+        e_space_velocity = convert_to_ellipsoid_space(vec3(1),
                                                       self.__collision_detection.get_packet().r3_velocity)
 
         self.__collision_detection.get_packet().velocity = e_space_velocity
@@ -138,11 +139,18 @@ class ObjectRaycaster(Raycaster):
         self.__collision_detection.get_packet().base_point = e_space_position
         self.__collision_detection.get_packet().found_collision = False
         self.__collision_detection.get_packet().nearest_distance = 999
+
+        self.__sort_list(collider_entities)
         for entity in collider_entities:
             self.__collision_detection.detect_object(entity)
             if self.__collision_detection.get_packet().found_collision:
                 self.__current_object_point = list(self.__collision_detection.get_packet().intersection_point)
                 return entity
 
-    def get_current_object_point(self):
+    def __sort_list(self, collider_entities: list) -> None:
+        collider_entities.sort(key=lambda x: abs(sqrt((x.get_position()[0] - self.get_camera().get_position()[0])**2 +
+                                                      (x.get_position()[1] - self.get_camera().get_position()[1])**2 +
+                                                      (x.get_position()[2] - self.get_camera().get_position()[2])**2)))
+
+    def get_current_object_point(self) -> list[float]:
         return self.__current_object_point
