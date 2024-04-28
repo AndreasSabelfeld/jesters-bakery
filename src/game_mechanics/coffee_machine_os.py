@@ -49,6 +49,7 @@ class CoffeeMachineOS:
         self.__selected_texture = GuiTexture(loader.load_texture("selected_test"), [0, 0], [self.__icon_size * 1.1,
                                                                                             self.__icon_size * 1.1])
         self.__cancel_texture = GuiTexture(loader.load_texture("cancel_test"), [-2, -2], [0.05, 0.05])
+        self.__start_texture = GuiTexture(loader.load_texture("start_test"), [-2, -2], [0.05, 0.05])
         self.__selected_position = [0, 0]  # x y, top-left corner is 0, 0
         self.__current_page = 0
         self.__product_entries = None
@@ -89,7 +90,7 @@ class CoffeeMachineOS:
         self.__product_entries = CoffeePage.get_instances()[self.__current_page].get_products()
         guis.extend([product.get_icon() for product in self.__product_entries])
         guis.extend([product.get_icon() for product in self.__brewing_queue])
-        guis.extend([self.__selected_texture, self.__cancel_texture])
+        guis.extend([self.__selected_texture, self.__cancel_texture, self.__start_texture])
         self.__gui_renderer.render(guis)
         self.__texts = self.get_page_texts()
         TextMaster.render_specified(self.__texts)
@@ -169,7 +170,7 @@ class CoffeeMachineOS:
                     self.__selected_position[0] = self.__current_page * 4
                 self.__selected_position[1] -= 1 if self.__selected_position[1] > 0 else 0
             if KeyboardInput.on_key_down(b's'):
-                self.__selected_position[1] += 1 if self.__selected_position[1] < 4 else 0
+                self.__selected_position[1] += 1 if self.__selected_position[1] < 5 else 0
                 if self.__selected_position[1] == 4:
                     self.__selected_position[0] = 0
             if KeyboardInput.on_key_down(b'a'):
@@ -182,6 +183,8 @@ class CoffeeMachineOS:
             if KeyboardInput.on_key_down(b'\r'):    # enter key
                 if self.__selected_position[1] == 4:
                     self.__remove_beverage_from_queue(self.__selected_position[0])
+                elif self.__selected_position[1] == 5:
+                    self.__start_making_coffee()
                 else:
                     index = self.__selected_position[1] * 4 + self.__selected_position[0] % 4
                     if index < len(self.__product_entries):
@@ -191,7 +194,11 @@ class CoffeeMachineOS:
             # page should not change if we are currently deleting products from the queue
             self.__current_page = self.__selected_position[0] // 4
 
-        # if the last row is selected and any product are in queue, the brewing queue cancel button should appear
+        self.__move_cancel_button()
+        self.__move_start_button()
+
+    def __move_cancel_button(self) -> None:
+        # if the fourth row is selected and any product are in queue, the brewing queue cancel button should appear
         if self.__selected_position[1] == 4 and self.__brewing_queue:
             self.__selected_texture.set_position([-2, -2])  # out of bounds
             self.__cancel_texture.set_position([self.__icon_offset * (self.__selected_position[0] + 1) - 0.95, -0.70])
@@ -199,8 +206,17 @@ class CoffeeMachineOS:
             # else move the cancel button out of bounds
             self.__cancel_texture.set_position([-2, -2])
             # selected texture loops back from x-position 4 to 1, but internally the position is being counted further
-            self.__selected_texture.set_position([(self.__icon_offset + 1/(self.__rows + self.__size_adjustment)*2 * (self.__selected_position[0] % 4)) - 1,
-                                                 1 - (self.__icon_offset + 1/(self.__columns + self.__size_adjustment)*2 * self.__selected_position[1])])
+            self.__selected_texture.set_position([(self.__icon_offset + 1 / (self.__rows + self.__size_adjustment) * 2 * (self.__selected_position[0] % 4)) - 1,
+                                                  1 - (self.__icon_offset + 1 / (self.__columns + self.__size_adjustment) * 2 * self.__selected_position[1])])
+
+    def __move_start_button(self) -> None:
+        # if the fifth row is selected and any product are in queue, the brewing queue start button should appear
+        if self.__selected_position[1] == 5 and self.__brewing_queue:
+            self.__selected_texture.set_position([-2, -2])  # out of bounds
+            self.__start_texture.set_position([self.__icon_offset - 0.95, -0.8])
+        else:
+            # else move the start button out of bounds
+            self.__start_texture.set_position([-2, -2])
 
     def __check_bools(self):
         if self.__coffee_buffer:
