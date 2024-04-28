@@ -2,6 +2,7 @@ from OpenGL.GLUT import *
 from OpenGL.GL import *
 import random
 
+from src.game_mechanics.coffee_container import CoffeeContainer
 from src.render_engine.display_manager import DisplayManager
 from src.render_engine.gui_renderer import GuiRenderer
 from src.render_engine.master_renderer import MasterRenderer
@@ -54,6 +55,7 @@ def main():
     loader = Loader()
     obj_loader = OBJLoader()
     normal_mapped_obj_loader = NormalMappedOBJLoader()
+    CoffeeContainer.add_loaders(loader, obj_loader)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~~~~TEXT~~~~~~~~~~~~~~~~
@@ -187,23 +189,28 @@ def main():
     small_coffee = Entity(static_small_coffee_model, [70 + 2, 29.39, 50], 0, 0, 0, 1)
     small_coffee_collider = Entity(static_small_coffee_collider, [70 + 2, 29.39, 50], 0, 0, 0, 1)
     small_coffee_game_object = GameObject(small_coffee, name="COFFEE", collider=small_coffee_collider)
+    small_coffee_game_object.set_attachment(CoffeeContainer(CoffeeContainer.COFFEE_CUP, small_coffee_game_object))
 
     big_coffee = Entity(static_big_coffee_model, [70 + 4, 29.39, 50], 0, 0, 0, 1)
     big_coffee_collider = Entity(static_big_coffee_collider, [70 + 4, 29.39, 50], 0, 0, 0, 1)
     big_coffee_game_object = GameObject(big_coffee, name="COFFEE", collider=big_coffee_collider)
+    big_coffee_game_object.set_attachment(CoffeeContainer(CoffeeContainer.CAPPUCCINO_CUP, big_coffee_game_object))
 
     tea_pot = Entity(static_tea_pot_model, [70 + 6, 29.39, 50], 0, 0, 0, 1)
     tea_pot_lid = Entity(static_tea_pot_lid_model, [70 + 6, 29.39, 50], 0, 0, 0, 1)
     tea_pot_collider = Entity(static_tea_pot_collider, [70 + 6, 29.39, 50], 0, 0, 0, 1)
     tea_pot_game_object = GameObject(tea_pot, tea_pot_lid, name="TEA", collider=tea_pot_collider)
+    tea_pot_game_object.set_attachment(CoffeeContainer(CoffeeContainer.TEA_POT, tea_pot_game_object))
 
     small_glass = Entity(static_small_glass_model, [70 + 8, 29.39, 50], 0, 0, 0, 1)
     small_glass_collider = Entity(static_small_glass_collider, [70 + 8, 29.39, 50], 0, 0, 0, 1)
     small_glass_game_object = GameObject(small_glass, name="COFFEE", collider=small_glass_collider)
+    small_glass_game_object.set_attachment(CoffeeContainer(CoffeeContainer.SMALL_GLASS, small_glass_game_object))
 
     big_glass = Entity(static_big_glass_model, [70 + 10, 29.39, 50], 0, 0, 0, 1)
     big_glass_collider = Entity(static_big_glass_collider, [70 + 10, 29.39, 50], 0, 0, 0, 1)
     big_glass_game_object = GameObject(big_glass, name="COFFEE", collider=big_glass_collider)
+    big_glass_game_object.set_attachment(CoffeeContainer(CoffeeContainer.BIG_GLASS, big_glass_game_object))
 
     entities = [coffee_machine_game_object, small_coffee_game_object, big_coffee_game_object, tea_pot_game_object, small_glass_game_object, big_glass_game_object]
     collider_entities = entities.copy()
@@ -269,7 +276,6 @@ def main():
 
         coffee_os.check_for_interaction(player, camera)
         coffee_os.render_screen()
-        print(coffee_os.get_coffee_list())
 
         master_renderer.render_scene(entities, [], terrains, lights, camera, display)
         TextMaster.render_not_specified(coffee_os.get_all_texts())

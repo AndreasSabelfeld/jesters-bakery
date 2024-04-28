@@ -67,7 +67,7 @@ class GameObject:
     def get_entity(self) -> Entity:
         return self.__entity
 
-    def get_child(self):
+    def get_child(self) -> Entity:
         return self.__child
 
     def set_child(self, child: Entity) -> None:

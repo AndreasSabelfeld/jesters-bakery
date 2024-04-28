@@ -11,9 +11,9 @@ class CoffeeProduct:
     """
 
     ESPRESSO_CUP = 0
-    COFFEE_CUP = 1
-    CAPPUCCINO_CUP = 2
-    SMALL_GLASS = 3
+    SMALL_GLASS = 1
+    COFFEE_CUP = 2
+    CAPPUCCINO_CUP = 3
     BIG_GLASS = 4
     TEA_POT = 5
 
@@ -22,7 +22,7 @@ class CoffeeProduct:
     all_texts = []
 
     def __init__(self, name: str, icon: GuiTexture, brew_length: float, container_type: int, allows_double: bool,
-                 loader) -> None:
+                 loader, texture, add_to_coffee_page: bool = True) -> None:
         """
         Creates a new CoffeeProduct instance
 
@@ -37,6 +37,7 @@ class CoffeeProduct:
         self.__container_type = container_type
         self.__allows_double = allows_double
         self.__loader = loader
+        self.__texture = texture
         self.__font = FontType(self.__loader.load_texture("candara"), "res/candara.fnt")
         self.__icon_size = 0.125    # same as in CoffeeMachineOS class
         self.__text_offset = 0.04   # same as in CoffeeMachineOS class
@@ -50,7 +51,8 @@ class CoffeeProduct:
         self.__text.set_color(1, 0, 0)
         self.__text.set_border_width(0.7)
         self.__text.set_border_edge(0.1)
-        CoffeePage.add_product(self)
+        if add_to_coffee_page:
+            CoffeePage.add_product(self)
         CoffeeProduct.all_texts.append(self.__text)
 
     def get_name(self) -> str:
@@ -70,3 +72,9 @@ class CoffeeProduct:
 
     def get_text(self) -> GUIText:
         return self.__text
+
+    def is_allow_double(self) -> bool:
+        return self.__allows_double
+
+    def get_texture(self):
+        return self.__texture
