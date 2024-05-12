@@ -98,20 +98,63 @@ class KeyboardInput:
         return cls.__scroll
 
     @classmethod
-    def get_dx(cls):
+    def get_dx(cls) -> float:
         return cls.__dx
 
     @classmethod
-    def get_dy(cls):
+    def get_dy(cls) -> float:
         return cls.__dy
 
     @classmethod
-    def set_window_size(cls, size: list[int]):
+    def set_window_size(cls, size: list[int]) -> None:
         cls.__window_size = size
 
     @classmethod
-    def get_window_size(cls):
+    def get_window_size(cls) -> list[int, int]:
         return cls.__window_size
+
+    @classmethod
+    def get_cooldowns(cls) -> dict:
+        return cls.__cooldowns
+
+
+class KeyboardInputListener(KeyboardInput):
+    """Individual Keyboard Listener working with instances"""
+
+    def __init__(self):
+        self.__cooldowns = dict()
+
+    def on_key_down(self, key_to_check) -> bool:
+        if key_to_check not in self.__cooldowns.keys():
+            self.__cooldowns.update({key_to_check: False})
+        # if key is held down for the first frame
+        if self.get_keys_held().get(key_to_check) and not self.__cooldowns.get(key_to_check):
+            self.__cooldowns.update({key_to_check: True})  # key is on cooldown
+            return True
+        if not self.get_keys_held().get(key_to_check) and self.__cooldowns.get(key_to_check):
+            self.__cooldowns.update({key_to_check: False})  # key can be pressed again
+        return False
+
+    def get_keys_held(self) -> dict:
+        return super().get_keys_held()
+
+    def get_mouse_keys_held(self) -> dict:
+        return super().get_mouse_keys_held()
+
+    def get_mouse_pos(self) -> list[float]:
+        return super().get_mouse_pos()
+
+    def get_scroll(self) -> int:
+        return super().get_scroll()
+
+    def get_dx(self) -> float:
+        return super().get_dx()
+
+    def get_dy(self) -> float:
+        return super().get_dx()
+
+    def get_cooldowns(self) -> dict:
+        return self.__cooldowns
 
 
 # copied from https://stackoverflow.com/questions/46506850/how-can-i-get-input-from-an-xbox-one-controller-in-python

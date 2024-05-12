@@ -12,10 +12,6 @@ class StaticShader(ShaderProgram):
     __FRAGMENT_FILE = f"{path[0]}/src/shaders/fragmentShader.glsl"
 
     def __init__(self):
-        if ShaderProgram.get_is_cel():
-            # if cel shading is activated use another shader
-            StaticShader.__FRAGMENT_FILE = f"{path[0]}/src/shaders/cel_fragmentShader.glsl"
-
         self.__location_transformation_matrix: int = 0  # no location
         self.__location_projection_matrix: int = 0
         self.__location_view_matrix: int = 0

@@ -16,7 +16,7 @@ class ShadowMapMasterRenderer:
     referenced from outside the shadows package.
     """
 
-    __SHADOW_MAP_SIZE = 2048
+    __SHADOW_MAP_SIZE = 2 ** 13
 
     def __init__(self, camera):
         """

@@ -32,8 +32,7 @@ class CoffeeContainer:
             level = 3
         match container_type:
             case 0:
-                ...
-                # TODO
+                return TexturedModel(self.__obj_loader.load_obj_model(f"espresso_cup_lvl_{level}", self.__loader), texture)
             case 1:
                 return TexturedModel(self.__obj_loader.load_obj_model(f"small_glass_lvl_{level}", self.__loader), texture)
             case 2:
@@ -47,13 +46,13 @@ class CoffeeContainer:
 
     def fill(self, texture) -> None:
         self.__level += 1
-        self.__parent_entity.set_child(Entity(self.get_model(self.__container_type, self.__level, texture),
-                                              self.__parent_entity.get_position(), 0, 0, 0, 1))
+        self.__parent_entity.set_child_0(Entity(self.get_model(self.__container_type, self.__level, texture),
+                                                self.__parent_entity.get_position(), 0, 0, 0, 1))
 
     def set_level(self, level: int, texture) -> None:
         self.__level = level
-        self.__parent_entity.set_child(Entity(self.get_model(self.__container_type, self.__level, texture),
-                                              self.__parent_entity.get_position(), 0, 0, 0, 1))
+        self.__parent_entity.set_child_0(Entity(self.get_model(self.__container_type, self.__level, texture),
+                                                self.__parent_entity.get_position(), 0, 0, 0, 1))
 
     def get_level(self) -> int:
         return self.__level

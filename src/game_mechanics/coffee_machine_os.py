@@ -18,7 +18,7 @@ class CoffeeMachineOS:
     BACKGROUND_TEXTURE_SIZE = [1920, 1080]
     __NAME = "COFFEE_MACHINE"
 
-    def __init__(self, render_target, loader, obj_loader, fbo, gui_renderer) -> None:
+    def __init__(self, render_target, loader, obj_loader, fbo, gui_renderer, object_picker) -> None:
         """
         Creates new CoffeeMachineOS instance.
 
@@ -29,7 +29,6 @@ class CoffeeMachineOS:
         """
         self.__render_target = render_target
         self.__interaction_key = b'f'
-        self.__interaction_radius = 10
         self.__is_interacting = False
         self.__original_camera_pos = None
         self.__original_camera_angles = None
@@ -38,6 +37,7 @@ class CoffeeMachineOS:
         self.__obj_loader = obj_loader
         self.__fbo = fbo
         self.__gui_renderer = gui_renderer
+        self.__object_picker = object_picker
 
         self.__icon_offset = 0.25
         self.__text_offset = 0.04
@@ -97,20 +97,17 @@ class CoffeeMachineOS:
         self.__fbo.unbind_frame_buffer()
         self.__render_target.get_model().set_texture(ModelTexture(self.__fbo.get_color_texture()))
 
-    def check_for_interaction(self, player, camera) -> None:
-        distance = sqrt((self.__render_target.get_position()[0] - player.get_position()[0])**2 +
-                        (self.__render_target.get_position()[1] - player.get_position()[1])**2 +
-                        (self.__render_target.get_position()[2] - player.get_position()[2])**2)
-        if distance < self.__interaction_radius:
-            if KeyboardInput.on_key_down(self.__interaction_key):
-                if not self.__is_interacting:
-                    self.__is_interacting = True
-                    player.set_player_under_control(False)
-                    self.__move_in_front_screen(camera)
-                else:
-                    self.__is_interacting = False
-                    player.set_player_under_control(True)
-                    self.__move_camera_to_original_pos(camera)
+    def interact(self, player, camera, listener) -> None:
+        if listener.on_key_down(self.__interaction_key):
+            collision = self.__object_picker.update([self.__render_target])
+            if self.__is_interacting:
+                self.__is_interacting = False
+                player.set_player_under_control(True)
+                self.__move_camera_to_original_pos(camera)
+            elif collision == self.__render_target:
+                self.__is_interacting = True
+                player.set_player_under_control(False)
+                self.__move_in_front_screen(camera)
 
     def get_is_interacting(self) -> bool:
         return self.__is_interacting
@@ -242,7 +239,7 @@ class CoffeeMachineOS:
         position = vec3(self.__render_target.get_position()) + offset
 
         camera.set_position(position)
-        camera.set_yaw(0)
+        camera.set_yaw(-self.__render_target.get_rot_y())
         camera.set_pitch(0)
         camera.set_roll(0)
 
@@ -260,7 +257,7 @@ class CoffeeMachineOS:
                                      [self.__icon_size, self.__icon_size]),
                           brew_length=7,
                           allows_double=False,
-                          container_type=CoffeeProduct.CAPPUCCINO_CUP,
+                          container_type=CoffeeProduct.ESPRESSO_CUP,
                           loader=self.__loader,
                           texture=ModelTexture(self.__loader.load_texture("grass_block")))
 

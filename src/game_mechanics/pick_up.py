@@ -23,13 +23,16 @@ class Carry:
         self.__forward_distance = 3
         self.__sideways_distance = 2
 
-    def update(self) -> None:
+    def update(self, can_pick_up: bool = True) -> None:
         relevant_entities = [_ for _ in self.movable_entities if
                              _ not in (self.__carrying_object_right, self.__carrying_object_left)]
         if self.__is_carrying_right:
             self.__move_right()
         if self.__is_carrying_left:
             self.__move_left()
+
+        if not can_pick_up:
+            return
 
         if KeyboardInput.on_key_down(b'e'):
             if self.__is_carrying_right:
@@ -48,8 +51,8 @@ class Carry:
         if isinstance(entity, GameObject):
             if not entity.is_pickup_able():
                 return
-            if entity.get_name() == "COFFEE" or entity.get_name() == "TEA":
-                self.__pick_up_coffee(entity)
+            if self.__special_cases(entity):
+                return
         if entity is not None:
             if side:
                 self.__is_carrying_right = True
@@ -58,6 +61,18 @@ class Carry:
                 self.__is_carrying_left = True
                 self.__carrying_object_left = entity
 
+    def __special_cases(self, entity) -> int:
+        name = entity.get_name()
+        if name == "COFFEE" or name == "TEA":
+            self.__pick_up_coffee(entity)
+            return 0
+        if name == "TOP_DRAWER":
+            entity.get_attachment().move_top_drawer()
+            return 1
+        if name == "BOTTOM_DRAWER":
+            entity.get_attachment().move_bottom_drawer()
+            return 1
+
     def __lay_down(self, side: int, carrying_entity, relevant_entities: list) -> None:
         relevant_entities = [_ for _ in relevant_entities if
                              _ not in self.__coffee_machine.get_attachment().get_coffee_list()]
@@ -65,25 +80,38 @@ class Carry:
         if isinstance(entity, GameObject):
             if entity.get_name() == CoffeeMachineOS.get_name():
                 self.__lay_down_coffee(side)
-                self.__remove_carrying_object(side)
+                self.remove_carrying_object(side)
                 return
         if entity is not None:
             carrying_entity.set_position(self.__object_picker.get_current_object_point())
-            self.__remove_carrying_object(side)
+            self.remove_carrying_object(side)
         else:
             self.__terrain_picker.update()
             terrain = self.__terrain_picker.get_current_terrain_point()
             if terrain is not None:
-                self.__remove_carrying_object(side)
+                self.remove_carrying_object(side)
                 carrying_entity.set_position(terrain)
 
-    def __remove_carrying_object(self, side: int) -> None:
+    def add_carrying_object(self, side: int, entity) -> None:
+        if side:
+            if not self.__is_carrying_right:
+                self.__is_carrying_right = True
+                self.__carrying_object_right = entity
+        else:
+            if not self.__is_carrying_left:
+                self.__is_carrying_left = True
+                self.__carrying_object_left = entity
+
+    def remove_carrying_object(self, side: int) -> any:
         if side:
             self.__is_carrying_right = False
+            obj = self.__carrying_object_right
             self.__carrying_object_right = None
         else:
             self.__is_carrying_left = False
+            obj = self.__carrying_object_left
             self.__carrying_object_left = None
+        return obj
 
     def __move_right(self):
         self.__terrain_picker.update()

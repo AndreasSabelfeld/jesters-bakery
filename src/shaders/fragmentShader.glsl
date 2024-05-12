@@ -26,7 +26,6 @@ const int pcf_count = 2;
 const float total_texels = (pcf_count * 2.0 + 1.0) * (pcf_count * 2.0 + 1.0);
 
 void main(void){
-
     float texel_size = 1.0 / shadow_map_size;
     float total = 0.0;
     for(int x=-pcf_count; x<=pcf_count; x++){

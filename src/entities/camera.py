@@ -53,7 +53,7 @@ class Camera:
     @classmethod
     def set_pitch(cls, pitch: float):
         """Class method setter that changes the class variable 'pitch' to an angle"""
-        if -90 < pitch < 90:    # limit the angle to 90° both up and down
+        if -90 <= pitch <= 90:    # limit the angle to 90° both up and down
             cls.__pitch = pitch
 
     @classmethod

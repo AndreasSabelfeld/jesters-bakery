@@ -1,4 +1,5 @@
 from src.shaders.static_shader import StaticShader
+from src.shaders.outline_shader import OutlineShader
 from src.terrain.terrain_shader import TerrainShader
 from src.normal_mapping.normal_mapping_shader import NormalMappingShader
 from src.skybox.skybox_renderer import SkyboxRenderer
@@ -7,6 +8,7 @@ from src.shadows.shadow_map_master_renderer import ShadowMapMasterRenderer
 from src.shadows.shadow_box import ShadowBox
 from src.game_mechanics.game_object import GameObject
 from .entity_renderer import EntityRenderer
+from .outline_renderer import OutlineRenderer
 from .terrain_renderer import TerrainRenderer
 from .display_manager import DisplayManager
 
@@ -28,10 +30,12 @@ class MasterRenderer:
         self.enable_culling()
 
         self.__entity_shader = StaticShader()
+        self.__outline_shader = OutlineShader()
         self.__terrain_shader = TerrainShader()
         self.__normal_map_shader = NormalMappingShader()
         self.__projection_matrix = self.create_projection_matrix()
         self.__entity_renderer = EntityRenderer(self.__entity_shader, self.__projection_matrix)
+        self.__outline_renderer = OutlineRenderer(self.__outline_shader, self.__projection_matrix)
         self.__terrain_renderer = TerrainRenderer(self.__terrain_shader, self.__projection_matrix)
         self.__skybox_renderer = SkyboxRenderer(loader, self.__projection_matrix)
         self.__normal_map_renderer = NormalMappingRenderer(self.__projection_matrix, self.__normal_map_shader)
@@ -119,13 +123,23 @@ class MasterRenderer:
         self.__shadow_map_renderer.render(self.__entities, sun)
         self.__entities.clear()
 
+    def render_outline(self, entity_list):
+        for entity in entity_list:
+            self.process_entity(entity)
+        self.__outline_shader.start()
+        self.__outline_renderer.render(self.__entities)
+        self.__outline_shader.stop()
+        self.__entities.clear()
+
     def process_terrain(self, terrain) -> None:
         self.__terrains.append(terrain)
 
     def process_entity(self, entity) -> None:
         if isinstance(entity, GameObject):
-            if entity.has_child():
-                self.process_entity(entity.get_child())
+            if entity.has_child_0():
+                self.process_entity(entity.get_child_0())
+            if entity.has_child_1():
+                self.process_entity(entity.get_child_1())
             entity = entity.get_entity()
         entity_model = entity.get_model()
         batch = self.__entities.get(entity_model)

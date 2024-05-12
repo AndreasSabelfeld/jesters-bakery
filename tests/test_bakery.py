@@ -3,12 +3,13 @@ from OpenGL.GL import *
 import random
 
 from src.game_mechanics.coffee_container import CoffeeContainer
+from src.game_mechanics.fridge import Fridge
 from src.render_engine.display_manager import DisplayManager
 from src.render_engine.gui_renderer import GuiRenderer
 from src.render_engine.master_renderer import MasterRenderer
 from src.render_engine.loader import Loader
 from src.render_engine.time import Time
-from src.render_engine.input_controller import KeyboardInput, ControllerInput
+from src.render_engine.input_controller import KeyboardInput, KeyboardInputListener, ControllerInput
 
 from src.textures.model_texture import ModelTexture
 from src.textures.terrain_texture import TerrainTexture
@@ -42,6 +43,7 @@ from src.game_mechanics.pick_up import Carry
 from src.game_mechanics.coffee_machine_os import CoffeeMachineOS
 from src.game_mechanics.coffee_product import CoffeeProduct
 from src.game_mechanics.game_object import GameObject
+from src.game_mechanics.fridge_object import FridgeObject
 
 
 def main():
@@ -127,6 +129,42 @@ def main():
     static_coffee_machine_screen_model = TexturedModel(coffee_machine_screen_model, coffee_machine_screen_texture)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    # ~~~~~~~~~~~~~FRIDGE~~~~~~~~~~~~~~~
+    fridge_case_model = obj_loader.load_obj_model("fridge_case", loader)
+    fridge_case_texture = ModelTexture(loader.load_texture("counter"))
+    fridge_case_texture.set_shine_damper(10)
+    fridge_case_texture.set_reflectivity(0.5)
+    static_fridge_case_model = TexturedModel(fridge_case_model, fridge_case_texture)
+    static_fridge_case_collider = TexturedModel(obj_loader.load_obj_model("case_collider", loader), ModelTexture(loader.load_texture("")))
+
+    fridge_top_drawer_model = obj_loader.load_obj_model("fridge_top_drawer", loader)
+    fridge_top_drawer_texture = ModelTexture(loader.load_texture("drawer"))
+    fridge_top_drawer_texture.set_shine_damper(10)
+    fridge_top_drawer_texture.set_reflectivity(0.5)
+    static_fridge_top_drawer_model = TexturedModel(fridge_top_drawer_model, fridge_top_drawer_texture)
+    static_fridge_top_drawer_collider = TexturedModel(obj_loader.load_obj_model("top_drawer_collider", loader), ModelTexture(loader.load_texture("")))
+
+    fridge_bottom_drawer_model = obj_loader.load_obj_model("fridge_bottom_drawer", loader)
+    fridge_bottom_drawer_texture = ModelTexture(loader.load_texture("drawer"))
+    fridge_bottom_drawer_texture.set_shine_damper(10)
+    fridge_bottom_drawer_texture.set_reflectivity(0.5)
+    static_fridge_bottom_drawer_model = TexturedModel(fridge_bottom_drawer_model, fridge_bottom_drawer_texture)
+    static_fridge_bottom_drawer_collider = TexturedModel(obj_loader.load_obj_model("bottom_drawer_collider", loader), ModelTexture(loader.load_texture("")))
+
+    fridge_bottom_grid_model = obj_loader.load_obj_model("fridge_bottom_grid", loader)
+    fridge_bottom_grid_texture = ModelTexture(loader.load_texture("grass"))
+    fridge_bottom_grid_texture.set_shine_damper(10)
+    fridge_bottom_grid_texture.set_reflectivity(0)
+    static_fridge_bottom_grid_model = TexturedModel(fridge_bottom_grid_model, fridge_bottom_grid_texture)
+
+    fridge_top_grid_model = obj_loader.load_obj_model("fridge_top_grid", loader)
+    fridge_top_grid_texture = ModelTexture(loader.load_texture("grass"))
+    fridge_top_grid_texture.set_shine_damper(10)
+    fridge_top_grid_texture.set_reflectivity(0)
+    static_fridge_top_grid_model = TexturedModel(fridge_top_grid_model, fridge_top_grid_texture)
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     # ~~~~~~~~~~COFFEE CUPS~~~~~~~~~~~~~
     small_coffee_model = obj_loader.load_obj_model("small_coffee_cup", loader)
     small_coffee_texture = ModelTexture(loader.load_texture("coffee_cup_texture"))
@@ -152,6 +190,10 @@ def main():
     big_glass_model = obj_loader.load_obj_model("big_glass", loader)
     static_big_glass_model = TexturedModel(big_glass_model, small_coffee_texture)
     static_big_glass_collider = TexturedModel(obj_loader.load_obj_model("big_glass_collider", loader), ModelTexture(loader.load_texture("")))
+
+    espresso_model = obj_loader.load_obj_model("espresso_cup", loader)
+    static_espresso_model = TexturedModel(espresso_model, small_coffee_texture)
+    static_espresso_collider = TexturedModel(obj_loader.load_obj_model("espresso_cup_collider", loader), ModelTexture(loader.load_texture("")))
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~~~TERRAIN~~~~~~~~~~~~~~~
@@ -186,6 +228,24 @@ def main():
                                             collider=coffee_machine_collider)
     coffee_machine_game_object.set_pickup_able(False)
 
+    fridge_case = Entity(static_fridge_case_model, [60, 29.39, 50], 0, 0, 0, machine_size)
+    fridge_case_collider = Entity(static_fridge_case_collider, [60, 29.39, 50], 0, 0, 0, machine_size)
+    fridge_top_drawer = Entity(static_fridge_top_drawer_model, [60, 29.39, 50], 0, 0, 0, machine_size)
+    fridge_top_drawer_collider = Entity(static_fridge_top_drawer_collider, [60, 29.39, 50], 0, 0, 0, machine_size)
+    fridge_bottom_drawer = Entity(static_fridge_bottom_drawer_model, [60, 29.39, 50], 0, 0, 0, machine_size)
+    fridge_bottom_drawer_collider = Entity(static_fridge_bottom_drawer_collider, [60, 29.39, 50], 0, 0, 0, machine_size)
+    fridge_bottom_grid = Entity(static_fridge_bottom_grid_model, [60, 29.39, 50], 0, 0, 0, machine_size)
+    fridge_top_grid = Entity(static_fridge_top_grid_model, [60, 29.39, 50], 0, 0, 0, machine_size)
+
+    fridge_game_object = GameObject(fridge_case, child_0=fridge_top_drawer, child_1=fridge_bottom_drawer, collider=fridge_case_collider)
+    fridge_game_object.set_pickup_able(False)
+    fridge_game_object.get_child_0().set_collider(fridge_top_drawer_collider)
+    fridge_game_object.get_child_1().set_collider(fridge_bottom_drawer_collider)
+    fridge_game_object.get_child_0().set_name("TOP_DRAWER")
+    fridge_game_object.get_child_1().set_name("BOTTOM_DRAWER")
+    # fridge_game_object.get_child_0().set_child_0(fridge_top_grid)
+    # fridge_game_object.get_child_1().set_child_0(fridge_bottom_grid)
+
     small_coffee = Entity(static_small_coffee_model, [70 + 2, 29.39, 50], 0, 0, 0, 1)
     small_coffee_collider = Entity(static_small_coffee_collider, [70 + 2, 29.39, 50], 0, 0, 0, 1)
     small_coffee_game_object = GameObject(small_coffee, name="COFFEE", collider=small_coffee_collider)
@@ -212,8 +272,21 @@ def main():
     big_glass_game_object = GameObject(big_glass, name="COFFEE", collider=big_glass_collider)
     big_glass_game_object.set_attachment(CoffeeContainer(CoffeeContainer.BIG_GLASS, big_glass_game_object))
 
-    entities = [coffee_machine_game_object, small_coffee_game_object, big_coffee_game_object, tea_pot_game_object, small_glass_game_object, big_glass_game_object]
+    espresso_cup = Entity(static_espresso_model, [70 + 12, 29.39, 50], 0, 0, 0, 1)
+    espresso_cup_collider = Entity(static_espresso_collider, [70 + 12, 29.39, 50], 0, 0, 0, 1)
+    espresso_cup_game_object = GameObject(espresso_cup, name="COFFEE", collider=espresso_cup_collider)
+    espresso_cup_game_object.set_attachment(CoffeeContainer(CoffeeContainer.ESPRESSO_CUP, espresso_cup_game_object))
+
+    cauldron = Entity(static_small_glass_model, [70 + 8, 29.39, 50], 0, 0, 0, 3)
+    cauldron_collider = Entity(static_small_glass_collider, [70 + 8, 29.39, 50], 0, 0, 0, 3)
+    cauldron_game_object = GameObject(cauldron, name="FRIDGE", collider=cauldron_collider)
+    cauldron_game_object.set_attachment(FridgeObject((2, 2)))
+
+    entities = [coffee_machine_game_object, small_coffee_game_object, big_coffee_game_object, tea_pot_game_object,
+                small_glass_game_object, big_glass_game_object, espresso_cup_game_object, fridge_game_object,
+                cauldron_game_object]
     collider_entities = entities.copy()
+    collider_entities.extend([fridge_game_object.get_child_0(), fridge_game_object.get_child_1()])
 
     # ~~~~~~~~~~~~LIGHTS~~~~~~~~~~~~~~~~
     sun = Light([-100000, -150000, -100000], [1, 1, 1])
@@ -224,7 +297,8 @@ def main():
     bunny_model = obj_loader.load_obj_model("bunny", loader)
     static_bunny_model = TexturedModel(bunny_model, ModelTexture(loader.load_texture("white")))
 
-    player = FirstPersonPlayer(static_bunny_model, [60, 0, 40], 0, 0, 0, 1)
+    player = FirstPersonPlayer(static_bunny_model, [60, 0, 40], 0, 0, 0, 3)
+    player.set_player_size(12)
     entities.append(player)
     camera = Camera(player)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -246,11 +320,23 @@ def main():
 
     # ~~~~~~~~~~~~~GAME~~~~~~~~~~~~~~~~~
     carry = Carry(terrain_picker, object_picker, coffee_machine_game_object)
-    coffee_os = CoffeeMachineOS(coffee_machine_screen, loader, obj_loader, fbo, gui_renderer)
+    carry.movable_entities = collider_entities
+    coffee_os = CoffeeMachineOS(coffee_machine_screen, loader, obj_loader, fbo, gui_renderer, object_picker)
     coffee_machine_game_object.set_attachment(coffee_os)
+    fridge = Fridge(fridge_game_object.get_child_0(), fridge_game_object.get_child_1(), object_picker, loader, gui_renderer)
+    fridge_game_object.get_child_0().set_attachment(fridge)
+    fridge_game_object.get_child_1().set_attachment(fridge)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    i = 0
+    # ~~~~~~~KEYBOARD LISTENERS~~~~~~~~~
+    listener_c = KeyboardInputListener()
+    listener_f = KeyboardInputListener()
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    cube = Entity(static_grass_model, [60, 29.39, 50], 0, 0, 0, 0.1)
+    entities.append(cube)
+
+    frame = 0
     while glutGetWindow() != 0:
         # game logic
         Time.set_current_time(Time.time_current_time())
@@ -259,13 +345,16 @@ def main():
 
         fps = 1 / Time.get_delta_time()
 
+        frame += 1
+
         player.move(collider_entities)
-        text2.set_text_string(str(['%.2f' % elem for elem in player.get_position()]))
-        text3.set_text_string(str('%.2f' % fps))
-        if not coffee_os.get_is_interacting():
+        text2.set_text_string(str(['%.2f' % elem for elem in cube.get_position()]))
+        text3.set_text_string(str(fridge.get_bottom_drawer_inventory()))
+        if not (coffee_os.get_is_interacting() or fridge.get_is_interacting()):
             camera.move()
-        carry.movable_entities = collider_entities
-        carry.update()
+            carry.update()
+        else:
+            carry.update(False)
 
         object_picker.update(collider_entities)
         if KeyboardInput.get_keys_held().get(b'c'):
@@ -274,11 +363,13 @@ def main():
 
         master_renderer.render_shadow_map(entities, sun)
 
-        coffee_os.check_for_interaction(player, camera)
+        coffee_os.interact(player, camera, listener_c)
+        fridge.interact(player, camera, listener_f)
         coffee_os.render_screen()
 
         master_renderer.render_scene(entities, [], terrains, lights, camera, display)
         TextMaster.render_not_specified(coffee_os.get_all_texts())
+        fridge.update(carry)
 
         glutSwapBuffers()         # needs to be called AFTER finished drawing
         glutMainLoopEvent()       # used to run openGL manually in a loop instead of glutMainLoop()

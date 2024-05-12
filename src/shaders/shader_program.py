@@ -17,7 +17,7 @@ class ShaderProgram:
         glAttachShader(self.__program_id, self.__vertex_shader_id)      # attach the shader to the program
         glAttachShader(self.__program_id, self.__fragment_shader_id)    # attach the shader to the program
         self.__use_geometry_shader = False
-        if geometry_file is not None:
+        if geometry_file:
             self.__use_geometry_shader = True
             self.__geometry_shader_id = self.load_shader(geometry_file, GL_GEOMETRY_SHADER)
             glAttachShader(self.__program_id, self.__geometry_shader_id)
