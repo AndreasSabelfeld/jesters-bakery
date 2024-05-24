@@ -44,6 +44,7 @@ from src.game_mechanics.coffee_machine_os import CoffeeMachineOS
 from src.game_mechanics.coffee_product import CoffeeProduct
 from src.game_mechanics.game_object import GameObject
 from src.game_mechanics.fridge_object import FridgeObject
+from src.game_mechanics.scanner import Scanner
 
 
 def main():
@@ -233,6 +234,7 @@ def main():
     coffee_machine_game_object = GameObject(coffee_machine, coffee_machine_screen, name=CoffeeMachineOS.get_name(),
                                             collider=coffee_machine_collider)
     coffee_machine_game_object.set_pickup_able(False)
+    coffee_machine_game_object.set_prompt("Press the 'F' Key to interact.")
 
     fridge_case = Entity(static_fridge_case_model, [60, 29.39, 50], 0, 0, 0, machine_size)
     fridge_case_collider = Entity(static_fridge_case_collider, [60, 29.39, 50], 0, 0, 0, machine_size)
@@ -249,49 +251,59 @@ def main():
     fridge_game_object.get_child_1().set_collider(fridge_bottom_drawer_collider)
     fridge_game_object.get_child_0().set_name("TOP_DRAWER")
     fridge_game_object.get_child_1().set_name("BOTTOM_DRAWER")
-    # fridge_game_object.get_child_0().set_child_0(fridge_top_grid)
-    # fridge_game_object.get_child_1().set_child_0(fridge_bottom_grid)
+    fridge_game_object.get_child_0().set_prompt("Press 'E' or 'Q' to open. Press the 'F' Key to interact.")
+    fridge_game_object.get_child_1().set_prompt("Press 'E' or 'Q' to open. Press the 'F' Key to interact.")
+    fridge_game_object.get_child_0().set_info("The cake is a lie")
+    fridge_game_object.get_child_1().set_info("The cake is a lie")
 
     small_coffee = Entity(static_small_coffee_model, [70 + 2, 29.39, 50], 0, 0, 0, 1)
     small_coffee_collider = Entity(static_small_coffee_collider, [70 + 2, 29.39, 50], 0, 0, 0, 1)
     small_coffee_game_object = GameObject(small_coffee, name="COFFEE", collider=small_coffee_collider)
     small_coffee_game_object.set_attachment(CoffeeContainer(CoffeeContainer.COFFEE_CUP, small_coffee_game_object))
+    small_coffee_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
 
     big_coffee = Entity(static_big_coffee_model, [70 + 4, 29.39, 50], 0, 0, 0, 1)
     big_coffee_collider = Entity(static_big_coffee_collider, [70 + 4, 29.39, 50], 0, 0, 0, 1)
     big_coffee_game_object = GameObject(big_coffee, name="COFFEE", collider=big_coffee_collider)
     big_coffee_game_object.set_attachment(CoffeeContainer(CoffeeContainer.CAPPUCCINO_CUP, big_coffee_game_object))
+    big_coffee_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
 
     tea_pot = Entity(static_tea_pot_model, [70 + 6, 29.39, 50], 0, 0, 0, 1)
     tea_pot_lid = Entity(static_tea_pot_lid_model, [70 + 6, 29.39, 50], 0, 0, 0, 1)
     tea_pot_collider = Entity(static_tea_pot_collider, [70 + 6, 29.39, 50], 0, 0, 0, 1)
     tea_pot_game_object = GameObject(tea_pot, tea_pot_lid, name="TEA", collider=tea_pot_collider)
     tea_pot_game_object.set_attachment(CoffeeContainer(CoffeeContainer.TEA_POT, tea_pot_game_object))
+    tea_pot_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
 
     small_glass = Entity(static_small_glass_model, [70 + 8, 29.39, 50], 0, 0, 0, 1)
     small_glass_collider = Entity(static_small_glass_collider, [70 + 8, 29.39, 50], 0, 0, 0, 1)
     small_glass_game_object = GameObject(small_glass, name="COFFEE", collider=small_glass_collider)
     small_glass_game_object.set_attachment(CoffeeContainer(CoffeeContainer.SMALL_GLASS, small_glass_game_object))
+    small_glass_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
 
     big_glass = Entity(static_big_glass_model, [70 + 10, 29.39, 50], 0, 0, 0, 1)
     big_glass_collider = Entity(static_big_glass_collider, [70 + 10, 29.39, 50], 0, 0, 0, 1)
     big_glass_game_object = GameObject(big_glass, name="COFFEE", collider=big_glass_collider)
     big_glass_game_object.set_attachment(CoffeeContainer(CoffeeContainer.BIG_GLASS, big_glass_game_object))
+    big_glass_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
 
     espresso_cup = Entity(static_espresso_model, [70 + 12, 29.39, 50], 0, 0, 0, 1)
     espresso_cup_collider = Entity(static_espresso_collider, [70 + 12, 29.39, 50], 0, 0, 0, 1)
     espresso_cup_game_object = GameObject(espresso_cup, name="COFFEE", collider=espresso_cup_collider)
     espresso_cup_game_object.set_attachment(CoffeeContainer(CoffeeContainer.ESPRESSO_CUP, espresso_cup_game_object))
+    espresso_cup_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
 
     cauldron = Entity(static_small_glass_model, [70 + 8, 29.39, 50], 0, 0, 0, 3)
     cauldron_collider = Entity(static_small_glass_collider, [70 + 8, 29.39, 50], 0, 0, 0, 3)
     cauldron_game_object = GameObject(cauldron, name="FRIDGE", collider=cauldron_collider)
     cauldron_game_object.set_attachment(FridgeObject((2, 2), cauldron))
+    cauldron_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
 
     milk_sac = Entity(static_milk_sac_model, [70 + 14, 29.39, 50], 0, 0, 0, machine_size)
     milk_sac_collider = Entity(static_milk_sac_collider, [70 + 14, 29.39, 50], 0, 0, 0, machine_size)
     milk_sac_game_object = GameObject(milk_sac, name="FRIDGE", collider=milk_sac_collider)
     milk_sac_game_object.set_attachment(FridgeObject((3, 2), milk_sac))
+    milk_sac_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
 
     entities = [coffee_machine_game_object, small_coffee_game_object, big_coffee_game_object, tea_pot_game_object,
                 small_glass_game_object, big_glass_game_object, espresso_cup_game_object, fridge_game_object,
@@ -336,12 +348,8 @@ def main():
     fridge = Fridge(fridge_game_object.get_child_0(), fridge_game_object.get_child_1(), object_picker, loader, gui_renderer)
     fridge_game_object.get_child_0().set_attachment(fridge)
     fridge_game_object.get_child_1().set_attachment(fridge)
+    scanner = Scanner(object_picker, loader)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    # ~~~~~~~KEYBOARD LISTENERS~~~~~~~~~
-    listener_c = KeyboardInputListener()
-    listener_f = KeyboardInputListener()
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     cube = Entity(static_grass_model, [60, 29.39, 50], 0, 0, 0, 0.1)
     entities.append(cube)
@@ -363,14 +371,15 @@ def main():
             carry.update(False)
 
         object_picker.update(collider_entities)
+        scanner.update(collider_entities)
         if KeyboardInput.get_keys_held().get(b'c'):
             ent = Entity(static_grass_model, object_picker.get_current_object_point(), 0, 0, 0, 0.1)
             entities.append(ent)
 
         master_renderer.render_shadow_map(entities, sun)
 
-        coffee_os.interact(player, camera, listener_c)
-        fridge.interact(player, camera, listener_f)
+        coffee_os.interact(player, camera)
+        fridge.interact(player, camera)
         coffee_os.render_screen()
 
         master_renderer.render_scene(entities, [], terrains, lights, camera, display)

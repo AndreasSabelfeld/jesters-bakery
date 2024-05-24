@@ -10,6 +10,7 @@ class TextMeshCreator:
 
     __LINE_HEIGHT = 0.003
     __SPACE_ASCII = 32
+    __NEW_LINE = ord('\n')
 
     def __init__(self, meta_file: str):
         self.__meta_data = MetaFile(meta_file)
@@ -26,6 +27,9 @@ class TextMeshCreator:
         current_word = Word(text.get_font_size())
         for c in chars:
             ascii = ord(c)
+            if ascii == self.__NEW_LINE:
+                lines.append(current_line)
+                current_line = Line(self.__meta_data.get_space_width(), text.get_font_size(), text.get_max_line_size())
             if ascii == self.__SPACE_ASCII:
                 added = current_line.attempt_to_add_word(current_word)
                 if not added:
@@ -35,6 +39,8 @@ class TextMeshCreator:
                 current_word = Word(text.get_font_size())
                 continue
             character = self.__meta_data.get_character(ascii)
+            if not character:
+                continue
             current_word.add_character(character)
         self.complete_structure(lines, current_line, current_word, text)
         return lines

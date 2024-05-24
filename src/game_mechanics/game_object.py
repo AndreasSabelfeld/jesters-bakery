@@ -6,6 +6,8 @@ class GameObject:
     def __init__(self, entity: Entity, child_0: Entity = None, child_1: Entity = None, name: str = "", collider: Entity = None):
         self.__entity = entity
         self.__name = name
+        self.__prompt = ""
+        self.__info = ""
         self.__pickup_able = True
         self.__attachment = None
         self.__collider = entity
@@ -116,3 +118,14 @@ class GameObject:
             return True
         return False
 
+    def set_prompt(self, text: str) -> None:
+        self.__prompt = text
+
+    def get_prompt(self) -> str:
+        return self.__prompt
+
+    def set_info(self, info: str) -> None:
+        self.__info = info
+
+    def get_info(self) -> str:
+        return self.__info

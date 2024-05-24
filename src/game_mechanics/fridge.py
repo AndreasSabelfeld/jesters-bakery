@@ -4,7 +4,7 @@ from src.guis.gui_texture import GuiTexture
 from src.pycgtypes import vec3, mat3
 from src.game_mechanics.game_object import GameObject
 from src.render_engine.display_manager import DisplayManager
-from src.render_engine.input_controller import KeyboardInput
+from src.render_engine.input_controller import KeyboardInput, KeyboardInputListener
 
 
 class Fridge:
@@ -33,6 +33,8 @@ class Fridge:
 
         self.__selected_texture = GuiTexture(loader.load_texture("selected_test"), [0, 0], [self.__icon_size_x, self.__icon_size_y])
         self.__selected_pos = [0, 0]
+
+        self.__listener = KeyboardInputListener()
 
     def update(self, pick_up: Carry):
         if self.__is_interacting:
@@ -68,8 +70,8 @@ class Fridge:
             [x.increase_position(0, 0, self.__opening_offset.z) for x in set([x for xs in self.__bottom_drawer_inventory for x in xs if x is not None])]
             self.__bottom_drawer_is_open = True
 
-    def interact(self, player, camera, listener) -> None:
-        if listener.on_key_down(self.__interaction_key):
+    def interact(self, player, camera) -> None:
+        if self.__listener.on_key_down(self.__interaction_key):
             collision = self.__object_picker.update([self.__top_drawer.get_collider(), self.__bottom_drawer.get_collider()])
             if self.__is_interacting:
                 self.__is_interacting = 0
@@ -77,9 +79,15 @@ class Fridge:
                 self.__move_camera_to_original_pos(camera)
             elif collision in [self.__top_drawer.get_collider(), self.__bottom_drawer.get_collider()]:
                 if collision == self.__top_drawer.get_collider():
-                    self.__is_interacting = 1
+                    if self.__top_drawer_is_open:
+                        self.__is_interacting = self.__TOP_DRAWER
+                    else:
+                        return
                 else:
-                    self.__is_interacting = 2
+                    if self.__bottom_drawer_is_open:
+                        self.__is_interacting = self.__BOTTOM_DRAWER
+                    else:
+                        return
                 player.set_player_under_control(False)
                 self.__move_on_top_drawer(camera, collision)
 

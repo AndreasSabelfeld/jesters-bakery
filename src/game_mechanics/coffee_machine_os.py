@@ -1,7 +1,7 @@
 from math import sqrt
 from time import sleep
 from threading import Thread
-from src.render_engine.input_controller import KeyboardInput, ControllerInput
+from src.render_engine.input_controller import KeyboardInput, ControllerInput, KeyboardInputListener
 from src.render_engine.time import Time
 from src.game_mechanics.coffee_product import CoffeeProduct
 from src.game_mechanics.coffe_page import CoffeePage
@@ -80,6 +80,8 @@ class CoffeeMachineOS:
         self.__brewing_queue = []
         self.__max_queue_length = 7
 
+        self.__listener = KeyboardInputListener()
+
     def render_screen(self) -> None:
         self.__update_time_remaining()
         self.__check_bools()
@@ -97,8 +99,8 @@ class CoffeeMachineOS:
         self.__fbo.unbind_frame_buffer()
         self.__render_target.get_model().set_texture(ModelTexture(self.__fbo.get_color_texture()))
 
-    def interact(self, player, camera, listener) -> None:
-        if listener.on_key_down(self.__interaction_key):
+    def interact(self, player, camera) -> None:
+        if self.__listener.on_key_down(self.__interaction_key):
             collision = self.__object_picker.update([self.__render_target])
             if self.__is_interacting:
                 self.__is_interacting = False
