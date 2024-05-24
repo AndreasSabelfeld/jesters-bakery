@@ -1,6 +1,7 @@
 from src.render_engine.input_controller import KeyboardInput, ControllerInput
 from src.game_mechanics.game_object import GameObject
 from src.game_mechanics.coffee_machine_os import CoffeeMachineOS
+from src.game_mechanics.fridge_object import FridgeObject
 from src.pycgtypes import vec3
 
 
@@ -112,6 +113,12 @@ class Carry:
             obj = self.__carrying_object_left
             self.__carrying_object_left = None
         return obj
+
+    def get_carrying_object(self, side: int) -> any:
+        if side:
+            return self.__carrying_object_right
+        else:
+            return self.__carrying_object_left
 
     def __move_right(self):
         self.__terrain_picker.update()

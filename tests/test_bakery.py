@@ -196,6 +196,12 @@ def main():
     static_espresso_collider = TexturedModel(obj_loader.load_obj_model("espresso_cup_collider", loader), ModelTexture(loader.load_texture("")))
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    # ~~~~~~~~~~~~~BEVERAGES~~~~~~~~~~~~
+    milk_sac_model = obj_loader.load_obj_model("milk_sac", loader)
+    static_milk_sac_model = TexturedModel(milk_sac_model, small_coffee_texture)
+    static_milk_sac_collider = TexturedModel(obj_loader.load_obj_model("milk_sac_collider", loader), ModelTexture(loader.load_texture("")))
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     # ~~~~~~~~~~~~TERRAIN~~~~~~~~~~~~~~~
     background_texture = TerrainTexture(loader.load_texture("grass"))
     r_texture = TerrainTexture(loader.load_texture("mud"))
@@ -280,14 +286,18 @@ def main():
     cauldron = Entity(static_small_glass_model, [70 + 8, 29.39, 50], 0, 0, 0, 3)
     cauldron_collider = Entity(static_small_glass_collider, [70 + 8, 29.39, 50], 0, 0, 0, 3)
     cauldron_game_object = GameObject(cauldron, name="FRIDGE", collider=cauldron_collider)
-    cauldron_game_object.set_attachment(FridgeObject((2, 2)))
+    cauldron_game_object.set_attachment(FridgeObject((2, 2), cauldron))
+
+    milk_sac = Entity(static_milk_sac_model, [70 + 14, 29.39, 50], 0, 0, 0, machine_size)
+    milk_sac_collider = Entity(static_milk_sac_collider, [70 + 14, 29.39, 50], 0, 0, 0, machine_size)
+    milk_sac_game_object = GameObject(milk_sac, name="FRIDGE", collider=milk_sac_collider)
+    milk_sac_game_object.set_attachment(FridgeObject((3, 2), milk_sac))
 
     entities = [coffee_machine_game_object, small_coffee_game_object, big_coffee_game_object, tea_pot_game_object,
                 small_glass_game_object, big_glass_game_object, espresso_cup_game_object, fridge_game_object,
-                cauldron_game_object]
+                cauldron_game_object, milk_sac_game_object]
     collider_entities = entities.copy()
     collider_entities.extend([fridge_game_object.get_child_0(), fridge_game_object.get_child_1()])
-
     # ~~~~~~~~~~~~LIGHTS~~~~~~~~~~~~~~~~
     sun = Light([-100000, -150000, -100000], [1, 1, 1])
     lights = [sun]
@@ -336,7 +346,6 @@ def main():
     cube = Entity(static_grass_model, [60, 29.39, 50], 0, 0, 0, 0.1)
     entities.append(cube)
 
-    frame = 0
     while glutGetWindow() != 0:
         # game logic
         Time.set_current_time(Time.time_current_time())
@@ -345,11 +354,8 @@ def main():
 
         fps = 1 / Time.get_delta_time()
 
-        frame += 1
-
         player.move(collider_entities)
         text2.set_text_string(str(['%.2f' % elem for elem in cube.get_position()]))
-        text3.set_text_string(str(fridge.get_bottom_drawer_inventory()))
         if not (coffee_os.get_is_interacting() or fridge.get_is_interacting()):
             camera.move()
             carry.update()

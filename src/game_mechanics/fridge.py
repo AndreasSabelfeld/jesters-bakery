@@ -40,24 +40,32 @@ class Fridge:
             self.__move_cursor()
             self.place(pick_up)
 
+            if KeyboardInput.on_key_down(b'r'):
+                if pick_up.get_carrying_object(Carry.RIGHT):
+                    if isinstance(pick_up.get_carrying_object(Carry.RIGHT).get_attachment(), FridgeObject):
+                        pick_up.get_carrying_object(Carry.RIGHT).get_attachment().rotate()
+                if pick_up.get_carrying_object(Carry.LEFT):
+                    if isinstance(pick_up.get_carrying_object(Carry.LEFT).get_attachment(), FridgeObject):
+                        pick_up.get_carrying_object(Carry.LEFT).get_attachment().rotate()
+
     def move_top_drawer(self):
         if self.__top_drawer_is_open:
             self.__top_drawer.set_position(vec3(self.__top_drawer.get_position()) - self.__opening_offset)
-            [x.increase_position(0, 0, -self.__opening_offset.z) for xs in self.__top_drawer_inventory for x in xs if x is not None]
+            [x.increase_position(0, 0, -self.__opening_offset.z) for x in set([x for xs in self.__top_drawer_inventory for x in xs if x is not None])]
             self.__top_drawer_is_open = False
         else:
             self.__top_drawer.set_position(vec3(self.__top_drawer.get_position()) + self.__opening_offset)
-            [x.increase_position(0, 0, self.__opening_offset.z) for xs in self.__top_drawer_inventory for x in xs if x is not None]
+            [x.increase_position(0, 0, self.__opening_offset.z) for x in set([x for xs in self.__top_drawer_inventory for x in xs if x is not None])]
             self.__top_drawer_is_open = True
 
     def move_bottom_drawer(self):
         if self.__bottom_drawer_is_open:
             self.__bottom_drawer.set_position(vec3(self.__bottom_drawer.get_position()) - self.__opening_offset)
-            [x.increase_position(0, 0, -self.__opening_offset.z) for xs in self.__bottom_drawer_inventory for x in xs if x is not None]
+            [x.increase_position(0, 0, -self.__opening_offset.z) for x in set([x for xs in self.__bottom_drawer_inventory for x in xs if x is not None])]
             self.__bottom_drawer_is_open = False
         else:
             self.__bottom_drawer.set_position(vec3(self.__bottom_drawer.get_position()) + self.__opening_offset)
-            [x.increase_position(0, 0, self.__opening_offset.z) for xs in self.__bottom_drawer_inventory for x in xs if x is not None]
+            [x.increase_position(0, 0, self.__opening_offset.z) for x in set([x for xs in self.__bottom_drawer_inventory for x in xs if x is not None])]
             self.__bottom_drawer_is_open = True
 
     def interact(self, player, camera, listener) -> None:
@@ -80,25 +88,31 @@ class Fridge:
 
     def place(self, hands):
         if KeyboardInput.on_key_down(b'e'):
-            entity = hands.remove_carrying_object(Carry.RIGHT)
+            entity = hands.get_carrying_object(Carry.RIGHT)
             if not entity:
                 self.take(Carry.RIGHT, hands)
                 return
             if self.__is_interacting == self.__TOP_DRAWER:
-                self.__place_in_top_drawer(entity)
+                if self.__check_for_room(entity, self.__top_drawer_inventory):
+                    self.__place_in_top_drawer(hands.remove_carrying_object(Carry.RIGHT))
+                    hands.movable_entities.remove(entity)
             else:
-                self.__place_in_bottom_drawer(entity)
-            hands.movable_entities.remove(entity)
+                if self.__check_for_room(entity, self.__bottom_drawer_inventory):
+                    self.__place_in_bottom_drawer(hands.remove_carrying_object(Carry.RIGHT))
+                    hands.movable_entities.remove(entity)
         elif KeyboardInput.on_key_down(b'q'):
-            entity = hands.remove_carrying_object(Carry.LEFT)
+            entity = hands.get_carrying_object(Carry.LEFT)
             if not entity:
                 self.take(Carry.LEFT, hands)
                 return
             if self.__is_interacting == self.__TOP_DRAWER:
-                self.__place_in_top_drawer(entity)
+                if self.__check_for_room(entity, self.__top_drawer_inventory):
+                    self.__place_in_top_drawer(entity)
+                    hands.movable_entities.remove(entity)
             else:
-                self.__place_in_bottom_drawer(entity)
-            hands.movable_entities.remove(entity)
+                if self.__check_for_room(entity, self.__top_drawer_inventory):
+                    self.__place_in_bottom_drawer(entity)
+                    hands.movable_entities.remove(entity)
 
     def take(self, side: int, hands: Carry):
         if self.__is_interacting == self.__TOP_DRAWER:
@@ -121,17 +135,39 @@ class Fridge:
         z_tile_size = 1.21
         offset = [-2.4 + x_tile_size / 2, 3.66, -1.45 + z_tile_size / 2]
 
+        if isinstance(entity.get_attachment(), FridgeObject):
+            if entity.get_attachment().get_size()[1] > 1 and entity.get_attachment().get_orientation():
+                offset[0] += x_tile_size  * (entity.get_attachment().get_size()[1] - 1)
+            if entity.get_attachment().get_orientation():
+                entity.set_rot_y(-90)
+            else:
+                entity.set_rot_y(0)
+        else:
+            entity.set_rot_y(0)
+
         x_pos = offset[0] + self.__selected_pos[0] * x_tile_size + self.__top_drawer.get_position()[0]
         y_pos = offset[1] + self.__top_drawer.get_position()[1]
         z_pos = offset[2] + self.__selected_pos[1] * z_tile_size + self.__top_drawer.get_position()[2]
 
         self.__sort_in_inventory(entity, self.__top_drawer_inventory)
         entity.set_position([x_pos, y_pos, z_pos])
+        entity.set_rot_x(0)
+        entity.set_rot_z(0)
 
     def __place_in_bottom_drawer(self, entity) -> None:
         x_tile_size = 1.16
         z_tile_size = 1.21
         offset = [-2.4 + x_tile_size / 2, 0.46, -1.45 + z_tile_size / 2]
+
+        if isinstance(entity.get_attachment(), FridgeObject):
+            if entity.get_attachment().get_size()[1] > 1 and entity.get_attachment().get_orientation():
+                offset[0] += x_tile_size * (entity.get_attachment().get_size()[1] - 1)
+            if entity.get_attachment().get_orientation():
+                entity.set_rot_y(-90)
+            else:
+                entity.set_rot_y(0)
+        else:
+            entity.set_rot_y(0)
 
         x_pos = offset[0] + self.__selected_pos[0] * x_tile_size + self.__bottom_drawer.get_position()[0]
         y_pos = offset[1]                                        + self.__bottom_drawer.get_position()[1]
@@ -139,22 +175,50 @@ class Fridge:
 
         self.__sort_in_inventory(entity, self.__bottom_drawer_inventory)
         entity.set_position([x_pos, y_pos, z_pos])
+        entity.set_rot_x(0)
+        entity.set_rot_z(0)
+
+    def __check_for_room(self, entity, inventory) -> bool:
+        if not isinstance(entity.get_attachment(), FridgeObject):
+            if inventory[self.__selected_pos[1]][self.__selected_pos[0]]:
+                return False
+            else:
+                return True
+
+        if entity.get_attachment().get_orientation() == entity.get_attachment().NORTH:
+            x = entity.get_attachment().get_size()[0]
+            y = entity.get_attachment().get_size()[1]
+        else:
+            x = entity.get_attachment().get_size()[1]
+            y = entity.get_attachment().get_size()[0]
+        for i in range(y):
+            for j in range(x):
+                try:
+                    if inventory[self.__selected_pos[1] + i][self.__selected_pos[0] + j]:
+                        return False
+                except IndexError:
+                    return False
+        return True
 
     def __sort_in_inventory(self, entity, inventory):
-        if isinstance(entity, GameObject):
-            if isinstance(entity.get_attachment(), FridgeObject):
-                for i in range(entity.get_attachment().get_size()[1]):
-                    for j in range(entity.get_attachment().get_size()[0]):
-                        inventory[self.__selected_pos[1] + i][self.__selected_pos[0] + j] = entity
-
-        inventory[self.__selected_pos[1]][self.__selected_pos[0]] = entity
+        if isinstance(entity.get_attachment(), FridgeObject):
+            if entity.get_attachment().get_orientation() == 0:
+                x = entity.get_attachment().get_size()[0]
+                y = entity.get_attachment().get_size()[1]
+            else:
+                x = entity.get_attachment().get_size()[1]
+                y = entity.get_attachment().get_size()[0]
+            for i in range(y):
+                for j in range(x):
+                    inventory[self.__selected_pos[1] + i][self.__selected_pos[0] + j] = entity
+        else:
+            inventory[self.__selected_pos[1]][self.__selected_pos[0]] = entity
 
     def __sort_out_inventory(self, entity, inventory):
-        if isinstance(entity, GameObject):
-            if isinstance(entity.get_attachment(), FridgeObject):
-                self.__nestrepl(inventory, entity, None)
-
-        inventory[self.__selected_pos[1]][self.__selected_pos[0]] = None
+        if isinstance(entity.get_attachment(), FridgeObject):
+            self.__nestrepl(inventory, entity, None)
+        else:
+            inventory[self.__selected_pos[1]][self.__selected_pos[0]] = None
 
     def __move_on_top_drawer(self, camera, drawer) -> None:
         self.__original_camera_pos = camera.get_position()
@@ -206,9 +270,6 @@ class Fridge:
         y_pos = y_offset - y_tile_size * self.__selected_pos[1]
 
         self.__selected_texture.set_position([x_pos, y_pos])
-
-    def get_bottom_drawer_inventory(self):
-        return self.__bottom_drawer_inventory
 
     @staticmethod
     def __nestrepl(lst, instance, repl):
