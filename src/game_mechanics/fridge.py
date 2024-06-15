@@ -128,14 +128,15 @@ class Fridge:
             if not entity:
                 return
             hands.movable_entities.append(entity)
-            hands.add_carrying_object(side, self.__top_drawer_inventory[self.__selected_pos[1]][self.__selected_pos[0]])
+            hands.set_carrying_object(side, self.__top_drawer_inventory[self.__selected_pos[1]][self.__selected_pos[0]])
             self.__sort_out_inventory(entity, self.__top_drawer_inventory)
         else:
             entity = self.__bottom_drawer_inventory[self.__selected_pos[1]][self.__selected_pos[0]]
             if not entity:
                 return
             hands.movable_entities.append(entity)
-            hands.add_carrying_object(side, self.__bottom_drawer_inventory[self.__selected_pos[1]][self.__selected_pos[0]])
+            hands.set_carrying_object(side,
+                                      self.__bottom_drawer_inventory[self.__selected_pos[1]][self.__selected_pos[0]])
             self.__sort_out_inventory(entity, self.__bottom_drawer_inventory)
 
     def __place_in_top_drawer(self, entity) -> None:

@@ -120,9 +120,10 @@ class CoffeeMachineOS:
         texts.append(self.__time_remaining)
         return texts
 
-    @staticmethod
-    def get_all_texts() -> list:
-        return CoffeeProduct.all_texts
+    def get_all_texts(self) -> list:
+        texts = CoffeeProduct.all_texts
+        texts.append(self.__time_remaining)
+        return texts
 
     def get_icon_size(self) -> float:
         return self.__icon_size

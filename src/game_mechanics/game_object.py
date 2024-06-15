@@ -3,9 +3,10 @@ from src.entities.entity import Entity
 
 class GameObject:
 
-    def __init__(self, entity: Entity, child_0: Entity = None, child_1: Entity = None, name: str = "", collider: Entity = None):
+    def __init__(self, entity: Entity, child_0: Entity = None, child_1: Entity = None, int_name: str = "", collider: Entity = None):
         self.__entity = entity
-        self.__name = name
+        self.__internal_name = int_name
+        self.__external_name = ""
         self.__prompt = ""
         self.__info = ""
         self.__pickup_able = True
@@ -29,11 +30,17 @@ class GameObject:
     def get_attachment(self):
         return self.__attachment
 
-    def set_name(self, name: str) -> None:
-        self.__name = name
+    def set_int_name(self, name: str) -> None:
+        self.__internal_name = name
 
-    def get_name(self) -> str:
-        return self.__name
+    def get_int_name(self) -> str:
+        return self.__internal_name
+
+    def set_ext_name(self, name: str) -> None:
+        self.__external_name = name
+
+    def get_ext_name(self) -> str:
+        return self.__external_name
 
     def set_pickup_able(self, pickup_able: bool) -> None:
         self.__pickup_able = pickup_able

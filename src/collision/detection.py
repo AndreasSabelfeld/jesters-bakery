@@ -32,10 +32,11 @@ class Detection:
 
     def detect_object(self, entity) -> vec3 | None:
         if isinstance(entity, GameObject):
-            """if entity.has_child():
-                self.detect_object(entity.get_child())"""
-            # use entity collider instead of the normal model (if none is specified, the default is still the model)
+            # use entity collider instead of the normal model
             entity_collider = entity.get_collider()
+            if not entity_collider:
+                # if no collider is specified, skip this entity
+                return
             vertices = self.get_all_tris(entity_collider)
             indices = entity_collider.get_model().get_raw_model().get_indices()
 

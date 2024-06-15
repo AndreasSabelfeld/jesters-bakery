@@ -26,8 +26,8 @@ class Scanner:
             self.__text.set_text_string("")
             return
 
-        if look_at.get_name():
-            self.__name = look_at.get_name()
+        if look_at.get_int_name():
+            self.__name = look_at.get_int_name()
         if look_at.get_prompt():
             self.__prompt = look_at.get_prompt()
         if look_at.get_info():
