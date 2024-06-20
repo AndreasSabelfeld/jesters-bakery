@@ -4,6 +4,7 @@ import random
 
 from src.game_mechanics.coffee_container import CoffeeContainer
 from src.game_mechanics.fridge import Fridge
+from src.game_mechanics.tap import Tap
 from src.render_engine.display_manager import DisplayManager
 from src.render_engine.gui_renderer import GuiRenderer
 from src.render_engine.master_renderer import MasterRenderer
@@ -312,6 +313,9 @@ def main():
     milk_foamer_game_object.get_child_1().set_int_name("MILK_FOAMER_CUP")
     milk_foamer_game_object.get_child_1().set_child_0(milk_foamer_rotator)
 
+    textures = [grass_texture] * 5
+    tap = Tap(obj_loader, loader, [60, 37.39, 50], [0, 0, 0], 1, textures)
+
     small_coffee = Entity(static_small_coffee_model, [70 + 2, 29.39, 50], 0, 0, 0, 1)
     small_coffee_collider = Entity(static_small_coffee_collider, [70 + 2, 29.39, 50], 0, 0, 0, 1)
     small_coffee_game_object = GameObject(small_coffee, int_name="COFFEE", collider=small_coffee_collider)
@@ -333,13 +337,13 @@ def main():
 
     small_glass = Entity(static_small_glass_model, [70 + 8, 29.39, 50], 0, 0, 0, 1)
     small_glass_collider = Entity(static_small_glass_collider, [70 + 8, 29.39, 50], 0, 0, 0, 1)
-    small_glass_game_object = GameObject(small_glass, int_name="COFFEE", collider=small_glass_collider)
+    small_glass_game_object = GameObject(small_glass, int_name="GLASS", collider=small_glass_collider)
     small_glass_game_object.set_attachment(CoffeeContainer(CoffeeContainer.SMALL_GLASS, small_glass_game_object))
     small_glass_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
 
     big_glass = Entity(static_big_glass_model, [70 + 10, 29.39, 50], 0, 0, 0, 1)
     big_glass_collider = Entity(static_big_glass_collider, [70 + 10, 29.39, 50], 0, 0, 0, 1)
-    big_glass_game_object = GameObject(big_glass, int_name="COFFEE", collider=big_glass_collider)
+    big_glass_game_object = GameObject(big_glass, int_name="GLASS", collider=big_glass_collider)
     big_glass_game_object.set_attachment(CoffeeContainer(CoffeeContainer.BIG_GLASS, big_glass_game_object))
     big_glass_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
 
@@ -370,9 +374,11 @@ def main():
     entities = [coffee_machine_game_object, small_coffee_game_object, big_coffee_game_object, tea_pot_game_object,
                 small_glass_game_object, big_glass_game_object, espresso_cup_game_object, fridge_game_object,
                 cauldron_game_object, milk_sac_game_object, milk_foamer_game_object, milk_game_object, milk_foamer_screen]
+    entities.extend(tap.get_game_objects())
     collider_entities = entities.copy()
     collider_entities.extend([fridge_game_object.get_child_0(), fridge_game_object.get_child_1(),
                              milk_foamer_game_object.get_child_0(), milk_foamer_game_object.get_child_1()])
+    collider_entities.remove(tap.get_base())
     # ~~~~~~~~~~~~LIGHTS~~~~~~~~~~~~~~~~
     sun = Light([-100000, -150000, -100000], [1, 1, 1])
     lights = [sun]
@@ -451,6 +457,7 @@ def main():
         fridge.interact(player, camera)
         coffee_os.render_screen()
         milk_foamer_os.update()
+        tap.update()
 
         master_renderer.render_scene(entities, [], terrains, lights, camera, display)
         not_specified = coffee_os.get_all_texts()

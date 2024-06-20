@@ -1,4 +1,3 @@
-from math import sqrt
 from time import sleep
 from threading import Thread
 from src.render_engine.input_controller import KeyboardInput, ControllerInput, KeyboardInputListener

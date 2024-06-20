@@ -64,7 +64,7 @@ class Carry:
 
     def __pick_up_special_cases(self, entity, side) -> int:
         name = entity.get_int_name()
-        if name == "COFFEE" or name == "TEA":
+        if name == "COFFEE" or name == "TEA" or name == "GLASS":
             self.__pick_up_coffee(entity)
             return 0
         elif name == "TOP_DRAWER":
@@ -123,6 +123,12 @@ class Carry:
                     return 1
                 elif self.get_carrying_object(side).get_int_name() == "MILK":
                     entity.get_attachment().fill(self.get_carrying_object(side).get_attachment().get_texture())
+                    return 1
+        elif name == "TAP":
+            if isinstance(self.get_carrying_object(side), GameObject):
+                if self.get_carrying_object(side).get_int_name() == "GLASS":
+                    entity.get_attachment().start_fill(self.get_carrying_object(side))
+                    self.remove_carrying_object(side)
                     return 1
 
     def __lay_down(self, side: int, carrying_entity, relevant_entities: list) -> None:
@@ -199,7 +205,7 @@ class Carry:
         if side:
             if not isinstance(self.__carrying_object_right, GameObject):
                 return
-            if self.__carrying_object_right.get_int_name() == "COFFEE":
+            if self.__carrying_object_right.get_int_name() == "COFFEE" or self.__carrying_object_right.get_int_name() == "GLASS":
                 if self.__coffee_machine.get_attachment().get_coffee(1) is None:
                     self.__coffee_machine.get_attachment().set_coffee(1, self.__carrying_object_right)
                 elif self.__coffee_machine.get_attachment().get_coffee(2) is None:
@@ -210,7 +216,7 @@ class Carry:
         else:
             if not isinstance(self.__carrying_object_left, GameObject):
                 return
-            if self.__carrying_object_left.get_int_name() == "COFFEE":
+            if self.__carrying_object_left.get_int_name() == "COFFEE" or self.__carrying_object_left.get_int_name() == "GLASS":
                 if self.__coffee_machine.get_attachment().get_coffee(1) is None:
                     self.__coffee_machine.get_attachment().set_coffee(1, self.__carrying_object_left)
                 elif self.__coffee_machine.get_attachment().get_coffee(2) is None:

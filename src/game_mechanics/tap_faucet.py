@@ -1,0 +1,86 @@
+from threading import Thread
+from time import sleep
+
+from src.entities.entity import Entity
+from src.game_mechanics.game_object import GameObject
+from src.models.textured_model import TexturedModel
+from src.textures.model_texture import ModelTexture
+
+
+class TapFaucet:
+    def __init__(self, obj_loader, loader, pos: list[float], rotation: list[float], size: int, texture):
+        self.__obj_loader = obj_loader
+        self.__loader = loader
+        self.__pos = pos
+        self.__rot = rotation
+        self.__size = size
+
+        self.__faucet = None
+        self.__fill_texture = texture
+        self.__filling = False
+        self.__offset = [0, 2, 0.75]
+        self.__brewing_length = 6
+        self.__placed_glass = None
+        self.__timing_buffer = False
+
+        self.__load_assets()
+
+    def update(self):
+        if self.__timing_buffer:
+            self.__fill(self.__placed_glass)
+            self.__timing_buffer = False
+
+    def start_fill(self, glass: GameObject) -> None:
+        self.__filling = True
+        glass.set_pickup_able(False)
+        glass.set_position([self.__pos[0] + self.__offset[0],
+                            self.__pos[1] + self.__offset[1],
+                            self.__pos[2] + self.__offset[2]])
+
+        self.__placed_glass = glass
+        process = Thread(target=self.__fill_timing, args=(glass,))
+        process.start()
+
+    def __fill_timing(self, glass: GameObject):
+        levels = 3
+        interval = self.__brewing_length / levels
+        for i in range(levels):
+            sleep(interval)
+            self.__timing_buffer = True
+        self.__filling = False
+        glass.set_pickup_able(True)
+
+    def __fill(self, glass: GameObject):
+        glass.get_attachment().fill(self.__fill_texture)
+
+    def __load_assets(self) -> None:
+        tap_tap_model = self.__obj_loader.load_obj_model("tap_tap", self.__loader)
+        tap_tap_texture = ModelTexture(self.__loader.load_texture("white"))
+        tap_tap_texture.set_reflectivity(5)
+        static_tap_tap_model = TexturedModel(tap_tap_model, tap_tap_texture)
+        static_tap_tap_collider = TexturedModel(self.__obj_loader.load_obj_model("tap_tap_collider", self.__loader),
+                                                ModelTexture(self.__loader.load_texture("")))
+
+        tap_sign_model = self.__obj_loader.load_obj_model("tap_sign", self.__loader)
+        tap_sign_texture = ModelTexture(self.__loader.load_texture(""))
+        tap_sign_texture.set_reflectivity(1)
+        static_tap_sign_model = TexturedModel(tap_sign_model, tap_sign_texture)
+
+        tap_tap = Entity(static_tap_tap_model, self.__pos, *self.__rot, self.__size)
+        tap_sign = Entity(static_tap_sign_model, self.__pos, *self.__rot, self.__size)
+        tap_tap_collider = Entity(static_tap_tap_collider, self.__pos, *self.__rot, self.__size)
+        self.__faucet = GameObject(tap_tap, child_0=tap_sign, collider=tap_tap_collider, int_name="TAP")
+        self.__faucet.set_attachment(self)
+        self.__faucet.set_pickup_able(False)
+
+    def set_brewing_length(self, length: float) -> None:
+        self.__brewing_length = length
+
+    def get_faucet_game_object(self) -> GameObject:
+        return self.__faucet
+
+    def get_position(self) -> list[float]:
+        return self.__pos
+
+    def is_filling(self) -> bool:
+        return self.__filling
