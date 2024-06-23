@@ -130,6 +130,17 @@ class Carry:
                     entity.get_attachment().start_fill(self.get_carrying_object(side))
                     self.remove_carrying_object(side)
                     return 1
+        elif name == "MIXER":
+            if self.get_carrying_object(side).get_int_name() == "MIXER_VESSEL":
+                entity.get_attachment().place_vessel(self.get_carrying_object(side))
+                entity.get_attachment().start_mix(self.get_carrying_object(side))
+                self.remove_carrying_object(side)
+                return 1
+        elif name == "MIXER_VESSEL":
+            if isinstance(self.get_carrying_object(side), GameObject):
+                if isinstance(self.get_carrying_object(side).get_attachment(), FridgeObject):
+                    entity.get_attachment().fill(self.get_carrying_object(side).get_attachment().get_texture())
+                    return 1
 
     def __lay_down(self, side: int, carrying_entity, relevant_entities: list) -> None:
         relevant_entities = [_ for _ in relevant_entities if

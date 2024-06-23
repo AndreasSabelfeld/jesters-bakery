@@ -10,6 +10,8 @@ Step 2:
     - Triangulate Faces
 
 Step 3:
-    Select these two:
+    Select these two settings:
         Forward:    -Z Forward
         Up:         Y Up
+Step 4:
+    Export

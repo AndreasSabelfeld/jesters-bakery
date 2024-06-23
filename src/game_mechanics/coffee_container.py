@@ -26,7 +26,7 @@ class CoffeeContainer:
         cls.__loader = loader
         cls.__obj_loader = obj_loader
 
-    def get_model(self, container_type: int, level: int, texture: str) -> TexturedModel:
+    def get_model(self, container_type: int, level: int, texture) -> TexturedModel:
         if level > 3:
             self.toggle_overflown()
             level = 3

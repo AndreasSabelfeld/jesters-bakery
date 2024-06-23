@@ -4,6 +4,8 @@ import random
 
 from src.game_mechanics.coffee_container import CoffeeContainer
 from src.game_mechanics.fridge import Fridge
+from src.game_mechanics.mixer import Mixer
+from src.game_mechanics.mixer_vessel import MixerVessel
 from src.game_mechanics.tap import Tap
 from src.render_engine.display_manager import DisplayManager
 from src.render_engine.gui_renderer import GuiRenderer
@@ -203,6 +205,22 @@ def main():
     static_milk_foamer_lid_collider = TexturedModel(obj_loader.load_obj_model("milk_foamer_lid_collider", loader), ModelTexture(loader.load_texture("")))
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    # ~~~~~~~~~~~~~MIXER~~~~~~~~~~~~~~~~
+    mixer_model = obj_loader.load_obj_model("mixer", loader)
+    mixer_texture = ModelTexture(loader.load_texture(""))
+    mixer_texture.set_reflectivity(0.75)
+    static_mixer_model = TexturedModel(mixer_model, mixer_texture)
+    static_mixer_collider = TexturedModel(obj_loader.load_obj_model("mixer_collider", loader),
+                                                       ModelTexture(loader.load_texture("")))
+
+    mixer_vessel_model = obj_loader.load_obj_model("mixer_vessel", loader)
+    mixer_vessel_texture = ModelTexture(loader.load_texture(""))
+    mixer_vessel_texture.set_reflectivity(0.75)
+    static_mixer_vessel_model = TexturedModel(mixer_vessel_model, mixer_vessel_texture)
+    static_mixer_vessel_collider = TexturedModel(obj_loader.load_obj_model("mixer_vessel_collider", loader),
+                                          ModelTexture(loader.load_texture("")))
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     # ~~~~~~~~~~COFFEE CUPS~~~~~~~~~~~~~
     small_coffee_model = obj_loader.load_obj_model("small_coffee_cup", loader)
     small_coffee_texture = ModelTexture(loader.load_texture("coffee_cup_texture"))
@@ -316,6 +334,15 @@ def main():
     textures = [grass_texture] * 5
     tap = Tap(obj_loader, loader, [60, 37.39, 50], [0, 0, 0], 1, textures)
 
+    mixer = Entity(static_mixer_model, [40, 38, 50], 0, 0, 0, 1)
+    mixer_collider = Entity(static_mixer_collider, [40, 38, 50], 0, 0, 0, 1)
+    mixer_game_object = GameObject(mixer, collider=mixer_collider, int_name="MIXER")
+    mixer_game_object.set_pickup_able(False)
+
+    mixer_vessel = Entity(static_mixer_vessel_model, [35, 38, 50], 0, 0, 0, 1)
+    mixer_vessel_collider = Entity(static_mixer_vessel_collider, [35, 38, 50], 0, 0, 0, 1)
+    mixer_vessel_game_object = GameObject(mixer_vessel, collider=mixer_vessel_collider, int_name="MIXER_VESSEL")
+
     small_coffee = Entity(static_small_coffee_model, [70 + 2, 29.39, 50], 0, 0, 0, 1)
     small_coffee_collider = Entity(static_small_coffee_collider, [70 + 2, 29.39, 50], 0, 0, 0, 1)
     small_coffee_game_object = GameObject(small_coffee, int_name="COFFEE", collider=small_coffee_collider)
@@ -373,7 +400,8 @@ def main():
 
     entities = [coffee_machine_game_object, small_coffee_game_object, big_coffee_game_object, tea_pot_game_object,
                 small_glass_game_object, big_glass_game_object, espresso_cup_game_object, fridge_game_object,
-                cauldron_game_object, milk_sac_game_object, milk_foamer_game_object, milk_game_object, milk_foamer_screen]
+                cauldron_game_object, milk_sac_game_object, milk_foamer_game_object, milk_game_object, milk_foamer_screen,
+                mixer_game_object, mixer_vessel_game_object]
     entities.extend(tap.get_game_objects())
     collider_entities = entities.copy()
     collider_entities.extend([fridge_game_object.get_child_0(), fridge_game_object.get_child_1(),
@@ -423,6 +451,10 @@ def main():
     milk_foamer_game_object.set_attachment(milk_foamer_os)
     milk_foamer_game_object.get_child_0().set_attachment(milk_foamer_os)
     milk_foamer_game_object.get_child_1().set_attachment(milk_foamer_os)
+    mixer_vessel_os = MixerVessel(mixer_vessel_game_object, obj_loader, loader)
+    mixer_os = Mixer(mixer_game_object)
+    mixer_game_object.set_attachment(mixer_os)
+    mixer_vessel_game_object.set_attachment(mixer_vessel_os)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     cube = Entity(static_grass_model, [60, 29.39, 50], 0, 0, 0, 0.1)
@@ -447,9 +479,6 @@ def main():
 
         object_picker.update(collider_entities)
         scanner.update(collider_entities)
-        if KeyboardInput.get_keys_held().get(b'c'):
-            ent = Entity(static_grass_model, object_picker.get_current_object_point(), 0, 0, 0, 0.1)
-            entities.append(ent)
 
         master_renderer.render_shadow_map(entities, sun)
 
@@ -458,6 +487,7 @@ def main():
         coffee_os.render_screen()
         milk_foamer_os.update()
         tap.update()
+        mixer_vessel_os.update()
 
         master_renderer.render_scene(entities, [], terrains, lights, camera, display)
         not_specified = coffee_os.get_all_texts()
