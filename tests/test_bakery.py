@@ -3,6 +3,8 @@ from OpenGL.GL import *
 import random
 
 from src.game_mechanics.coffee_container import CoffeeContainer
+from src.game_mechanics.food import Food
+from src.game_mechanics.food_spawn import FoodSpawn
 from src.game_mechanics.fridge import Fridge
 from src.game_mechanics.mixer import Mixer
 from src.game_mechanics.mixer_vessel import MixerVessel
@@ -221,6 +223,20 @@ def main():
                                           ModelTexture(loader.load_texture("")))
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    # ~~~~~~~~~~~~~FOOD~~~~~~~~~~~~~~~~~
+    sandwich_model = obj_loader.load_obj_model("sandwich", loader)
+    sandwich_texture = ModelTexture(loader.load_texture(""))
+    static_sandwich_model = TexturedModel(sandwich_model, sandwich_texture)
+    static_sandwich_collider = TexturedModel(obj_loader.load_obj_model("sandwich_collider", loader),
+                                             ModelTexture(loader.load_texture("")))
+
+    plate_model = obj_loader.load_obj_model("plate", loader)
+    plate_texture = ModelTexture(loader.load_texture("white"))
+    static_plate_model = TexturedModel(plate_model, plate_texture)
+    static_plate_collider = TexturedModel(obj_loader.load_obj_model("plate_collider", loader),
+                                             ModelTexture(loader.load_texture("")))
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     # ~~~~~~~~~~COFFEE CUPS~~~~~~~~~~~~~
     small_coffee_model = obj_loader.load_obj_model("small_coffee_cup", loader)
     small_coffee_texture = ModelTexture(loader.load_texture("coffee_cup_texture"))
@@ -398,10 +414,14 @@ def main():
     milk_game_object.set_attachment(FridgeObject((1, 1), milk, ModelTexture(loader.load_texture("white"))))
     milk_sac_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
 
+    plate = Entity(static_plate_model, [25, 38 , 50], 0, 0, 0, 0.5)
+    plate_collider = Entity(static_plate_collider, [25, 38 , 50], 0, 0, 0, 0.5)
+    plate_game_object = GameObject(plate, int_name="PLATE", collider=plate_collider)
+
     entities = [coffee_machine_game_object, small_coffee_game_object, big_coffee_game_object, tea_pot_game_object,
                 small_glass_game_object, big_glass_game_object, espresso_cup_game_object, fridge_game_object,
                 cauldron_game_object, milk_sac_game_object, milk_foamer_game_object, milk_game_object, milk_foamer_screen,
-                mixer_game_object, mixer_vessel_game_object]
+                mixer_game_object, mixer_vessel_game_object, plate_game_object]
     entities.extend(tap.get_game_objects())
     collider_entities = entities.copy()
     collider_entities.extend([fridge_game_object.get_child_0(), fridge_game_object.get_child_1(),
@@ -455,6 +475,9 @@ def main():
     mixer_os = Mixer(mixer_game_object)
     mixer_game_object.set_attachment(mixer_os)
     mixer_vessel_game_object.set_attachment(mixer_vessel_os)
+
+    sandwich = Food(static_sandwich_model, static_sandwich_collider, Food.SANDWICH)
+    sandwich_spawn = FoodSpawn(sandwich, [30, 38, 50], [0, 0, 0], 0.5, entities, collider_entities)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     cube = Entity(static_grass_model, [60, 29.39, 50], 0, 0, 0, 0.1)

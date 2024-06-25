@@ -12,10 +12,12 @@ class GameObject:
         self.__pickup_able = True
         self.__attachment = None
         self.__collider = entity
+        self.__parent = None
+        self.__offset = [0, 0, 0]
         if collider: self.__collider = collider
-        if child_0: self.__child_0 = GameObject(child_0)
+        if child_0: self.set_child_0(child_0)
         else: self.__child_0 = None
-        if child_1: self.__child_1 = GameObject(child_1)
+        if child_1: self.set_child_1(child_1)
         else: self.__child_1 = None
 
     def set_collider(self, collider: Entity) -> None:
@@ -49,6 +51,9 @@ class GameObject:
         return self.__pickup_able
 
     def set_position(self, pos: list[float]) -> None:
+        pos = [pos[0] + self.get_offset()[0],
+               pos[1] + self.get_offset()[1],
+               pos[2] + self.get_offset()[2]]
         self.__entity.set_position(pos)
         self.__collider.set_position(pos)
         if self.has_child_0():
@@ -57,7 +62,10 @@ class GameObject:
             self.__child_1.set_position(pos)
 
     def get_position(self) -> list[float]:
-        return self.__entity.get_position()
+        pos = [self.__entity.get_position()[0] + self.get_offset()[0],
+               self.__entity.get_position()[1] + self.get_offset()[1],
+               self.__entity.get_position()[2] + self.get_offset()[2]]
+        return pos
 
     def increase_position(self, dx: float, dy: float, dz: float):
         self.set_position([self.get_position()[0] + dx,
@@ -100,20 +108,46 @@ class GameObject:
     def get_scale(self) -> float:
         return self.get_entity().get_scale()
 
+    def get_offset(self) -> list[float]:
+        return self.__offset
+
+    def set_offset(self, offset: list[float]) -> None:
+        self.__offset = offset
+
     def get_entity(self) -> Entity:
         return self.__entity
+
+    def set_parent(self, parent: 'GameObject') -> None:
+        self.__parent = parent
+
+    def get_parent(self) -> 'GameObject':
+        return self.__parent
 
     def get_child_0(self) -> 'GameObject':
         return self.__child_0
 
     def set_child_0(self, child: Entity) -> None:
-        self.__child_0 = GameObject(child)
+        if isinstance(child, GameObject):
+            self.__child_0 = child
+        else:
+            self.__child_0 = GameObject(child)
+        self.__child_0.set_parent(self)
+        self.__child_0.set_offset([self.__child_0.get_position()[0] - self.get_position()[0],
+                                   self.__child_0.get_position()[1] - self.get_position()[1],
+                                   self.__child_0.get_position()[2] - self.get_position()[2]])
 
     def get_child_1(self) -> 'GameObject':
         return self.__child_1
 
     def set_child_1(self, child: Entity) -> None:
-        self.__child_1 = GameObject(child)
+        if isinstance(child, GameObject):
+            self.__child_1 = child
+        else:
+            self.__child_1 = GameObject(child)
+        self.__child_1.set_parent(self)
+        self.__child_1.set_offset([self.__child_0.get_position()[0] - self.get_position()[0],
+                                   self.__child_0.get_position()[1] - self.get_position()[1],
+                                   self.__child_0.get_position()[2] - self.get_position()[2]])
 
     def has_child_0(self) -> bool:
         if self.__child_0:
@@ -124,6 +158,12 @@ class GameObject:
         if self.__child_1:
             return True
         return False
+
+    def remove_child_0(self) -> None:
+        self.__child_0 = None
+
+    def remove_child_1(self) -> None:
+        self.__child_1 = None
 
     def set_prompt(self, text: str) -> None:
         self.__prompt = text

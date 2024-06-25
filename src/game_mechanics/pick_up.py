@@ -1,3 +1,4 @@
+from src.game_mechanics.food_spawn import FoodSpawn
 from src.render_engine.input_controller import KeyboardInput, ControllerInput
 from src.game_mechanics.game_object import GameObject
 from src.game_mechanics.coffee_machine_os import CoffeeMachineOS
@@ -24,6 +25,9 @@ class Carry:
         self.__forward_distance = 3
         self.__sideways_distance = 3.5
 
+        self.__c_pressed = False
+        self.__y_pressed = False
+
     def update(self, can_pick_up: bool = True) -> None:
         relevant_entities = [_ for _ in self.movable_entities if
                              _ not in (self.__carrying_object_right, self.__carrying_object_left)]
@@ -47,9 +51,27 @@ class Carry:
             else:
                 self.__pick_up(self.LEFT, relevant_entities)
 
+        if KeyboardInput.on_key_down(b'c') or self.__c_pressed:
+            self.__c_pressed = True
+            if KeyboardInput.on_key_down(b'y'):
+                self.__put_right_in_left()
+                self.__c_pressed = False
+
+        if KeyboardInput.on_key_down(b'y') or self.__y_pressed:
+            self.__y_pressed = True
+            if KeyboardInput.on_key_down(b'c'):
+                self.__put_left_in_right()
+                self.__y_pressed = False
+
     def __pick_up(self, side, relevant_entities) -> None:
         entity = self.__object_picker.update(relevant_entities)
         if isinstance(entity, GameObject):
+            if entity.get_parent():
+                if entity is entity.get_parent().get_child_0():
+                    entity.get_parent().remove_child_0()
+                else:
+                    entity.get_parent().remove_child_1()
+                entity.set_offset([0, 0, 0])
             if self.__pick_up_special_cases(entity, side):
                 return
             if not entity.is_pickup_able():
@@ -95,6 +117,9 @@ class Carry:
                 entity.get_attachment().set_cup_placed(False)
                 self.set_carrying_object(side, entity.get_child_1())
             return 1
+        elif isinstance(entity.get_attachment(), FoodSpawn):
+            entity.get_attachment().spawn()
+            return 0
 
     def __lay_down_special_cases(self, entity, side):
         name = entity.get_int_name()
@@ -140,6 +165,17 @@ class Carry:
             if isinstance(self.get_carrying_object(side), GameObject):
                 if isinstance(self.get_carrying_object(side).get_attachment(), FridgeObject):
                     entity.get_attachment().fill(self.get_carrying_object(side).get_attachment().get_texture())
+                    return 1
+        elif name == "PLATE":
+            if isinstance(self.get_carrying_object(side), GameObject):
+                if self.get_carrying_object(side).get_int_name() == "FOOD":
+                    offset = [0, 0.4, 0]
+                    pos = [entity.get_position()[0] + offset[0],
+                           entity.get_position()[1] + offset[1],
+                           entity.get_position()[2] + offset[2]]
+                    self.get_carrying_object(side).set_position(pos)
+                    entity.set_child_0(self.get_carrying_object(side))
+                    self.remove_carrying_object(side)
                     return 1
 
     def __lay_down(self, side: int, carrying_entity, relevant_entities: list) -> None:
@@ -235,3 +271,11 @@ class Carry:
             if self.__carrying_object_left.get_int_name() == "TEA":
                 if self.__coffee_machine.get_attachment().get_coffee(0) is None:
                     self.__coffee_machine.get_attachment().set_coffee(0, self.__carrying_object_left)
+
+    def __put_left_in_right(self):
+        """Object in the left hand 'collides' with the object in the right hand."""
+        self.__lay_down_special_cases(self.get_carrying_object(self.RIGHT), self.LEFT)
+
+    def __put_right_in_left(self):
+        """Object in the right hand 'collides' with the object in the left hand."""
+        self.__lay_down_special_cases(self.get_carrying_object(self.LEFT), self.RIGHT)
