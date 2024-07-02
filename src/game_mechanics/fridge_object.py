@@ -5,11 +5,12 @@ class FridgeObject:
     NORTH = 0
     EAST = 1
 
-    def __init__(self, size: tuple[int, int],  entity, texture: ModelTexture, orientation: int = NORTH):
+    def __init__(self, size: tuple[int, int],  entity, texture: ModelTexture, content: str, orientation: int = NORTH):
         self.__size = size
         self.__orientation = orientation
         self.__entity = entity
         self.__texture = texture
+        self.__content = content
 
     def get_size(self) -> tuple[int, int]:
         return self.__size
@@ -25,3 +26,6 @@ class FridgeObject:
 
     def get_texture(self) -> ModelTexture:
         return self.__texture
+
+    def get_content(self) -> str:
+        return self.__content

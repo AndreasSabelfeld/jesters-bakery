@@ -38,6 +38,7 @@ class MilkFoamer:
         self.__fill_cooldown = 0.0
         self.__brewing_time = 30.0
         self.__processed_fill_texture = ModelTexture(loader.load_texture("grass_block"))
+        self.__content = list()
 
         self.__listener = KeyboardInputListener()
 
@@ -73,6 +74,10 @@ class MilkFoamer:
             self.__fill_lvl += 1
             self.__fill_cooldown = 1.5
 
+    def empty(self) -> None:
+        self.__milk_foamer.get_child_1().remove_child_1()
+        self.__fill_lvl = 0
+
     def display(self) -> None:
         self.__fbo.bind_frame_buffer()
         guis = [self.__black_texture]
@@ -87,6 +92,7 @@ class MilkFoamer:
         # child_1 = cup
         # child_1.child_1 = filling
         self.__milk_foamer.get_child_1().set_child_1(entity)
+        self.append_content("Foam")
 
     def get_lid_closed(self) -> bool:
         return self.__lid_closed
@@ -108,3 +114,25 @@ class MilkFoamer:
 
     def get_is_brewing(self) -> bool:
         return self.__is_brewing
+
+    def append_content(self, content: str | list) -> None:
+        if self.__content and self.__content[-1] == content:
+            return
+        if isinstance(content, str):
+            self.__content.append(content)
+        elif isinstance(content, list):
+            self.__content.extend(content)
+
+    def remove_content(self) -> list:
+        c = self.__content.copy()
+        self.__content = []
+        return c
+
+    def get_content(self) -> list:
+        return self.__content.copy()
+
+    def get_texture(self):
+        return self.__processed_fill_texture
+
+    def get_fill_lvl(self) -> int:
+        return self.__fill_lvl

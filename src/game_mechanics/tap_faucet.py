@@ -8,12 +8,13 @@ from src.textures.model_texture import ModelTexture
 
 
 class TapFaucet:
-    def __init__(self, obj_loader, loader, pos: list[float], rotation: list[float], size: int, texture):
+    def __init__(self, obj_loader, loader, pos: list[float], rotation: list[float], size: int, texture, content: str):
         self.__obj_loader = obj_loader
         self.__loader = loader
         self.__pos = pos
         self.__rot = rotation
         self.__size = size
+        self.__content = content
 
         self.__faucet = None
         self.__fill_texture = texture
@@ -37,6 +38,7 @@ class TapFaucet:
                             self.__pos[1] + self.__offset[1],
                             self.__pos[2] + self.__offset[2]])
 
+        glass.get_attachment().append_content(self.get_content())
         self.__placed_glass = glass
         process = Thread(target=self.__fill_timing, args=(glass,))
         process.start()
@@ -84,3 +86,6 @@ class TapFaucet:
 
     def is_filling(self) -> bool:
         return self.__filling
+
+    def get_content(self) -> str:
+        return self.__content

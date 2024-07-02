@@ -1,7 +1,8 @@
 from src.font_mesh_creator.font_type import FontType
 from src.font_mesh_creator.gui_text import GUIText
 from src.guis.gui_texture import GuiTexture
-from src.game_mechanics.coffe_page import CoffeePage
+from src.game_mechanics.coffee_page import CoffeePage, CoffeePageLactoseFree
+from src.textures.model_texture import ModelTexture
 
 
 class CoffeeProduct:
@@ -22,7 +23,8 @@ class CoffeeProduct:
     all_texts = []
 
     def __init__(self, name: str, icon: GuiTexture, brew_length: float, container_type: int, allows_double: bool,
-                 loader, texture, add_to_coffee_page: bool = True) -> None:
+                 loader, texture: ModelTexture, content: list, add_to_coffee_page: bool = True,
+                 lactose_free: bool = False) -> None:
         """
         Creates a new CoffeeProduct instance
 
@@ -38,6 +40,8 @@ class CoffeeProduct:
         self.__allows_double = allows_double
         self.__loader = loader
         self.__texture = texture
+        self.__content = content
+        self.__lactose_free = lactose_free
         self.__font = FontType(self.__loader.load_texture("candara"), "res/candara.fnt")
         self.__icon_size = 0.125    # same as in CoffeeMachineOS class
         self.__text_offset = 0.04   # same as in CoffeeMachineOS class
@@ -52,8 +56,14 @@ class CoffeeProduct:
         self.__text.set_border_width(0.7)
         self.__text.set_border_edge(0.1)
         if add_to_coffee_page:
-            CoffeePage.add_product(self)
-        CoffeeProduct.all_texts.append(self.__text)
+            if not lactose_free:
+                CoffeePage.add_product(self)
+            else:
+                CoffeePageLactoseFree.add_product(self)
+        if not lactose_free:
+            CoffeeProduct.all_texts.append(self.__text)
+        else:
+            CoffeeProductLactoseFree.all_texts.append(self.__text)
 
     def get_name(self) -> str:
         return self.__name
@@ -76,5 +86,33 @@ class CoffeeProduct:
     def is_allow_double(self) -> bool:
         return self.__allows_double
 
-    def get_texture(self):
+    def get_texture(self) -> ModelTexture:
         return self.__texture
+
+    def get_content(self) -> list:
+        return self.__content
+
+    def is_lactose_free(self) -> bool:
+        return self.__lactose_free
+
+
+class CoffeeProductLactoseFree(CoffeeProduct):
+    """
+    Product entry for the lactose free coffee machine. Each product has a name, icon, a brew length and a respective
+    'container', mug, glass etc.
+    """
+
+    all_texts = []
+
+    def __init__(self, name: str, icon: GuiTexture, brew_length: float, container_type: int, allows_double: bool,
+             loader, texture, content: list, add_to_coffee_page: bool = True) -> None:
+        """
+        Creates a new CoffeeProduct instance
+
+        :param name: The name of the product (e.g. 'Cappuccino')
+        :param icon: The GUI object of the icon
+        :param brew_length: The time it takes to brew the product [in seconds]
+        :param container_type: The container the product needs to be brewed in (int from 0 to 5)
+        """
+        super().__init__(name, icon, brew_length, container_type, allows_double, loader, texture, content,
+                         add_to_coffee_page, lactose_free=True)

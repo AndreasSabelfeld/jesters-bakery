@@ -47,11 +47,11 @@ class Tap:
         pos_2 = [self.__pos[0] - 0 * offset, self.__pos[1], self.__pos[2]]
         pos_3 = [self.__pos[0] + 1 * offset, self.__pos[1], self.__pos[2]]
         pos_4 = [self.__pos[0] + 2 * offset, self.__pos[1], self.__pos[2]]
-        self.__faucet_0 = TapFaucet(self.__obj_loader, self.__loader, pos_0, self.__rot, self.__size, self.__textures[0])
-        self.__faucet_1 = TapFaucet(self.__obj_loader, self.__loader, pos_1, self.__rot, self.__size, self.__textures[1])
-        self.__faucet_2 = TapFaucet(self.__obj_loader, self.__loader, pos_2, self.__rot, self.__size, self.__textures[2])
-        self.__faucet_3 = TapFaucet(self.__obj_loader, self.__loader, pos_3, self.__rot, self.__size, self.__textures[3])
-        self.__faucet_4 = TapFaucet(self.__obj_loader, self.__loader, pos_4, self.__rot, self.__size, self.__textures[4])
+        self.__faucet_0 = TapFaucet(self.__obj_loader, self.__loader, pos_0, self.__rot, self.__size, self.__textures[0], "Coke")
+        self.__faucet_1 = TapFaucet(self.__obj_loader, self.__loader, pos_1, self.__rot, self.__size, self.__textures[1], "Schorle")
+        self.__faucet_2 = TapFaucet(self.__obj_loader, self.__loader, pos_2, self.__rot, self.__size, self.__textures[2], "Still Water")
+        self.__faucet_3 = TapFaucet(self.__obj_loader, self.__loader, pos_3, self.__rot, self.__size, self.__textures[3], "Sparkling Water")
+        self.__faucet_4 = TapFaucet(self.__obj_loader, self.__loader, pos_4, self.__rot, self.__size, self.__textures[4], "Beer")
 
     def get_base(self) -> GameObject:
         return self.__base

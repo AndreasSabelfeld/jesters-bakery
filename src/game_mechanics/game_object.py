@@ -145,9 +145,9 @@ class GameObject:
         else:
             self.__child_1 = GameObject(child)
         self.__child_1.set_parent(self)
-        self.__child_1.set_offset([self.__child_0.get_position()[0] - self.get_position()[0],
-                                   self.__child_0.get_position()[1] - self.get_position()[1],
-                                   self.__child_0.get_position()[2] - self.get_position()[2]])
+        self.__child_1.set_offset([self.__child_1.get_position()[0] - self.get_position()[0],
+                                   self.__child_1.get_position()[1] - self.get_position()[1],
+                                   self.__child_1.get_position()[2] - self.get_position()[2]])
 
     def has_child_0(self) -> bool:
         if self.__child_0:

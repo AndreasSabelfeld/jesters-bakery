@@ -21,3 +21,5 @@ class Mixer:
     def __mix(self, vessel: GameObject):
         sleep(3)
         vessel.set_pickup_able(True)
+        if vessel.get_attachment().get_content():
+            vessel.get_attachment().append_content("Mixed")

@@ -19,7 +19,8 @@ class CoffeeContainer:
         self.__parent_entity = parent_entity
         self.__level = 0
         self.__overflown = False
-        self.__content_name = "empty"
+        self.__content = list()
+        self.__parent_entity.set_info(self.__content)
 
     @classmethod
     def add_loaders(cls, loader, obj_loader):
@@ -65,3 +66,22 @@ class CoffeeContainer:
         if not self.__overflown:
             self.__overflown = True
             self.__parent_entity.get_entity().get_model().set_texture(overflown_texture)
+
+    def get_content(self) -> list:
+        return self.__content.copy()
+
+    def append_content(self, content: str | list) -> None:
+        if isinstance(content, str):
+            # if we have two halves, this makes one full
+            if "half" in content and content in self.__content:
+                self.__content.remove(content)
+                self.__content.append(content.removesuffix(" half"))
+            else:
+                self.__content.append(content)
+        elif isinstance(content, list):
+            self.__content.extend(content)
+
+    def remove_content(self) -> list:
+        c = self.__content.copy()
+        self.__content = []
+        return c

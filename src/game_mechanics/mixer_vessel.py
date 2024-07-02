@@ -13,6 +13,8 @@ class MixerVessel:
         self.__lvl = 0
         self.__max_lvl = 3
         self.__fill_cooldown = 0
+        self.__content = []
+        self.__texture = None
 
     def update(self):
         if self.__fill_cooldown > 0:
@@ -33,3 +35,30 @@ class MixerVessel:
                                              self.__vessel.get_scale()))
             self.__lvl += 1
             self.__fill_cooldown = 1.5
+            self.__texture = texture
+
+    def empty(self) -> None:
+        self.__vessel.remove_child_1()
+        self.__lvl = 0
+
+    def append_content(self, content: str | list) -> None:
+        if self.__content and self.__content[-1] == content:
+            return
+        if isinstance(content, str):
+            self.__content.append(content)
+        elif isinstance(content, list):
+            self.__content.extend(content)
+
+    def remove_content(self) -> list:
+        c = self.__content.copy()
+        self.__content = []
+        return c
+
+    def get_content(self) -> list:
+        return self.__content.copy()
+
+    def get_texture(self):
+        return self.__texture
+
+    def get_fill_lvl(self) -> int:
+        return self.__lvl

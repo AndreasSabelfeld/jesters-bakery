@@ -4,6 +4,8 @@ from src.font_rendering.text_master import TextMaster
 from src.render_engine.display_manager import DisplayManager
 from src.render_engine.loader import Loader
 
+from src.game_mechanics.order import Order, MasterOrder
+
 from OpenGL.GLUT import *
 
 
@@ -20,9 +22,15 @@ def main():
 
     # ~~~~~~~~~~~~~TEXT~~~~~~~~~~~~~~~~
     TextMaster(loader)
-    font = FontType(loader.load_texture("arial"), "res/arial.fnt")
-    text = GUIText("This is a test text!", 10, font, [0.5, 0.5], 0.5, True)
+    font = FontType(loader.load_texture("candara"), "res/candara.fnt")
+    text = GUIText("This is a test text! \nEspresso \nCappuccino", 10, font, [0, 0], 1, True)
     text.set_color(1, 0, 0)
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # ~~~~~~~~~~~~~ORDER~~~~~~~~~~~~~~~~
+    master_order = MasterOrder(loader)
+    order1 = Order(master_order, 3)
+    order1.get_gui_text()
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     while glutGetWindow() != 0:

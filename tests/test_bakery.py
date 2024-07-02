@@ -8,6 +8,7 @@ from src.game_mechanics.food_spawn import FoodSpawn
 from src.game_mechanics.fridge import Fridge
 from src.game_mechanics.mixer import Mixer
 from src.game_mechanics.mixer_vessel import MixerVessel
+from src.game_mechanics.order import MasterOrder, Order
 from src.game_mechanics.tap import Tap
 from src.render_engine.display_manager import DisplayManager
 from src.render_engine.gui_renderer import GuiRenderer
@@ -45,7 +46,7 @@ from src.collision.box import Box
 from src.collision.detection import Detection
 
 from src.game_mechanics.pick_up import Carry
-from src.game_mechanics.coffee_machine_os import CoffeeMachineOS
+from src.game_mechanics.coffee_machine_os import CoffeeMachineOS, CoffeeMachineOSLactoseFree
 from src.game_mechanics.coffee_product import CoffeeProduct
 from src.game_mechanics.game_object import GameObject
 from src.game_mechanics.fridge_object import FridgeObject
@@ -134,6 +135,12 @@ def main():
     coffee_machine_screen_texture.set_shine_damper(10)
     coffee_machine_screen_texture.set_reflectivity(0.5)
     static_coffee_machine_screen_model = TexturedModel(coffee_machine_screen_model, coffee_machine_screen_texture)
+
+    coffee_machine_lf_screen_model = obj_loader.load_obj_model("coffee_machine_screen", loader)
+    coffee_machine_lf_screen_texture = ModelTexture(loader.load_texture("white"))
+    coffee_machine_lf_screen_texture.set_shine_damper(10)
+    coffee_machine_lf_screen_texture.set_reflectivity(0.5)
+    static_coffee_machine_lf_screen_model = TexturedModel(coffee_machine_lf_screen_model, coffee_machine_lf_screen_texture)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~~~~FRIDGE~~~~~~~~~~~~~~~
@@ -307,6 +314,14 @@ def main():
     coffee_machine_game_object.set_pickup_able(False)
     coffee_machine_game_object.set_prompt("Press the 'F' Key to interact.")
 
+    coffee_machine_lactose_free = Entity(static_coffee_machine_model, [65, 29.39, 50], 0, 0, 0, machine_size)
+    coffee_machine_lactose_free_collider = Entity(static_coffee_machine_collider, [65, 29.39, 50], 0, 0, 0, machine_size)
+    coffee_machine_lactose_free_screen = Entity(static_coffee_machine_lf_screen_model, [65, 29.39, 50], 0, 0, 0, machine_size)
+    coffee_machine_lactose_free_game_object = GameObject(coffee_machine_lactose_free, coffee_machine_lactose_free_screen,
+                                                         int_name=CoffeeMachineOSLactoseFree.get_name(), collider=coffee_machine_lactose_free_collider)
+    coffee_machine_lactose_free_game_object.set_pickup_able(False)
+    coffee_machine_lactose_free_game_object.set_prompt("Press the 'F' Key to interact.")
+
     fridge_case = Entity(static_fridge_case_model, [60, 29.39, 50], 0, 0, 0, machine_size)
     fridge_case_collider = Entity(static_fridge_case_collider, [60, 29.39, 50], 0, 0, 0, machine_size)
     fridge_top_drawer = Entity(static_fridge_top_drawer_model, [60, 29.39, 50], 0, 0, 0, machine_size)
@@ -399,19 +414,19 @@ def main():
     cauldron = Entity(static_small_glass_model, [70 + 8, 29.39, 50], 0, 0, 0, 3)
     cauldron_collider = Entity(static_small_glass_collider, [70 + 8, 29.39, 50], 0, 0, 0, 3)
     cauldron_game_object = GameObject(cauldron, int_name="FRIDGE", collider=cauldron_collider)
-    cauldron_game_object.set_attachment(FridgeObject((2, 2), cauldron, None))
+    cauldron_game_object.set_attachment(FridgeObject((2, 2), cauldron, None, "Milk"))
     cauldron_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
 
     milk_sac = Entity(static_milk_sac_model, [70 + 14, 29.39, 50], 0, 0, 0, machine_size)
     milk_sac_collider = Entity(static_milk_sac_collider, [70 + 14, 29.39, 50], 0, 0, 0, machine_size)
     milk_sac_game_object = GameObject(milk_sac, int_name="FRIDGE", collider=milk_sac_collider)
-    milk_sac_game_object.set_attachment(FridgeObject((3, 2), milk_sac, grass_texture))
+    milk_sac_game_object.set_attachment(FridgeObject((3, 2), milk_sac, grass_texture, "Milk"))
     milk_sac_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
 
     milk = Entity(static_milk_model, [70 + 16, 29.39, 50], 0, 0, 0, machine_size)
     milk_collider = Entity(static_milk_collider, [70 + 16, 29.39, 50], 0, 0, 0, machine_size)
     milk_game_object = GameObject(milk, int_name="MILK", collider=milk_collider)
-    milk_game_object.set_attachment(FridgeObject((1, 1), milk, ModelTexture(loader.load_texture("white"))))
+    milk_game_object.set_attachment(FridgeObject((1, 1), milk, ModelTexture(loader.load_texture("white")), "Milk"))
     milk_sac_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
 
     plate = Entity(static_plate_model, [25, 38 , 50], 0, 0, 0, 0.5)
@@ -421,7 +436,7 @@ def main():
     entities = [coffee_machine_game_object, small_coffee_game_object, big_coffee_game_object, tea_pot_game_object,
                 small_glass_game_object, big_glass_game_object, espresso_cup_game_object, fridge_game_object,
                 cauldron_game_object, milk_sac_game_object, milk_foamer_game_object, milk_game_object, milk_foamer_screen,
-                mixer_game_object, mixer_vessel_game_object, plate_game_object]
+                mixer_game_object, mixer_vessel_game_object, plate_game_object, coffee_machine_lactose_free_game_object]
     entities.extend(tap.get_game_objects())
     collider_entities = entities.copy()
     collider_entities.extend([fridge_game_object.get_child_0(), fridge_game_object.get_child_1(),
@@ -456,21 +471,30 @@ def main():
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     coffee_fbo = FBO(1920, 1080, multi_target=False, depth_buffer_type=FBO.DEPTH_TEXTURE)
+    lactose_free_coffee_fbo = FBO(1920, 1080, multi_target=False, depth_buffer_type=FBO.DEPTH_TEXTURE)
     milk_fbo = FBO(1920, 1080, multi_target=False, depth_buffer_type=FBO.DEPTH_TEXTURE)
 
     # ~~~~~~~~~~~~~GAME~~~~~~~~~~~~~~~~~
-    carry = Carry(terrain_picker, object_picker, coffee_machine_game_object)
+    carry = Carry(terrain_picker, object_picker, coffee_machine_game_object, coffee_machine_lactose_free_game_object)
     carry.movable_entities = collider_entities
+
     coffee_os = CoffeeMachineOS(coffee_machine_screen, loader, obj_loader, coffee_fbo, gui_renderer, object_picker)
     coffee_machine_game_object.set_attachment(coffee_os)
+
+    coffee_os_lactose_free = CoffeeMachineOSLactoseFree(coffee_machine_lactose_free_screen, loader, obj_loader, lactose_free_coffee_fbo, gui_renderer, object_picker)
+    coffee_machine_lactose_free_game_object.set_attachment(coffee_os_lactose_free)
+
     fridge = Fridge(fridge_game_object.get_child_0(), fridge_game_object.get_child_1(), object_picker, loader, gui_renderer)
     fridge_game_object.get_child_0().set_attachment(fridge)
     fridge_game_object.get_child_1().set_attachment(fridge)
+
     scanner = Scanner(object_picker, loader)
+
     milk_foamer_os = MilkFoamer(milk_foamer_game_object, milk_foamer_screen, loader, obj_loader, milk_fbo, gui_renderer, object_picker)
     milk_foamer_game_object.set_attachment(milk_foamer_os)
     milk_foamer_game_object.get_child_0().set_attachment(milk_foamer_os)
     milk_foamer_game_object.get_child_1().set_attachment(milk_foamer_os)
+
     mixer_vessel_os = MixerVessel(mixer_vessel_game_object, obj_loader, loader)
     mixer_os = Mixer(mixer_game_object)
     mixer_game_object.set_attachment(mixer_os)
@@ -483,6 +507,13 @@ def main():
     cube = Entity(static_grass_model, [60, 29.39, 50], 0, 0, 0, 0.1)
     entities.append(cube)
 
+    master_order = MasterOrder(loader, obj_loader, gui_renderer)
+    order_1 = Order(master_order, 4)
+    order_1.get_gui_text()
+    order_1_ga = order_1.get_game_object([40, 38, 55], [0, 0, 0], 10)
+    entities.append(order_1_ga)
+    collider_entities.append(order_1_ga)
+
     while glutGetWindow() != 0:
         # game logic
         Time.set_current_time(Time.time_current_time())
@@ -493,8 +524,9 @@ def main():
 
         player.move(collider_entities)
         text1.set_text_string(str('%.2f' % fps))
-        text2.set_text_string(str(['%.2f' % elem for elem in cube.get_position()]))
-        if not (coffee_os.get_is_interacting() or fridge.get_is_interacting()):
+        text2.set_text_string("")
+        text3.set_text_string("")
+        if not (coffee_os.get_is_interacting() or coffee_os_lactose_free.get_is_interacting() or fridge.get_is_interacting()):
             camera.move()
             carry.update()
         else:
@@ -506,14 +538,17 @@ def main():
         master_renderer.render_shadow_map(entities, sun)
 
         coffee_os.interact(player, camera)
+        coffee_os_lactose_free.interact(player, camera)
         fridge.interact(player, camera)
         coffee_os.render_screen()
+        coffee_os_lactose_free.render_screen()
         milk_foamer_os.update()
         tap.update()
         mixer_vessel_os.update()
 
         master_renderer.render_scene(entities, [], terrains, lights, camera, display)
         not_specified = coffee_os.get_all_texts()
+        not_specified.extend(coffee_os_lactose_free.get_all_texts())
         not_specified.append(milk_foamer_os.get_text())
         TextMaster.render_not_specified(not_specified)
         fridge.update(carry)
