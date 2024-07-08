@@ -166,7 +166,7 @@ def main():
     fbo = FBO(1920, 1080, multi_target=False, depth_buffer_type=FBO.DEPTH_TEXTURE)
 
     # ~~~~~~~~~~~~~GAME~~~~~~~~~~~~~~~~~
-    carry = Carry(terrain_picker, object_picker)
+    # carry = Carry(terrain_picker, object_picker)
 
     while glutGetWindow() != 0:
         # game logic
@@ -180,8 +180,8 @@ def main():
         camera.move()
         text2.set_text_string(str(['%.2f' % elem for elem in player.get_position()]))
         text3.set_text_string(str('%.2f' % fps))
-        carry.movable_entities = collider_entities
-        carry.update()
+        # carry.movable_entities = collider_entities
+        # carry.update()
 
         master_renderer.render_shadow_map(entities, sun)
 

@@ -15,6 +15,7 @@ class FoodSpawn:
         entity = Entity(food.get_model(), pos, *rot, size)
         collider = Entity(food.get_collider(), pos, *rot, size)
         self.__game_object = GameObject(entity, collider=collider, int_name="FOOD")
+        self.__game_object.set_info(food.get_food())
         self.__game_object.set_attachment(self)
         self.__entity_list.append(self.__game_object)
         self.__collider_list.append(self.__game_object)
@@ -22,11 +23,20 @@ class FoodSpawn:
     def get_game_object(self) -> GameObject:
         return self.__game_object
 
-    def spawn(self) -> None:
-        self.__game_object.set_attachment(None)
-        entity = Entity(self.__food.get_model(), self.__pos, *self.__rot, self.__size)
-        collider = Entity(self.__food.get_collider(), self.__pos, *self.__rot, self.__size)
-        self.__game_object = GameObject(entity, collider=collider, int_name="FOOD")
-        self.__game_object.set_attachment(self)
-        self.__entity_list.append(self.__game_object)
-        self.__collider_list.append(self.__game_object)
+    def spawn(self) -> GameObject:
+        if self.__food.get_alt_model():
+            model = self.__food.get_alt_model()
+            collider = self.__food.get_alt_collider()
+        else:
+            model = self.__food.get_model()
+            collider = self.__food.get_collider()
+
+        food_name = self.__food.get_food()
+        entity = Entity(model, self.__pos, *self.__rot, self.__size)
+        collider = Entity(collider, self.__pos, *self.__rot, self.__size)
+        game_object = GameObject(entity, collider=collider, int_name="FOOD")
+        game_object.set_attachment(self.__food)
+        game_object.set_info(food_name)
+        self.__entity_list.append(game_object)
+        self.__collider_list.append(game_object)
+        return game_object

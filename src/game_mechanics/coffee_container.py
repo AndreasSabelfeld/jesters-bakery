@@ -10,6 +10,8 @@ class CoffeeContainer:
     CAPPUCCINO_CUP = 3
     BIG_GLASS = 4
     TEA_POT = 5
+    BEER = 6
+    PROSECCO = 7
 
     __loader = None
     __obj_loader = None
@@ -29,8 +31,10 @@ class CoffeeContainer:
 
     def get_model(self, container_type: int, level: int, texture) -> TexturedModel:
         if level > 3:
-            self.toggle_overflown()
             level = 3
+            # if content is not a sublist of:
+            if not {"Oat Milk", "Foam"} <= set(self.__content) and "Sprite" not in self.__content:
+                self.toggle_overflown()
         match container_type:
             case 0:
                 return TexturedModel(self.__obj_loader.load_obj_model(f"espresso_cup_lvl_{level}", self.__loader), texture)
@@ -44,6 +48,10 @@ class CoffeeContainer:
                 return TexturedModel(self.__obj_loader.load_obj_model(f"big_glass_lvl_{level}", self.__loader), texture)
             case 5:
                 return TexturedModel(self.__obj_loader.load_obj_model(f"tea_pot_lvl_{level}", self.__loader), texture)
+            case 6:
+                return TexturedModel(self.__obj_loader.load_obj_model(f"beer_lvl_{level}", self.__loader), texture)
+            case 7:
+                return TexturedModel(self.__obj_loader.load_obj_model(f"prosecco_glass_lvl_{level}", self.__loader), texture)
 
     def fill(self, texture) -> None:
         self.__level += 1
@@ -76,6 +84,8 @@ class CoffeeContainer:
             if "half" in content and content in self.__content:
                 self.__content.remove(content)
                 self.__content.append(content.removesuffix(" half"))
+            elif self.__content and self.__content[-1] == content:
+                return
             else:
                 self.__content.append(content)
         elif isinstance(content, list):

@@ -2,26 +2,12 @@ from src.models.textured_model import TexturedModel
 
 
 class Food:
-    SANDWICH = 0
-    SIRSERLI = 1
-    CROISSANT = 2
-    CHOCOLATE_CROISSANT = 3
-    ALMOND_CROISSANT = 4
-    ERDBEERTOERTCHEN = 5
-    COOKIE = 6
-    SPITZBUB = 7
-    LINZERLI = 8
-    CARAC = 9
-    WURSTWEGGE = 10
-    SCHINKENGIPFEL = 11
-    CHOCOLATE_CAKE = 12
-    PASSIONFRUIT_CAKE = 13
-    CARROT_CAKE = 14
-    CITRON_CAKE = 15
 
-    def __init__(self, model: TexturedModel, collider: TexturedModel, food: int):
+    def __init__(self, model: TexturedModel, collider: TexturedModel, food: str):
         self.__model = model
+        self.__alt_model = None
         self.__collider = collider
+        self.__alt_collider = None
         self.__food = food
 
     def get_model(self) -> TexturedModel:
@@ -30,5 +16,17 @@ class Food:
     def get_collider(self) -> TexturedModel:
         return self.__collider
 
-    def get_food(self) -> int:
+    def get_food(self) -> str:
         return self.__food
+
+    def set_alt_model(self, model: TexturedModel) -> None:
+        self.__alt_model = model
+
+    def get_alt_model(self) -> TexturedModel:
+        return self.__alt_model
+
+    def set_alt_collider(self, collider: TexturedModel) -> None:
+        self.__alt_collider = collider
+
+    def get_alt_collider(self) -> TexturedModel:
+        return self.__alt_collider

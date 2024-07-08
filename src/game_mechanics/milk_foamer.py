@@ -136,3 +136,6 @@ class MilkFoamer:
 
     def get_fill_lvl(self) -> int:
         return self.__fill_lvl
+
+    def get_render_target(self) -> Entity:
+        return self.__render_target

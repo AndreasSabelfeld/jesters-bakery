@@ -210,7 +210,7 @@ def main():
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~~~PARTICLES~~~~~~~~~~~~~~
-    particle_master = ParticleMaster(loader, master_renderer.get_projection_matrix())
+    """particle_master = ParticleMaster(loader, master_renderer.get_projection_matrix())
 
     smoke_texture = ParticleTexture(loader.load_texture("particleAtlas"), 4, True)
     fire = ComplexParticleSystem(smoke_texture, 100, 10, 0.1, 1, 2)
@@ -226,15 +226,15 @@ def main():
     smoke.set_direction([0, 10, 0], 0.5)
     smoke.set_life_error(0.1)
     smoke.set_speed_error(0.4)
-    smoke.set_scale_error(0.8)
+    smoke.set_scale_error(0.8)"""
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~WATER RENDERER~~~~~~~~~~~
-    buffers = WaterFrameBuffers()
+    """buffers = WaterFrameBuffers()
     water_shader = WaterShader()
     water_renderer = WaterRenderer(loader, water_shader, master_renderer.get_projection_matrix(), buffers)
     water = WaterTile(100, 100, 0, 70)
-    waters = [water]
+    waters = [water]"""
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~MOUSE PICKER~~~~~~~~~~~~
@@ -279,15 +279,15 @@ def main():
         picker.update()
         # print(picker.get_current_terrain_point())
 
-        particle_master.update(camera)
+        """particle_master.update(camera)
         fire.emit_particle([10, 7, 10])
         smoke.emit_particle([30, 15, 60])
-
+        """
         master_renderer.render_shadow_map(entities, sun)
         glEnable(GL_CLIP_DISTANCE0)
 
         # render reflection texture
-        buffers.bind_reflection_frame_buffer()
+        """buffers.bind_reflection_frame_buffer()
         distance = 2 * (camera.get_position()[1] - water.get_height())
         camera.get_position()[1] -= distance
         camera.invert_pitch()
@@ -310,11 +310,12 @@ def main():
         water_renderer.render(waters, camera, sun)
 
         particle_master.render_particles(camera)  # after 3D stuff, before GUI
-        multisample_fbo.unbind_frame_buffer()
+        multisample_fbo.unbind_frame_buffer()"""
         # multisample_fbo.resolve_to_fbo(output_fbo0, GL_COLOR_ATTACHMENT0)
         # multisample_fbo.resolve_to_fbo(output_fbo1, GL_COLOR_ATTACHMENT1)
         # post_processor.do_post_processing(output_fbo0.get_color_texture(), output_fbo1.get_color_texture())
-        multisample_fbo.resolve_to_screen()
+        # multisample_fbo.resolve_to_screen()
+        master_renderer.render_scene(entities, normal_map_entities, terrains, lights, camera, display)
 
         TextMaster.render()
 

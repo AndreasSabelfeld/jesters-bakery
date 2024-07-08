@@ -53,6 +53,8 @@ from src.game_mechanics.fridge_object import FridgeObject
 from src.game_mechanics.scanner import Scanner
 from src.game_mechanics.milk_foamer import MilkFoamer
 
+import src.game_mechanics.prefabs as prefabs
+
 
 def main():
     # ~~~~~~~~~~~~DISPLAY~~~~~~~~~~~~~~
@@ -83,203 +85,6 @@ def main():
     text3.set_color(1, 0, 0)
     text3.set_border_width(0.7)
     text3.set_border_edge(0.1)
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    # ~~~~~~~~~~~~~CRATE~~~~~~~~~~~~~~~~
-    crate_model = normal_mapped_obj_loader.load_obj_model("crate", loader)
-    crate_texture = ModelTexture(loader.load_texture("crate"))
-    crate_texture.set_shine_damper(10)
-    crate_texture.set_reflectivity(0.5)
-    crate_texture.set_normal_map(loader.load_texture("crateNormal"))
-    static_crate_model = TexturedModel(crate_model, crate_texture)
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    # ~~~~~~~~GRASSBLOCK~~~~~~~~~~~~~~~~
-    grass_model = obj_loader.load_obj_model("cube", loader)
-    grass_texture = ModelTexture(loader.load_texture("grass_block"))
-    grass_texture.set_shine_damper(10)
-    grass_texture.set_reflectivity(0.5)
-    static_grass_model = TexturedModel(grass_model, grass_texture)
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    # ~~~~~~~~~~~~~BOULDER~~~~~~~~~~~~~~
-    boulder_model = normal_mapped_obj_loader.load_obj_model("boulder", loader)
-    boulder_texture = ModelTexture(loader.load_texture("boulder"))
-    boulder_texture.set_shine_damper(10)
-    boulder_texture.set_reflectivity(0.5)
-    boulder_texture.set_normal_map(loader.load_texture("boulderNormal"))
-    static_boulder_model = TexturedModel(boulder_model, boulder_texture)
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    # ~~~~~~~~~~~~~BARREL~~~~~~~~~~~~~~~
-    barrel_model = normal_mapped_obj_loader.load_obj_model("barrel", loader)
-    barrel_texture = ModelTexture(loader.load_texture("barrel"))
-    barrel_texture.set_shine_damper(10)
-    barrel_texture.set_reflectivity(0.5)
-    barrel_texture.set_normal_map(loader.load_texture("barrelNormal"))
-    barrel_texture.set_specular_map(loader.load_texture("barrelS"))
-    static_barrel_model = TexturedModel(barrel_model, barrel_texture)
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    # ~~~~~~~~~COFFEE MACHINE~~~~~~~~~~~
-    coffee_machine_model = obj_loader.load_obj_model("coffee_machine", loader)
-    coffee_machine_texture = ModelTexture(loader.load_texture("coffee_machine_texture"))
-    coffee_machine_texture.set_shine_damper(10)
-    coffee_machine_texture.set_reflectivity(0.5)
-    static_coffee_machine_model = TexturedModel(coffee_machine_model, coffee_machine_texture)
-    static_coffee_machine_collider = TexturedModel(obj_loader.load_obj_model("coffee_machine_collider", loader),
-                                                 ModelTexture(loader.load_texture("")))
-
-    coffee_machine_screen_model = obj_loader.load_obj_model("coffee_machine_screen", loader)
-    coffee_machine_screen_texture = ModelTexture(loader.load_texture("white"))
-    coffee_machine_screen_texture.set_shine_damper(10)
-    coffee_machine_screen_texture.set_reflectivity(0.5)
-    static_coffee_machine_screen_model = TexturedModel(coffee_machine_screen_model, coffee_machine_screen_texture)
-
-    coffee_machine_lf_screen_model = obj_loader.load_obj_model("coffee_machine_screen", loader)
-    coffee_machine_lf_screen_texture = ModelTexture(loader.load_texture("white"))
-    coffee_machine_lf_screen_texture.set_shine_damper(10)
-    coffee_machine_lf_screen_texture.set_reflectivity(0.5)
-    static_coffee_machine_lf_screen_model = TexturedModel(coffee_machine_lf_screen_model, coffee_machine_lf_screen_texture)
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    # ~~~~~~~~~~~~~FRIDGE~~~~~~~~~~~~~~~
-    fridge_case_model = obj_loader.load_obj_model("fridge_case", loader)
-    fridge_case_texture = ModelTexture(loader.load_texture("counter"))
-    fridge_case_texture.set_shine_damper(10)
-    fridge_case_texture.set_reflectivity(0.5)
-    static_fridge_case_model = TexturedModel(fridge_case_model, fridge_case_texture)
-    static_fridge_case_collider = TexturedModel(obj_loader.load_obj_model("case_collider", loader), ModelTexture(loader.load_texture("")))
-
-    fridge_top_drawer_model = obj_loader.load_obj_model("fridge_top_drawer", loader)
-    fridge_top_drawer_texture = ModelTexture(loader.load_texture("drawer"))
-    fridge_top_drawer_texture.set_shine_damper(10)
-    fridge_top_drawer_texture.set_reflectivity(0.5)
-    static_fridge_top_drawer_model = TexturedModel(fridge_top_drawer_model, fridge_top_drawer_texture)
-    static_fridge_top_drawer_collider = TexturedModel(obj_loader.load_obj_model("top_drawer_collider", loader), ModelTexture(loader.load_texture("")))
-
-    fridge_bottom_drawer_model = obj_loader.load_obj_model("fridge_bottom_drawer", loader)
-    fridge_bottom_drawer_texture = ModelTexture(loader.load_texture("drawer"))
-    fridge_bottom_drawer_texture.set_shine_damper(10)
-    fridge_bottom_drawer_texture.set_reflectivity(0.5)
-    static_fridge_bottom_drawer_model = TexturedModel(fridge_bottom_drawer_model, fridge_bottom_drawer_texture)
-    static_fridge_bottom_drawer_collider = TexturedModel(obj_loader.load_obj_model("bottom_drawer_collider", loader), ModelTexture(loader.load_texture("")))
-
-    fridge_bottom_grid_model = obj_loader.load_obj_model("fridge_bottom_grid", loader)
-    fridge_bottom_grid_texture = ModelTexture(loader.load_texture("grass"))
-    fridge_bottom_grid_texture.set_shine_damper(10)
-    static_fridge_bottom_grid_model = TexturedModel(fridge_bottom_grid_model, fridge_bottom_grid_texture)
-
-    fridge_top_grid_model = obj_loader.load_obj_model("fridge_top_grid", loader)
-    fridge_top_grid_texture = ModelTexture(loader.load_texture("grass"))
-    fridge_top_grid_texture.set_shine_damper(10)
-    static_fridge_top_grid_model = TexturedModel(fridge_top_grid_model, fridge_top_grid_texture)
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    milk_model = obj_loader.load_obj_model("milk", loader)
-    milk_texture = ModelTexture(loader.load_texture("white"))
-    milk_texture.set_shine_damper(10)
-    milk_texture.set_reflectivity(0.5)
-    static_milk_model = TexturedModel(milk_model, milk_texture)
-    static_milk_collider = TexturedModel(obj_loader.load_obj_model("milk_collider", loader), ModelTexture(loader.load_texture("")))
-    # ~~~~~~~~~~~~~~MILK~~~~~~~~~~~~~~~~
-
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    # ~~~~~~~~~~~MILK FOAMER~~~~~~~~~~~~
-    milk_foamer_vessel_model = obj_loader.load_obj_model("milk_foamer_vessel", loader)
-    milk_foamer_vessel_texture = ModelTexture(loader.load_texture("milk_foamer_vessel_tex"))
-    milk_foamer_vessel_texture.set_reflectivity(0.75)
-    static_milk_foamer_vessel_model = TexturedModel(milk_foamer_vessel_model, milk_foamer_vessel_texture)
-    static_milk_foamer_vessel_collider = TexturedModel(obj_loader.load_obj_model("milk_foamer_vessel_collider", loader), ModelTexture(loader.load_texture("")))
-
-    milk_foamer_screen_model = obj_loader.load_obj_model("milk_foamer_screen", loader)
-    milk_foamer_screen_texture = ModelTexture(loader.load_texture("black"))
-    static_milk_foamer_screen_model = TexturedModel(milk_foamer_screen_model, milk_foamer_screen_texture)
-
-    milk_foamer_cup_model = obj_loader.load_obj_model("milk_foamer_cup", loader)
-    milk_foamer_cup_texture = ModelTexture(loader.load_texture("milk_foamer_cup_tex"))
-    milk_foamer_cup_texture.set_reflectivity(0.75)
-    static_milk_foamer_cup_model = TexturedModel(milk_foamer_cup_model, milk_foamer_cup_texture)
-    static_milk_foamer_cup_collider = TexturedModel(obj_loader.load_obj_model("milk_foamer_cup_collider", loader), ModelTexture(loader.load_texture("")))
-
-    milk_foamer_rotator_model = obj_loader.load_obj_model("milk_foamer_rotator", loader)
-    milk_foamer_rotator_texture = ModelTexture(loader.load_texture("milk_foamer_rotator_tex"))
-    static_milk_foamer_rotator_model = TexturedModel(milk_foamer_rotator_model, milk_foamer_rotator_texture)
-
-    milk_foamer_lid_model = obj_loader.load_obj_model("milk_foamer_lid", loader)
-    milk_foamer_lid_texture = ModelTexture(loader.load_texture("milk_foamer_lid_tex"))
-    milk_foamer_lid_texture.set_reflectivity(0.75)
-    static_milk_foamer_lid_model = TexturedModel(milk_foamer_lid_model, milk_foamer_lid_texture)
-    static_milk_foamer_lid_collider = TexturedModel(obj_loader.load_obj_model("milk_foamer_lid_collider", loader), ModelTexture(loader.load_texture("")))
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    # ~~~~~~~~~~~~~MIXER~~~~~~~~~~~~~~~~
-    mixer_model = obj_loader.load_obj_model("mixer", loader)
-    mixer_texture = ModelTexture(loader.load_texture(""))
-    mixer_texture.set_reflectivity(0.75)
-    static_mixer_model = TexturedModel(mixer_model, mixer_texture)
-    static_mixer_collider = TexturedModel(obj_loader.load_obj_model("mixer_collider", loader),
-                                                       ModelTexture(loader.load_texture("")))
-
-    mixer_vessel_model = obj_loader.load_obj_model("mixer_vessel", loader)
-    mixer_vessel_texture = ModelTexture(loader.load_texture(""))
-    mixer_vessel_texture.set_reflectivity(0.75)
-    static_mixer_vessel_model = TexturedModel(mixer_vessel_model, mixer_vessel_texture)
-    static_mixer_vessel_collider = TexturedModel(obj_loader.load_obj_model("mixer_vessel_collider", loader),
-                                          ModelTexture(loader.load_texture("")))
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    # ~~~~~~~~~~~~~FOOD~~~~~~~~~~~~~~~~~
-    sandwich_model = obj_loader.load_obj_model("sandwich", loader)
-    sandwich_texture = ModelTexture(loader.load_texture(""))
-    static_sandwich_model = TexturedModel(sandwich_model, sandwich_texture)
-    static_sandwich_collider = TexturedModel(obj_loader.load_obj_model("sandwich_collider", loader),
-                                             ModelTexture(loader.load_texture("")))
-
-    plate_model = obj_loader.load_obj_model("plate", loader)
-    plate_texture = ModelTexture(loader.load_texture("white"))
-    static_plate_model = TexturedModel(plate_model, plate_texture)
-    static_plate_collider = TexturedModel(obj_loader.load_obj_model("plate_collider", loader),
-                                             ModelTexture(loader.load_texture("")))
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    # ~~~~~~~~~~COFFEE CUPS~~~~~~~~~~~~~
-    small_coffee_model = obj_loader.load_obj_model("small_coffee_cup", loader)
-    small_coffee_texture = ModelTexture(loader.load_texture("coffee_cup_texture"))
-    small_coffee_texture.set_shine_damper(10)
-    small_coffee_texture.set_reflectivity(0.5)
-    static_small_coffee_model = TexturedModel(small_coffee_model, small_coffee_texture)
-    static_small_coffee_collider = TexturedModel(obj_loader.load_obj_model("small_coffee_cup_collider", loader), ModelTexture(loader.load_texture("")))
-
-    big_coffee_model = obj_loader.load_obj_model("big_coffee_cup", loader)
-    static_big_coffee_model = TexturedModel(big_coffee_model, small_coffee_texture)
-    static_big_coffee_collider = TexturedModel(obj_loader.load_obj_model("big_coffee_cup_collider", loader), ModelTexture(loader.load_texture("")))
-
-    tea_pot_model = obj_loader.load_obj_model("tea_pot", loader)
-    static_tea_pot_model = TexturedModel(tea_pot_model, small_coffee_texture)
-    tea_pot_lid_model = obj_loader.load_obj_model("tea_pot_lid", loader)
-    static_tea_pot_lid_model = TexturedModel(tea_pot_lid_model, small_coffee_texture)
-    static_tea_pot_collider = TexturedModel(obj_loader.load_obj_model("tea_pot_collider", loader), ModelTexture(loader.load_texture("")))
-
-    small_glass_model = obj_loader.load_obj_model("small_glass", loader)
-    static_small_glass_model = TexturedModel(small_glass_model, small_coffee_texture)
-    static_small_glass_collider = TexturedModel(obj_loader.load_obj_model("small_glass_collider", loader), ModelTexture(loader.load_texture("")))
-
-    big_glass_model = obj_loader.load_obj_model("big_glass", loader)
-    static_big_glass_model = TexturedModel(big_glass_model, small_coffee_texture)
-    static_big_glass_collider = TexturedModel(obj_loader.load_obj_model("big_glass_collider", loader), ModelTexture(loader.load_texture("")))
-
-    espresso_model = obj_loader.load_obj_model("espresso_cup", loader)
-    static_espresso_model = TexturedModel(espresso_model, small_coffee_texture)
-    static_espresso_collider = TexturedModel(obj_loader.load_obj_model("espresso_cup_collider", loader), ModelTexture(loader.load_texture("")))
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    # ~~~~~~~~~~~~~BEVERAGES~~~~~~~~~~~~
-    milk_sac_model = obj_loader.load_obj_model("milk_sac", loader)
-    static_milk_sac_model = TexturedModel(milk_sac_model, small_coffee_texture)
-    static_milk_sac_collider = TexturedModel(obj_loader.load_obj_model("milk_sac_collider", loader), ModelTexture(loader.load_texture("")))
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~~~TERRAIN~~~~~~~~~~~~~~~
     background_texture = TerrainTexture(loader.load_texture("grass"))
@@ -291,160 +96,9 @@ def main():
     blend_map = TerrainTexture(loader.load_texture("black"))
 
     terrains = []
-    Terrain.set_size(200)
-    terrain = Terrain(0, 0, loader, texture_pack, blend_map, "white")
+    Terrain.set_size(400)
+    terrain = Terrain(0, 0, loader, texture_pack, blend_map, "heightmap_island")
     terrains.append(terrain)
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    # ~~~~~~~~~~~~~COLLIDERS~~~~~~~~~~~~~
-    colliders = []
-
-    # ~~~~~~~~~~~~~ENTITIES~~~~~~~~~~~~~
-    grass_block = Entity(static_grass_model, [50, 27.39, 50], 0, 0, 0, 1)
-    crate = Entity(static_crate_model, [80, 35, 50], 0, 0, 0, 0.01)
-    boulder = Entity(static_boulder_model, [80, 27.39, 70], 0, 0, 0, 0.1)
-    barrel = Entity(static_barrel_model, [80, 27.39, 90], 0, 0, 0, 1)
-
-    machine_size = 1.75
-    coffee_machine = Entity(static_coffee_machine_model, [70, 29.39, 50], 0, 0, 0, machine_size)
-    coffee_machine_collider = Entity(static_coffee_machine_collider, [70, 29.39, 50], 0, 0, 0, machine_size)
-    coffee_machine_screen = Entity(static_coffee_machine_screen_model, [70, 29.39, 50], 0, 0, 0, machine_size)
-    coffee_machine_game_object = GameObject(coffee_machine, coffee_machine_screen, int_name=CoffeeMachineOS.get_name(),
-                                            collider=coffee_machine_collider)
-    coffee_machine_game_object.set_pickup_able(False)
-    coffee_machine_game_object.set_prompt("Press the 'F' Key to interact.")
-
-    coffee_machine_lactose_free = Entity(static_coffee_machine_model, [65, 29.39, 50], 0, 0, 0, machine_size)
-    coffee_machine_lactose_free_collider = Entity(static_coffee_machine_collider, [65, 29.39, 50], 0, 0, 0, machine_size)
-    coffee_machine_lactose_free_screen = Entity(static_coffee_machine_lf_screen_model, [65, 29.39, 50], 0, 0, 0, machine_size)
-    coffee_machine_lactose_free_game_object = GameObject(coffee_machine_lactose_free, coffee_machine_lactose_free_screen,
-                                                         int_name=CoffeeMachineOSLactoseFree.get_name(), collider=coffee_machine_lactose_free_collider)
-    coffee_machine_lactose_free_game_object.set_pickup_able(False)
-    coffee_machine_lactose_free_game_object.set_prompt("Press the 'F' Key to interact.")
-
-    fridge_case = Entity(static_fridge_case_model, [60, 29.39, 50], 0, 0, 0, machine_size)
-    fridge_case_collider = Entity(static_fridge_case_collider, [60, 29.39, 50], 0, 0, 0, machine_size)
-    fridge_top_drawer = Entity(static_fridge_top_drawer_model, [60, 29.39, 50], 0, 0, 0, machine_size)
-    fridge_top_drawer_collider = Entity(static_fridge_top_drawer_collider, [60, 29.39, 50], 0, 0, 0, machine_size)
-    fridge_bottom_drawer = Entity(static_fridge_bottom_drawer_model, [60, 29.39, 50], 0, 0, 0, machine_size)
-    fridge_bottom_drawer_collider = Entity(static_fridge_bottom_drawer_collider, [60, 29.39, 50], 0, 0, 0, machine_size)
-    fridge_bottom_grid = Entity(static_fridge_bottom_grid_model, [60, 29.39, 50], 0, 0, 0, machine_size)
-    fridge_top_grid = Entity(static_fridge_top_grid_model, [60, 29.39, 50], 0, 0, 0, machine_size)
-
-    fridge_game_object = GameObject(fridge_case, child_0=fridge_top_drawer, child_1=fridge_bottom_drawer, collider=fridge_case_collider)
-    fridge_game_object.set_pickup_able(False)
-    fridge_game_object.get_child_0().set_collider(fridge_top_drawer_collider)
-    fridge_game_object.get_child_1().set_collider(fridge_bottom_drawer_collider)
-    fridge_game_object.get_child_0().set_int_name("TOP_DRAWER")
-    fridge_game_object.get_child_1().set_int_name("BOTTOM_DRAWER")
-    fridge_game_object.get_child_0().set_prompt("Press 'E' or 'Q' to open. Press the 'F' Key to interact.")
-    fridge_game_object.get_child_1().set_prompt("Press 'E' or 'Q' to open. Press the 'F' Key to interact.")
-    fridge_game_object.get_child_0().set_info("The cake is a lie")
-    fridge_game_object.get_child_1().set_info("The cake is a lie")
-
-    milk_foamer_pos = [50, 37.39, 50]
-    milk_foamer_vessel = Entity(static_milk_foamer_vessel_model, milk_foamer_pos, 0, 0, 0, 1)
-    milk_foamer_vessel_collider = Entity(static_milk_foamer_vessel_collider, milk_foamer_pos, 0, 0, 0, 1)
-    milk_foamer_screen = Entity(static_milk_foamer_screen_model, milk_foamer_pos, 0, 0, 0, 1)
-    milk_foamer_cup = Entity(static_milk_foamer_cup_model, milk_foamer_pos, 0, 0, 0, 1)
-    milk_foamer_cup_collider = Entity(static_milk_foamer_cup_collider, milk_foamer_pos, 0, 0, 0, 1)
-    milk_foamer_rotator = Entity(static_milk_foamer_rotator_model, milk_foamer_pos, 0, 0, 0, 1)
-    milk_foamer_lid = Entity(static_milk_foamer_lid_model, milk_foamer_pos, 0, 0, 0, 1)
-    milk_foamer_lid_collider = Entity(static_milk_foamer_lid_collider, milk_foamer_pos, 0, 0, 0, 1)
-
-    milk_foamer_game_object = GameObject(milk_foamer_vessel, child_0=milk_foamer_lid, child_1=milk_foamer_cup, collider=milk_foamer_vessel_collider,
-                                         int_name="MILK_FOAMER_VESSEL")
-    milk_foamer_game_object.set_pickup_able(False)
-    milk_foamer_game_object.set_prompt("Press 'F' to interact")
-    milk_foamer_game_object.get_child_0().set_collider(milk_foamer_lid_collider)
-    milk_foamer_game_object.get_child_0().set_int_name("MILK_FOAMER_LID")
-    milk_foamer_game_object.get_child_1().set_collider(milk_foamer_cup_collider)
-    milk_foamer_game_object.get_child_1().set_int_name("MILK_FOAMER_CUP")
-    milk_foamer_game_object.get_child_1().set_child_0(milk_foamer_rotator)
-
-    textures = [grass_texture] * 5
-    tap = Tap(obj_loader, loader, [60, 37.39, 50], [0, 0, 0], 1, textures)
-
-    mixer = Entity(static_mixer_model, [40, 38, 50], 0, 0, 0, 1)
-    mixer_collider = Entity(static_mixer_collider, [40, 38, 50], 0, 0, 0, 1)
-    mixer_game_object = GameObject(mixer, collider=mixer_collider, int_name="MIXER")
-    mixer_game_object.set_pickup_able(False)
-
-    mixer_vessel = Entity(static_mixer_vessel_model, [35, 38, 50], 0, 0, 0, 1)
-    mixer_vessel_collider = Entity(static_mixer_vessel_collider, [35, 38, 50], 0, 0, 0, 1)
-    mixer_vessel_game_object = GameObject(mixer_vessel, collider=mixer_vessel_collider, int_name="MIXER_VESSEL")
-
-    small_coffee = Entity(static_small_coffee_model, [70 + 2, 29.39, 50], 0, 0, 0, 1)
-    small_coffee_collider = Entity(static_small_coffee_collider, [70 + 2, 29.39, 50], 0, 0, 0, 1)
-    small_coffee_game_object = GameObject(small_coffee, int_name="COFFEE", collider=small_coffee_collider)
-    small_coffee_game_object.set_attachment(CoffeeContainer(CoffeeContainer.COFFEE_CUP, small_coffee_game_object))
-    small_coffee_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
-
-    big_coffee = Entity(static_big_coffee_model, [70 + 4, 29.39, 50], 0, 0, 0, 1)
-    big_coffee_collider = Entity(static_big_coffee_collider, [70 + 4, 29.39, 50], 0, 0, 0, 1)
-    big_coffee_game_object = GameObject(big_coffee, int_name="COFFEE", collider=big_coffee_collider)
-    big_coffee_game_object.set_attachment(CoffeeContainer(CoffeeContainer.CAPPUCCINO_CUP, big_coffee_game_object))
-    big_coffee_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
-
-    tea_pot = Entity(static_tea_pot_model, [70 + 6, 29.39, 50], 0, 0, 0, 1)
-    tea_pot_lid = Entity(static_tea_pot_lid_model, [70 + 6, 29.39, 50], 0, 0, 0, 1)
-    tea_pot_collider = Entity(static_tea_pot_collider, [70 + 6, 29.39, 50], 0, 0, 0, 1)
-    tea_pot_game_object = GameObject(tea_pot, tea_pot_lid, int_name="TEA", collider=tea_pot_collider)
-    tea_pot_game_object.set_attachment(CoffeeContainer(CoffeeContainer.TEA_POT, tea_pot_game_object))
-    tea_pot_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
-
-    small_glass = Entity(static_small_glass_model, [70 + 8, 29.39, 50], 0, 0, 0, 1)
-    small_glass_collider = Entity(static_small_glass_collider, [70 + 8, 29.39, 50], 0, 0, 0, 1)
-    small_glass_game_object = GameObject(small_glass, int_name="GLASS", collider=small_glass_collider)
-    small_glass_game_object.set_attachment(CoffeeContainer(CoffeeContainer.SMALL_GLASS, small_glass_game_object))
-    small_glass_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
-
-    big_glass = Entity(static_big_glass_model, [70 + 10, 29.39, 50], 0, 0, 0, 1)
-    big_glass_collider = Entity(static_big_glass_collider, [70 + 10, 29.39, 50], 0, 0, 0, 1)
-    big_glass_game_object = GameObject(big_glass, int_name="GLASS", collider=big_glass_collider)
-    big_glass_game_object.set_attachment(CoffeeContainer(CoffeeContainer.BIG_GLASS, big_glass_game_object))
-    big_glass_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
-
-    espresso_cup = Entity(static_espresso_model, [70 + 12, 29.39, 50], 0, 0, 0, 1)
-    espresso_cup_collider = Entity(static_espresso_collider, [70 + 12, 29.39, 50], 0, 0, 0, 1)
-    espresso_cup_game_object = GameObject(espresso_cup, int_name="COFFEE", collider=espresso_cup_collider)
-    espresso_cup_game_object.set_attachment(CoffeeContainer(CoffeeContainer.ESPRESSO_CUP, espresso_cup_game_object))
-    espresso_cup_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
-
-    cauldron = Entity(static_small_glass_model, [70 + 8, 29.39, 50], 0, 0, 0, 3)
-    cauldron_collider = Entity(static_small_glass_collider, [70 + 8, 29.39, 50], 0, 0, 0, 3)
-    cauldron_game_object = GameObject(cauldron, int_name="FRIDGE", collider=cauldron_collider)
-    cauldron_game_object.set_attachment(FridgeObject((2, 2), cauldron, None, "Milk"))
-    cauldron_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
-
-    milk_sac = Entity(static_milk_sac_model, [70 + 14, 29.39, 50], 0, 0, 0, machine_size)
-    milk_sac_collider = Entity(static_milk_sac_collider, [70 + 14, 29.39, 50], 0, 0, 0, machine_size)
-    milk_sac_game_object = GameObject(milk_sac, int_name="FRIDGE", collider=milk_sac_collider)
-    milk_sac_game_object.set_attachment(FridgeObject((3, 2), milk_sac, grass_texture, "Milk"))
-    milk_sac_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
-
-    milk = Entity(static_milk_model, [70 + 16, 29.39, 50], 0, 0, 0, machine_size)
-    milk_collider = Entity(static_milk_collider, [70 + 16, 29.39, 50], 0, 0, 0, machine_size)
-    milk_game_object = GameObject(milk, int_name="MILK", collider=milk_collider)
-    milk_game_object.set_attachment(FridgeObject((1, 1), milk, ModelTexture(loader.load_texture("white")), "Milk"))
-    milk_sac_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
-
-    plate = Entity(static_plate_model, [25, 38 , 50], 0, 0, 0, 0.5)
-    plate_collider = Entity(static_plate_collider, [25, 38 , 50], 0, 0, 0, 0.5)
-    plate_game_object = GameObject(plate, int_name="PLATE", collider=plate_collider)
-
-    entities = [coffee_machine_game_object, small_coffee_game_object, big_coffee_game_object, tea_pot_game_object,
-                small_glass_game_object, big_glass_game_object, espresso_cup_game_object, fridge_game_object,
-                cauldron_game_object, milk_sac_game_object, milk_foamer_game_object, milk_game_object, milk_foamer_screen,
-                mixer_game_object, mixer_vessel_game_object, plate_game_object, coffee_machine_lactose_free_game_object]
-    entities.extend(tap.get_game_objects())
-    collider_entities = entities.copy()
-    collider_entities.extend([fridge_game_object.get_child_0(), fridge_game_object.get_child_1(),
-                             milk_foamer_game_object.get_child_0(), milk_foamer_game_object.get_child_1()])
-    collider_entities.remove(tap.get_base())
-    # ~~~~~~~~~~~~LIGHTS~~~~~~~~~~~~~~~~
-    sun = Light([-100000, -150000, -100000], [1, 1, 1])
-    lights = [sun]
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~~~~~PLAYER~~~~~~~~~~~~~~
@@ -453,9 +107,9 @@ def main():
 
     player = FirstPersonPlayer(static_bunny_model, [60, 0, 40], 0, 0, 0, 3)
     player.set_player_size(12)
-    entities.append(player)
     camera = Camera(player)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     # ~~~~~~~~~~~RENDERER~~~~~~~~~~~~~~~
     master_renderer = MasterRenderer(loader, camera)
     master_renderer.set_fog_density(0.0035)
@@ -470,62 +124,144 @@ def main():
     object_picker = ObjectRaycaster(camera, master_renderer.get_projection_matrix())
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    coffee_fbo = FBO(1920, 1080, multi_target=False, depth_buffer_type=FBO.DEPTH_TEXTURE)
-    lactose_free_coffee_fbo = FBO(1920, 1080, multi_target=False, depth_buffer_type=FBO.DEPTH_TEXTURE)
-    milk_fbo = FBO(1920, 1080, multi_target=False, depth_buffer_type=FBO.DEPTH_TEXTURE)
+    entities = []
+    collider_entities = []
+
+    grass_texture = ModelTexture(loader.load_texture("grass_block"))
+    textures = [grass_texture] * 5
+
+    machine_size = 1.75
+    food_size = 0.5
+    mixer_size = 0.5
+    coffee_machine_game_object = prefabs.coffee_machine([50, 10, 50], [0, 0, 0], machine_size, loader, obj_loader,
+                                                        gui_renderer, object_picker)
+    coffee_machine_lactose_free_game_object = prefabs.lactose_free_coffee_machine([46, 10, 50], [0, 0, 0], machine_size,
+                                                                                  loader, obj_loader,
+                                                                                  gui_renderer, object_picker)
+    fridge_game_object = prefabs.fridge([40, 10, 50], [0, 0, 0], machine_size, loader, obj_loader,
+                                        gui_renderer, object_picker)
+    milk_foamer_game_object = prefabs.milk_foamer([56, 10, 50], [0, 0, 0], 1, loader, obj_loader,
+                                                  gui_renderer, object_picker)
+    milk_foamer_screen = milk_foamer_game_object.get_attachment().get_render_target()
+    mixer_game_object = prefabs.mixer([58, 10, 50], [0, 0, 0], mixer_size, loader, obj_loader)
+    mixer_vessel_game_object = prefabs.mixer_vessel([60, 10, 50], [0, 0, 0], mixer_size, loader, obj_loader)
+    tap = Tap(obj_loader, loader, [62, 12, 50], [0, 0, 0], 1, textures)
+    counter_game_object = prefabs.finished_counter([66, 10, 50], [0, 0, 0], 1, loader, obj_loader)
+    ice_machine_door = prefabs.ice_machine([66, 10, 50], [0, 0, 0], 1, loader, obj_loader, entities, collider_entities)
+    finished_col = prefabs.finished_collider([66, 10, 50], [0, 0, 0], 1, loader, obj_loader)
+    print("finished loading machines")
+
+    for i in range(5):
+        small_coffee_game_object = prefabs.coffee_cup([50, 10, 60 + i], [0, 0, 0], 1, loader, obj_loader)
+        big_coffee_game_object = prefabs.cappuccino_cup([52, 10, 60 + i], [0, 0, 0], 1, loader, obj_loader)
+        tea_pot_game_object = prefabs.tea([54, 10, 60 + i], [0, 0, 0], 1, loader, obj_loader)
+        small_glass_game_object = prefabs.small_glass([56, 10, 60 + i], [0, 0, 0], 1, loader, obj_loader)
+        big_glass_game_object = prefabs.big_glass([58, 10, 60 + i], [0, 0, 0], 1, loader, obj_loader)
+        espresso_cup_game_object = prefabs.espresso_cup([60, 10, 60 + i], [0, 0, 0], 1, loader, obj_loader)
+        plate_game_object = prefabs.plate([62, 10, 60 + i], [0, 0, 0], 0.5, loader, obj_loader)
+        beer_game_object = prefabs.beer([64, 10, 60 + i], [0, 0, 0], 1, loader, obj_loader)
+        prosecco_game_object = prefabs.prosecco_glass([66, 10, 60 + i], [0, 0, 0], 1, loader, obj_loader)
+        print(f"round {i}")
+
+        entities.extend([small_coffee_game_object, big_coffee_game_object, tea_pot_game_object, small_glass_game_object,
+                         big_glass_game_object, espresso_cup_game_object, plate_game_object, beer_game_object,
+                         prosecco_game_object])
+
+    print("finished loading vessels")
+
+    coke_zero = prefabs.coke_zero([72, 10, 50], [0, 0, 0], 1, loader, obj_loader)
+    sprite = prefabs.sprite([74, 10, 50], [0, 0, 0], 1, loader, obj_loader)
+    orange_juice = prefabs.orange_juice([76, 10, 50], [0, 0, 0], 1, loader, obj_loader)
+    topfit_juice = prefabs.topfit_juice([78, 10, 50], [0, 0, 0], 1, loader, obj_loader)
+    prosecco_bottle = prefabs.prosecco_bottle([80, 10, 50], [0, 0, 0], 1, loader, obj_loader)
+    chai_bottle = prefabs.chai_bottle([82, 10, 50], [0, 0, 0], 1, loader, obj_loader)
+    ovomaltine = prefabs.ovomaltine([84, 10, 50], [0, 0, 0], 1, loader, obj_loader)
+    caotina = prefabs.caotina([86, 10, 50], [0, 0, 0], 1, loader, obj_loader)
+    chocolatl = prefabs.chocolatl([88, 10, 50], [0, 0, 0], 1, loader, obj_loader)
+
+    milk_sac_game_object = prefabs.milk_sac([80, 10, 50], [0, 0, 0], 1, loader, obj_loader)
+    lactose_free_milk = prefabs.lactose_free_milk([82, 10, 50], [0, 0, 0], 1, loader, obj_loader)
+    oat_milk = prefabs.oat_milk([84, 10, 50], [0, 0, 0], 1, loader, obj_loader)
+
+    prefabs.ham_sandwich([50, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.salami_sandwich([52, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.tuna_sandwich([54, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.mango_chutney_sandwich([56, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.tomato_sandwich([58, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.sirserli([60, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.croissant([62, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.chocolate_croissant([64, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.almond_croissant([66, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.strawberry_tart([68, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.cookie([70, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.spitzbub([72, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.linzerli([74, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.carac([76, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.wurstwegge([78, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.schinkengipfel([80, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.chocolate_cake([82, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.passionfruit_cake([84, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.carrot_cake([86, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.citron_cake([88, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.lemons([90, 10, 70], [0, 0, 0], 1, loader, obj_loader, entities, collider_entities)
+
+    print("finished loading food")
+
+    entities.extend([coffee_machine_game_object, fridge_game_object, milk_sac_game_object, milk_foamer_game_object,
+                     milk_foamer_screen, mixer_game_object, mixer_vessel_game_object,
+                     coffee_machine_lactose_free_game_object, counter_game_object, *tap.get_game_objects(),
+                     prosecco_bottle, chai_bottle, coke_zero, sprite, orange_juice, topfit_juice, lactose_free_milk,
+                     oat_milk, ovomaltine, caotina, chocolatl, ice_machine_door])
+    collider_entities.extend(entities.copy())
+    collider_entities.extend([fridge_game_object.get_child_0(), fridge_game_object.get_child_1(),
+                              milk_foamer_game_object.get_child_0(), milk_foamer_game_object.get_child_1(),
+                              counter_game_object, finished_col])
+    print("finished loading assets")
+    # ~~~~~~~~~~~~LIGHTS~~~~~~~~~~~~~~~~
+    sun = Light([100000, 150000, -100000], [1, 1, 1])
+    player_light = Light([0, 0, 0], [1, 1, 1], [1, 0.001, 0.0002])
+    lights = [player_light]
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~~~~GAME~~~~~~~~~~~~~~~~~
     carry = Carry(terrain_picker, object_picker, coffee_machine_game_object, coffee_machine_lactose_free_game_object)
     carry.movable_entities = collider_entities
 
-    coffee_os = CoffeeMachineOS(coffee_machine_screen, loader, obj_loader, coffee_fbo, gui_renderer, object_picker)
-    coffee_machine_game_object.set_attachment(coffee_os)
-
-    coffee_os_lactose_free = CoffeeMachineOSLactoseFree(coffee_machine_lactose_free_screen, loader, obj_loader, lactose_free_coffee_fbo, gui_renderer, object_picker)
-    coffee_machine_lactose_free_game_object.set_attachment(coffee_os_lactose_free)
-
-    fridge = Fridge(fridge_game_object.get_child_0(), fridge_game_object.get_child_1(), object_picker, loader, gui_renderer)
-    fridge_game_object.get_child_0().set_attachment(fridge)
-    fridge_game_object.get_child_1().set_attachment(fridge)
-
     scanner = Scanner(object_picker, loader)
+    coffee_os = coffee_machine_game_object.get_attachment()
+    coffee_os_lactose_free = coffee_machine_lactose_free_game_object.get_attachment()
+    fridge = fridge_game_object.get_child_0().get_attachment()
+    milk_foamer_os = milk_foamer_game_object.get_attachment()
+    mixer_vessel_os = mixer_vessel_game_object.get_attachment()
 
-    milk_foamer_os = MilkFoamer(milk_foamer_game_object, milk_foamer_screen, loader, obj_loader, milk_fbo, gui_renderer, object_picker)
-    milk_foamer_game_object.set_attachment(milk_foamer_os)
-    milk_foamer_game_object.get_child_0().set_attachment(milk_foamer_os)
-    milk_foamer_game_object.get_child_1().set_attachment(milk_foamer_os)
-
-    mixer_vessel_os = MixerVessel(mixer_vessel_game_object, obj_loader, loader)
-    mixer_os = Mixer(mixer_game_object)
-    mixer_game_object.set_attachment(mixer_os)
-    mixer_vessel_game_object.set_attachment(mixer_vessel_os)
-
-    sandwich = Food(static_sandwich_model, static_sandwich_collider, Food.SANDWICH)
-    sandwich_spawn = FoodSpawn(sandwich, [30, 38, 50], [0, 0, 0], 0.5, entities, collider_entities)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    cube = Entity(static_grass_model, [60, 29.39, 50], 0, 0, 0, 0.1)
-    entities.append(cube)
-
-    master_order = MasterOrder(loader, obj_loader, gui_renderer)
+    master_order = MasterOrder(loader, obj_loader, gui_renderer, counter_game_object)
+    finished_col.set_attachment(master_order)
     order_1 = Order(master_order, 4)
     order_1.get_gui_text()
-    order_1_ga = order_1.get_game_object([40, 38, 55], [0, 0, 0], 10)
+    order_1_ga = order_1.get_game_object([40, 10, 55], [0, 0, 0], 10)
     entities.append(order_1_ga)
     collider_entities.append(order_1_ga)
+
+    cube_model = obj_loader.load_obj_model("cube", loader)
+    static_cube_model = TexturedModel(cube_model, ModelTexture(loader.load_texture("grass_block")))
+    cube_texture = static_cube_model.get_texture()
 
     while glutGetWindow() != 0:
         # game logic
         Time.set_current_time(Time.time_current_time())
-        Time.set_delta_time()                               # automatically calculates delta time
+        Time.set_delta_time()  # automatically calculates delta time
         Time.set_last_frame_time(Time.time_current_time())
 
         fps = 1 / Time.get_delta_time()
 
         player.move(collider_entities)
-        text1.set_text_string(str('%.2f' % fps))
-        text2.set_text_string("")
-        text3.set_text_string("")
+        player_light.set_position(camera.get_position())
+
+        text1.set_text_string(str(order_1.get_all_contents()))
+        text2.set_text_string(str(order_1.calculate_points()))
+        text3.set_text_string(str(order_1.get_time()))
         if not (coffee_os.get_is_interacting() or coffee_os_lactose_free.get_is_interacting() or fridge.get_is_interacting()):
             camera.move()
             carry.update()
@@ -535,7 +271,11 @@ def main():
         object_picker.update(collider_entities)
         scanner.update(collider_entities)
 
-        master_renderer.render_shadow_map(entities, sun)
+        if KeyboardInput.on_key_down(b'f'):
+            entities.append(Entity(static_cube_model, object_picker.get_current_object_point(), 0, 0, 0, 0.1))
+            print(object_picker.get_current_object_point())
+
+        master_renderer.render_shadow_map(entities, player_light)
 
         coffee_os.interact(player, camera)
         coffee_os_lactose_free.interact(player, camera)
@@ -553,8 +293,10 @@ def main():
         TextMaster.render_not_specified(not_specified)
         fridge.update(carry)
 
-        glutSwapBuffers()         # needs to be called AFTER finished drawing
-        glutMainLoopEvent()       # used to run openGL manually in a loop instead of glutMainLoop()
+        order_1.check_if_fulfilled()
+
+        glutSwapBuffers()  # needs to be called AFTER finished drawing
+        glutMainLoopEvent()  # used to run openGL manually in a loop instead of glutMainLoop()
 
 
 if __name__ == "__main__":

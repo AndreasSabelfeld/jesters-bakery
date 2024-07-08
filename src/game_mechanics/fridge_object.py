@@ -5,7 +5,7 @@ class FridgeObject:
     NORTH = 0
     EAST = 1
 
-    def __init__(self, size: tuple[int, int],  entity, texture: ModelTexture, content: str, orientation: int = NORTH):
+    def __init__(self, size: tuple[int, int],  entity, texture: ModelTexture, content: str | list, orientation: int = NORTH):
         self.__size = size
         self.__orientation = orientation
         self.__entity = entity

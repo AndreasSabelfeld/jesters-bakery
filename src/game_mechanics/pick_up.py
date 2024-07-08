@@ -1,5 +1,8 @@
 from src.game_mechanics.coffee_container import CoffeeContainer
+from src.game_mechanics.food import Food
 from src.game_mechanics.food_spawn import FoodSpawn
+from src.game_mechanics.order import MasterOrder
+from src.game_mechanics.ingredient import Ingredient
 from src.render_engine.input_controller import KeyboardInput, ControllerInput
 from src.game_mechanics.game_object import GameObject
 from src.game_mechanics.coffee_machine_os import CoffeeMachineOS, CoffeeMachineOSLactoseFree
@@ -70,6 +73,8 @@ class Carry:
     def __pick_up(self, side, relevant_entities) -> None:
         entity = self.__object_picker.update(relevant_entities)
         if isinstance(entity, GameObject):
+            if not entity.is_pickup_able():
+                return
             if entity.get_parent():
                 if entity is entity.get_parent().get_child_0():
                     entity.get_parent().remove_child_0()
@@ -77,8 +82,6 @@ class Carry:
                     entity.get_parent().remove_child_1()
                 entity.set_offset([0, 0, 0])
             if self.__pick_up_special_cases(entity, side):
-                return
-            if not entity.is_pickup_able():
                 return
         if entity is not None:
             if side:
@@ -124,8 +127,18 @@ class Carry:
                 self.set_carrying_object(side, entity.get_child_1())
             return 1
         elif isinstance(entity.get_attachment(), FoodSpawn):
-            entity.get_attachment().spawn()
-            return 0
+            self.set_carrying_object(side, entity.get_attachment().spawn())
+            return 1
+        elif name == "DOOR":
+            if entity.get_rot_x() == 90:
+                entity.set_rot_x(0)
+                entity.get_collider().set_position(entity.get_position())
+            else:
+                entity.set_rot_x(90)
+                entity.get_collider().set_position([entity.get_position()[0],
+                                                   entity.get_position()[1] - 1,
+                                                   entity.get_position()[2]])
+            return 1
 
     def __lay_down_special_cases(self, entity, side):
         name = entity.get_int_name()
@@ -175,6 +188,9 @@ class Carry:
                     entity.get_attachment().fill(self.get_carrying_object(side).get_attachment().get_texture())
                     entity.get_attachment().append_content(self.get_carrying_object(side).get_attachment().get_content())
                     return 1
+                elif isinstance(self.get_carrying_object(side).get_attachment(), Ingredient):
+                    entity.get_attachment().append_content(self.get_carrying_object(side).get_attachment().get_content())
+                    return 1
         elif name == "PLATE":
             if isinstance(self.get_carrying_object(side), GameObject):
                 if self.get_carrying_object(side).get_int_name() == "FOOD":
@@ -186,16 +202,54 @@ class Carry:
                     entity.set_child_0(self.get_carrying_object(side))
                     self.remove_carrying_object(side)
                     return 1
-        elif isinstance(entity, GameObject):
-            if isinstance(entity.get_attachment(), CoffeeContainer):
-                if self.get_carrying_object(side).get_int_name() == "MILK_FOAMER_CUP" or self.get_carrying_object(side).get_int_name() == "MIXER_VESSEL":
-                    if not self.get_carrying_object(side).get_attachment().get_fill_lvl():
-                        return 1
-                    entity.get_attachment().append_content(self.get_carrying_object(side).get_attachment().remove_content())
-                    entity.get_attachment().set_level(self.get_carrying_object(side).get_attachment().get_fill_lvl(),
-                                                      self.get_carrying_object(side).get_attachment().get_texture())
-                    self.get_carrying_object(side).get_attachment().empty()
+        if isinstance(entity.get_attachment(), CoffeeContainer):
+            if self.get_carrying_object(side).get_int_name() == "MILK_FOAMER_CUP" or self.get_carrying_object(side).get_int_name() == "MIXER_VESSEL":
+                if not self.get_carrying_object(side).get_attachment().get_fill_lvl():
                     return 1
+                entity.get_attachment().append_content(self.get_carrying_object(side).get_attachment().remove_content())
+                entity.get_attachment().set_level(self.get_carrying_object(side).get_attachment().get_fill_lvl(),
+                                                  self.get_carrying_object(side).get_attachment().get_texture())
+                self.get_carrying_object(side).get_attachment().empty()
+                return 1
+            elif isinstance(self.get_carrying_object(side).get_attachment(), FridgeObject):
+                entity.get_attachment().append_content(self.get_carrying_object(side).get_attachment().get_content())
+                entity.get_attachment().fill(self.get_carrying_object(side).get_attachment().get_texture())
+                return 1
+            elif entity.get_attachment().get_container_type() == CoffeeContainer.BIG_GLASS:
+                if isinstance(self.get_carrying_object(side), GameObject) and isinstance(self.get_carrying_object(side).get_attachment(), Food):
+                    food = self.get_carrying_object(side).get_attachment().get_food()
+                    if food == "Ice" or food == "Lemon":
+                        if not entity.get_child_0():
+                            self.get_carrying_object(side).set_position([entity.get_position()[0],
+                                                                         entity.get_position()[1] + 1,
+                                                                         entity.get_position()[2]])
+                            entity.set_child_0(self.get_carrying_object(side))
+                        elif not entity.get_child_1():
+                            self.get_carrying_object(side).set_position([entity.get_position()[0],
+                                                                         entity.get_position()[1] + 1,
+                                                                         entity.get_position()[2]])
+                            entity.set_child_1(self.get_carrying_object(side))
+                        else:
+                            return 0
+                        entity.get_attachment().append_content(food)
+                        self.get_carrying_object(side).set_pickup_able(False)
+                        self.movable_entities.remove(self.remove_carrying_object(side))
+                        return 1
+
+        elif name == "FINISHED":
+            if isinstance(entity.get_attachment(), MasterOrder):
+                if isinstance(self.get_carrying_object(side).get_attachment(), CoffeeContainer):
+                    entity.get_attachment().place(self.get_carrying_object(side))
+                    self.get_carrying_object(side).set_pickup_able(False)
+                    self.remove_carrying_object(side)
+                    return 1
+                if self.get_carrying_object(side).get_int_name() == "PLATE":
+                    if isinstance(self.get_carrying_object(side).get_child_0().get_attachment(), Food):
+                        entity.get_attachment().place(self.get_carrying_object(side).get_child_0())
+                        self.get_carrying_object(side).set_pickup_able(False)
+                        self.get_carrying_object(side).get_child_0().set_pickup_able(False)
+                        self.remove_carrying_object(side)
+                        return 1
 
     def __lay_down(self, side: int, carrying_entity, relevant_entities: list) -> None:
         relevant_entities = [_ for _ in relevant_entities if
@@ -282,7 +336,8 @@ class Carry:
         if side:
             if not isinstance(self.__carrying_object_right, GameObject):
                 return
-            if self.__carrying_object_right.get_int_name() == "COFFEE" or self.__carrying_object_right.get_int_name() == "GLASS":
+            if self.__carrying_object_right.get_int_name() == "COFFEE" or self.__carrying_object_right.get_int_name() == "GLASS"\
+                    or self.__carrying_object_right.get_int_name() == "MIXER_VESSEL":
                 if coffee_machine.get_attachment().get_coffee(1) is None:
                     coffee_machine.get_attachment().set_coffee(1, self.__carrying_object_right)
                 elif coffee_machine.get_attachment().get_coffee(2) is None:
@@ -293,7 +348,8 @@ class Carry:
         else:
             if not isinstance(self.__carrying_object_left, GameObject):
                 return
-            if self.__carrying_object_left.get_int_name() == "COFFEE" or self.__carrying_object_left.get_int_name() == "GLASS":
+            if self.__carrying_object_right.get_int_name() == "COFFEE" or self.__carrying_object_right.get_int_name() == "GLASS" \
+                    or self.__carrying_object_right.get_int_name() == "MIXER_VESSEL":
                 if coffee_machine.get_attachment().get_coffee(1) is None:
                     coffee_machine.get_attachment().set_coffee(1, self.__carrying_object_left)
                 elif coffee_machine.get_attachment().get_coffee(2) is None:
@@ -304,8 +360,10 @@ class Carry:
 
     def __put_left_in_right(self):
         """Object in the left hand 'collides' with the object in the right hand."""
-        self.__lay_down_special_cases(self.get_carrying_object(self.RIGHT), self.LEFT)
+        if self.get_carrying_object(self.LEFT) and self.get_carrying_object(self.RIGHT):
+            self.__lay_down_special_cases(self.get_carrying_object(self.RIGHT), self.LEFT)
 
     def __put_right_in_left(self):
         """Object in the right hand 'collides' with the object in the left hand."""
-        self.__lay_down_special_cases(self.get_carrying_object(self.LEFT), self.RIGHT)
+        if self.get_carrying_object(self.LEFT) and self.get_carrying_object(self.RIGHT):
+            self.__lay_down_special_cases(self.get_carrying_object(self.LEFT), self.RIGHT)

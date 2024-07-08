@@ -5,20 +5,25 @@ from src.entities.entity import Entity
 from src.font_mesh_creator.font_type import FontType
 from src.font_mesh_creator.gui_text import GUIText
 from src.font_rendering.text_master import TextMaster
+from src.game_mechanics.coffee_container import CoffeeContainer
 from src.game_mechanics.coffee_page import CoffeePage
+from src.game_mechanics.food import Food
 from src.game_mechanics.game_object import GameObject
 from src.guis.gui_texture import GuiTexture
 from src.models.raw_model import RawModel
 from src.models.textured_model import TexturedModel
 from src.post_processing.fbo import FBO
+from src.render_engine.time import Time
 from src.textures.model_texture import ModelTexture
 
 
 class Possibility:
-    def __init__(self, name: str, wishes: list, time=None):
+    def __init__(self, name: str, wishes: list, time: float, vessel=None, content=None):
         self.__name = name
         self.__wishes = wishes
         self.__time = time
+        self.__vessel = vessel
+        self.__content = content
 
     def get_name(self) -> str:
         return self.__name
@@ -29,6 +34,15 @@ class Possibility:
     def get_time(self) -> float:
         return self.__time
 
+    def set_content(self, content: list[str]) -> None:
+        self.__content = content
+
+    def get_content(self) -> list[str]:
+        return self.__content
+
+    def get_vessel(self) -> int:
+        return self.__vessel
+
 
 class Order:
     def __init__(self, master: 'MasterOrder', amount_of_orders: int):
@@ -37,9 +51,13 @@ class Order:
         self.__time = master.calculate_time(self.__order)
         self.__text = GUIText(self.get_order_string(), 10, self.__master.get_font(), [0, 0], 0.15, False)
         self.__white_texture = GuiTexture(self.__master.get_loader().load_texture("white"), [0, 0], [1920, 1080])
+        self.__fulfilled = False
+        self.__points = 0
+        self.__right_orders = 0
+        self.__wrong_orders = 0
 
     def get_order(self) -> list:
-        return self.__order
+        return self.__order.copy()
 
     def get_time(self) -> float:
         return self.__time
@@ -55,6 +73,12 @@ class Order:
 
     def get_gui_text(self) -> GUIText:
         return self.__text
+
+    def get_all_contents(self) -> list[list]:
+        l = list()
+        for order in self.get_order():
+            l.append(order[0].get_content())
+        return l
 
     @staticmethod
     def create_fbo(x: int, y: int) -> FBO:
@@ -96,10 +120,44 @@ class Order:
         ticket_entity = Entity(static_model, pos, *rot, size)
         return GameObject(ticket_entity, int_name="TICKET")
 
+    def check_if_fulfilled(self):
+        if self.__order:
+            self.__time -= Time.get_delta_time()
+        else:
+            self.__fulfilled = True
+
+        if self.__master.get_placed_products():
+            for product in self.__master.get_placed_products():
+                if isinstance(product, CoffeeContainer):
+                    content = product.get_content()
+                    vessel = product.get_container_type()
+                else:
+                    # it's food
+                    content = [product.get_food()]
+                    vessel = None
+                try:
+                    index = self.get_all_contents().index(content)
+                    if vessel == self.__order[index][0].get_vessel():
+                        self.__order.pop(index)
+                        self.__right_orders += 1
+                    self.__master.get_placed_products().remove(product)
+                except ValueError:
+                    # product is not in order
+                    self.__wrong_orders += 1
+                    self.__master.get_placed_products().remove(product)
+
+    def calculate_points(self) -> int:
+        self.__points = (10 * self.__right_orders) - (5 * self.__wrong_orders) + int(self.__time)
+        return self.__points
+
+    def is_fulfilled(self) -> bool:
+        return self.__fulfilled
+
 
 class MasterOrder:
-    def __init__(self, loader, obj_loader, gui_renderer):
+    def __init__(self, loader, obj_loader, gui_renderer, parent_object: GameObject):
         self.__chance_for_wish = 0.25
+        self.__placed_products = []
 
         self.__coffee_dict = dict()
         self.__load_coffee_products()
@@ -110,6 +168,9 @@ class MasterOrder:
         self.__obj_loader = obj_loader
         self.__font = FontType(self.__loader.load_texture("candara"), "res/candara.fnt")
         self.__gui_renderer = gui_renderer
+        self.__parent_object = parent_object
+
+        self.__i = 0
 
     def create_order(self, amount_of_orders: int) -> list:
         order = list()
@@ -119,15 +180,75 @@ class MasterOrder:
             if random.random() < self.__chance_for_wish:
                 if prod.get_wishes():
                     wish = prod.get_wishes()[random.randint(0, len(prod.get_wishes())-1)]
+            self.load_content(prod, wish)
             order.append([prod, wish, prod.get_time()])
         return order
+
+    def load_content(self, prod: Possibility, wish: str) -> None:
+        if not wish:
+            if not prod.get_content():
+                prod.set_content([prod.get_name()])
+        elif wish == "Oat Milk":
+            if prod.get_name() == "Milk Coffee":
+                prod.set_content(["Oat Milk", "Foam", "Oat Milk Coffee"])
+            if prod.get_name() == "Latte Macchiato":
+                prod.set_content(["Oat Milk", "Foam", "Espresso"])
+            if prod.get_name() == "Cappuccino":
+                prod.set_content(["Oat Milk", "Foam", "Espresso"])
+            if prod.get_name() == "Café Latte":
+                prod.set_content(["Oat Milk", "Foam", "Café Crème"])
+            if prod.get_name() == "Hot Chocolate":
+                prod.set_content(["Oat Milk", "Caotina"])
+            if prod.get_name() == "Cold Chocolate":
+                prod.set_content(["Oat Milk", "Caotina"])
+            if prod.get_name() == "Children Chocolate":
+                prod.set_content(["Oat Milk", "Caotina"])
+            if prod.get_name() == "Doppio Macchiato":
+                prod.set_content(["Oat Milk", "Foam", "Doppio"])
+            if prod.get_name() == "Ovomaltine":
+                prod.set_content(["Oat Milk", "Ovomaltine", "Mixed"])
+            if prod.get_name() == "Chai":
+                prod.set_content(["Oat Milk", "Chai", "Mixed"])
+            if prod.get_name() == "Chocolatl":
+                prod.set_content(["Oat Milk", "Chocolatl", "Mixed"])
+        else:
+            if not prod.get_content():
+                prod.set_content([prod.get_name(), wish])
+            else:
+                prod.get_content().append(wish)
+
+    def place(self, product: GameObject):
+        self.__placed_products.append(product.get_attachment())
+        left_corner_offset = [-2.1, 4.3, -4]
+        right_corner_offset = [5.7, 4.3, -0.3]
+
+        length = 7
+        width = 2
+        height = 3
+        offset = 0.2
+
+        j = (self.__i // length) % width
+        k = (self.__i // (width * length)) % height
+
+        x = self.__parent_object.get_position()[0] + left_corner_offset[0] + offset + \
+            ((right_corner_offset[0] - left_corner_offset[0]) / length) * (self.__i % length)
+        y = self.__parent_object.get_position()[1] + right_corner_offset[1] + (2 * k)
+        z = self.__parent_object.get_position()[2] + left_corner_offset[2] + offset + j * (4 / width)
+
+        if product.get_parent():
+            product.get_parent().set_position([x, y, z])
+        else:
+            product.set_position([x, y, z])
+
+        self.__i += 1
 
     @staticmethod
     def calculate_time(order: list):
         time = 0
+        grace_factor = 2
         for element in order:
             time += element[2]
-        time *= 1.5
+        time *= grace_factor
         return time
 
     def get_font(self) -> FontType:
@@ -142,6 +263,9 @@ class MasterOrder:
     def get_gui_renderer(self):
         return self.__gui_renderer
 
+    def get_placed_products(self):
+        return self.__placed_products
+
     def __load_coffee_products(self) -> None:
         for instance in CoffeePage.get_instances():
             for product in instance.get_products():
@@ -149,42 +273,78 @@ class MasterOrder:
 
     def __load_possibilities(self) -> None:
         poss = list()
-        poss.append(Possibility("Espresso", ["Decaffeinated"], self.__coffee_dict["Espresso"].get_brew_length()))
-        poss.append(Possibility("Doppio", ["Decaffeinated"], self.__coffee_dict["Doppio"].get_brew_length()))
-        poss.append(Possibility("Café Crème", ["Decaffeinated"], self.__coffee_dict["Café Crème"].get_brew_length()))
+        poss.append(Possibility("Espresso", ["Decaffeinated"],
+                                self.__coffee_dict["Espresso"].get_brew_length(),
+                                self.__coffee_dict["Espresso"].get_container_type()))
+        poss.append(Possibility("Doppio", ["Decaffeinated"],
+                                self.__coffee_dict["Doppio"].get_brew_length(),
+                                self.__coffee_dict["Doppio"].get_container_type()))
+        poss.append(Possibility("Café Crème", ["Decaffeinated"],
+                                self.__coffee_dict["Café Crème"].get_brew_length(),
+                                self.__coffee_dict["Café Crème"].get_container_type()))
         poss.append(Possibility("Milk Coffee", ["Decaffeinated", "Lactose Free", "Oat Milk"],
-                                self.__coffee_dict["Milk Coffee"].get_brew_length()))
+                                self.__coffee_dict["Milk Coffee"].get_brew_length(),
+                                self.__coffee_dict["Milk Coffee"].get_container_type()))
         poss.append(Possibility("Cappuccino", ["Decaffeinated", "Lactose Free", "Oat Milk"],
-                                self.__coffee_dict["Cappuccino"].get_brew_length()))
+                                self.__coffee_dict["Cappuccino"].get_brew_length(),
+                                self.__coffee_dict["Cappuccino"].get_container_type()))
         poss.append(Possibility("Latte Macchiato", ["Decaffeinated", "Lactose Free", "Oat Milk"],
-                                self.__coffee_dict["Latte Macchiato"].get_brew_length()))
+                                self.__coffee_dict["Latte Macchiato"].get_brew_length(),
+                                self.__coffee_dict["Latte Macchiato"].get_container_type()))
         poss.append(Possibility("Café Latte", ["Decaffeinated", "Lactose Free", "Oat Milk"],
-                                self.__coffee_dict["Café Latte"].get_brew_length()))
-        poss.append(Possibility("Tea", [], self.__coffee_dict["Tea"].get_brew_length()))
+                                self.__coffee_dict["Café Latte"].get_brew_length(),
+                                self.__coffee_dict["Café Latte"].get_container_type()))
+        poss.append(Possibility("Tea", [],
+                                self.__coffee_dict["Tea"].get_brew_length(),
+                                self.__coffee_dict["Tea"].get_container_type()))
         poss.append(Possibility("Hot Chocolate", ["Lactose Free", "Oat Milk"],
-                                self.__coffee_dict["Hot Chocolate"].get_brew_length()))
+                                self.__coffee_dict["Hot Chocolate"].get_brew_length(),
+                                self.__coffee_dict["Hot Chocolate"].get_container_type()))
         poss.append(Possibility("Cold Chocolate", ["Lactose Free", "Oat Milk"],
-                                self.__coffee_dict["Cold Chocolate"].get_brew_length()))
+                                self.__coffee_dict["Cold Chocolate"].get_brew_length(),
+                                self.__coffee_dict["Cold Chocolate"].get_container_type()))
         poss.append(Possibility("Children Chocolate", ["Lactose Free", "Oat Milk"],
-                                self.__coffee_dict["Children Chocolate"].get_brew_length()))
-        poss.append(Possibility("Warm Milk", [], self.__coffee_dict["Warm Milk"].get_brew_length()))
-        poss.append(Possibility("Cold Milk", [], self.__coffee_dict["Cold Milk"].get_brew_length()))
-        poss.append(Possibility("Babyccino", [], self.__coffee_dict["Babyccino"].get_brew_length()))
-        poss.append(Possibility("Americano", ["Decaffeinated"], self.__coffee_dict["Americano"].get_brew_length()))
+                                self.__coffee_dict["Children Chocolate"].get_brew_length(),
+                                self.__coffee_dict["Children Chocolate"].get_container_type()))
+        poss.append(Possibility("Warm Milk", [],
+                                self.__coffee_dict["Warm Milk"].get_brew_length(),
+                                self.__coffee_dict["Warm Milk"].get_container_type()))
+        poss.append(Possibility("Cold Milk", [],
+                                self.__coffee_dict["Cold Milk"].get_brew_length(),
+                                self.__coffee_dict["Cold Milk"].get_container_type()))
+        poss.append(Possibility("Babyccino", [],
+                                self.__coffee_dict["Babyccino"].get_brew_length(),
+                                self.__coffee_dict["Babyccino"].get_container_type()))
+        poss.append(Possibility("Americano", ["Decaffeinated"],
+                                self.__coffee_dict["Americano"].get_brew_length(),
+                                self.__coffee_dict["Americano"].get_container_type()))
         poss.append(Possibility("Doppio Macchiato", ["Decaffeinated", "Lactose Free", "Oat Milk"],
-                                self.__coffee_dict["Doppio Macchiato"].get_brew_length()))
-        poss.append(Possibility("Coke", ["Ice", "Lemon"], 6.0))
-        poss.append(Possibility("Schorle", ["Ice", "Lemon"], 6.0))
-        poss.append(Possibility("Sparkling Water", ["Ice", "Lemon"], 6.0))
-        poss.append(Possibility("Still Water", ["Ice", "Lemon"], 6.0))
-        poss.append(Possibility("Beer", ["Ice", "Lemon"], 6.0))
-        poss.append(Possibility("Chai", ["Lactose Free", "Oat Milk"], 5.0))
-        poss.append(Possibility("Sprite", ["Ice", "Lemon"], 5.0))
-        poss.append(Possibility("Coke Zero", ["Ice", "Lemon"], 5.0))
-        poss.append(Possibility("Juice", ["Ice", "Lemon"], 5.0))
-        poss.append(Possibility("Prosecco", [], 5.0))
-        poss.append(Possibility("Panaché", [], 8.0))
-        poss.append(Possibility("Sandwich", [], 5.0))
+                                self.__coffee_dict["Doppio Macchiato"].get_brew_length(),
+                                self.__coffee_dict["Doppio Macchiato"].get_container_type()))
+        poss.append(Possibility("Coke", ["Ice", "Lemon"], 6.0, CoffeeContainer.BIG_GLASS))
+        poss.append(Possibility("Schorle", ["Ice", "Lemon"], 6.0, CoffeeContainer.BIG_GLASS))
+        poss.append(Possibility("Sparkling Water", ["Ice", "Lemon"], 6.0, CoffeeContainer.BIG_GLASS))
+        poss.append(Possibility("Still Water", ["Ice", "Lemon"], 6.0, CoffeeContainer.BIG_GLASS))
+        poss.append(Possibility("Beer", [], 6.0, CoffeeContainer.BEER))
+        poss.append(Possibility("Chai", ["Lactose Free", "Oat Milk"], 5.0, CoffeeContainer.BIG_GLASS))
+        poss.append(Possibility("Sprite", ["Ice", "Lemon"], 5.0, CoffeeContainer.BIG_GLASS))
+        poss.append(Possibility("Coke Zero", ["Ice", "Lemon"], 5.0, CoffeeContainer.BIG_GLASS))
+        poss.append(Possibility("Orange Juice", ["Ice", "Lemon"], 5.0, CoffeeContainer.BIG_GLASS))
+        poss.append(Possibility("Topfit Juice", ["Ice", "Lemon"], 5.0, CoffeeContainer.BIG_GLASS))
+        poss.append(Possibility("Prosecco", [], 5.0, CoffeeContainer.PROSECCO))
+        poss.append(Possibility("Panaché", [], 8.0, CoffeeContainer.BEER,
+                                content=["Sprite", "Beer"]))
+        poss.append(Possibility("Ovomaltine", [], 10.0, CoffeeContainer.BIG_GLASS,
+                                content=["Milk for Chai, Ovo", "Ovomaltine", "Mixed"]))
+        poss.append(Possibility("Chai", [], 10.0, CoffeeContainer.BIG_GLASS,
+                                content=["Milk for Chai, Ovo", "Chai", "Mixed"]))
+        poss.append(Possibility("Chocolatl", [], 10.0, CoffeeContainer.BIG_GLASS,
+                                content=["Milk for Chai, Ovo", "Chocolatl", "Mixed"]))
+        poss.append(Possibility("Ham Sandwich", [], 5.0))
+        poss.append(Possibility("Salami Sandwich", [], 5.0))
+        poss.append(Possibility("Tuna Sandwich", [], 5.0))
+        poss.append(Possibility("Mango Chutney Sandwich", [], 5.0))
+        poss.append(Possibility("Tomato Sandwich", [], 5.0))
         poss.append(Possibility("Sirserli", [], 5.0))
         poss.append(Possibility("Croissant", [], 5.0))
         poss.append(Possibility("Chocolate Croissant", [], 5.0))
