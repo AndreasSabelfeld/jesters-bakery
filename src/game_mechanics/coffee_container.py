@@ -1,4 +1,5 @@
 from src.entities.entity import Entity
+from src.game_mechanics.game_object import GameObject
 from src.models.textured_model import TexturedModel
 from src.textures.model_texture import ModelTexture
 
@@ -16,7 +17,7 @@ class CoffeeContainer:
     __loader = None
     __obj_loader = None
 
-    def __init__(self, container_type: int, parent_entity):
+    def __init__(self, container_type: int, parent_entity: GameObject):
         self.__container_type = container_type
         self.__parent_entity = parent_entity
         self.__level = 0
@@ -34,26 +35,26 @@ class CoffeeContainer:
             level = 3
             # if content is not a sublist of:
             if not {"Oat Milk", "Foam"} <= set(self.__content) and "Sprite" not in self.__content:
-                self.toggle_overflown()
+                self.toggle_overflown(texture)
         match container_type:
             case 0:
-                return TexturedModel(self.__obj_loader.load_obj_model(f"espresso_cup_lvl_{level}", self.__loader), texture)
+                return TexturedModel(self.__obj_loader.load_obj_model(f"objs/cups/espresso_cup_lvl_{level}", self.__loader), texture)
             case 1:
-                return TexturedModel(self.__obj_loader.load_obj_model(f"small_glass_lvl_{level}", self.__loader), texture)
+                return TexturedModel(self.__obj_loader.load_obj_model(f"objs/cups/small_glass_lvl_{level}", self.__loader), texture)
             case 2:
-                return TexturedModel(self.__obj_loader.load_obj_model(f"small_coffee_cup_lvl_{level}", self.__loader), texture)
+                return TexturedModel(self.__obj_loader.load_obj_model(f"objs/cups/small_coffee_cup_lvl_{level}", self.__loader), texture)
             case 3:
-                return TexturedModel(self.__obj_loader.load_obj_model(f"big_coffee_cup_lvl_{level}", self.__loader), texture)
+                return TexturedModel(self.__obj_loader.load_obj_model(f"objs/cups/big_coffee_cup_lvl_{level}", self.__loader), texture)
             case 4:
-                return TexturedModel(self.__obj_loader.load_obj_model(f"big_glass_lvl_{level}", self.__loader), texture)
+                return TexturedModel(self.__obj_loader.load_obj_model(f"objs/cups/big_glass_lvl_{level}", self.__loader), texture)
             case 5:
-                return TexturedModel(self.__obj_loader.load_obj_model(f"tea_pot_lvl_{level}", self.__loader), texture)
+                return TexturedModel(self.__obj_loader.load_obj_model(f"objs/cups/tea_pot_lvl_{level}", self.__loader), texture)
             case 6:
-                return TexturedModel(self.__obj_loader.load_obj_model(f"beer_lvl_{level}", self.__loader), texture)
+                return TexturedModel(self.__obj_loader.load_obj_model(f"objs/cups/beer_lvl_{level}", self.__loader), texture)
             case 7:
-                return TexturedModel(self.__obj_loader.load_obj_model(f"prosecco_glass_lvl_{level}", self.__loader), texture)
+                return TexturedModel(self.__obj_loader.load_obj_model(f"objs/cups/prosecco_glass_lvl_{level}", self.__loader), texture)
 
-    def fill(self, texture) -> None:
+    def fill(self, texture: ModelTexture) -> None:
         self.__level += 1
         self.__parent_entity.set_child_0(Entity(self.get_model(self.__container_type, self.__level, texture),
                                                 self.__parent_entity.get_position(), 0, 0, 0, 1))
@@ -66,14 +67,16 @@ class CoffeeContainer:
     def get_level(self) -> int:
         return self.__level
 
+    def set_texture(self, texture: ModelTexture) -> None:
+        self.set_level(self.get_level(), texture)
+
     def get_container_type(self) -> int:
         return self.__container_type
 
-    def toggle_overflown(self) -> None:
-        overflown_texture = ModelTexture(self.__loader.load_texture("grass_block"))
+    def toggle_overflown(self, texture) -> None:
         if not self.__overflown:
             self.__overflown = True
-            self.__parent_entity.get_entity().get_model().set_texture(overflown_texture)
+            self.__parent_entity.get_entity().get_model().set_texture(texture)
 
     def get_content(self) -> list:
         return self.__content.copy()

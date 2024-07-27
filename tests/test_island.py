@@ -79,17 +79,17 @@ def main():
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~~~PINES~~~~~~~~~~~~~~~~
-    pine_model = obj_loader.load_obj_model("pine", loader)
+    pine_model = obj_loader.load_obj_model("objs/legacy/pine", loader)
     static_pine_model = TexturedModel(pine_model, ModelTexture(loader.load_texture("pine")))
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~~~~ROCK~~~~~~~~~~~~~~~~
-    rock_model = obj_loader.load_obj_model("rocks", loader)
+    rock_model = obj_loader.load_obj_model("objs/legacy/rocks", loader)
     static_rock_model = TexturedModel(rock_model, ModelTexture(loader.load_texture("rocks")))
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~~CHERRY TREE~~~~~~~~~~~
-    cherry_tree = obj_loader.load_obj_model("cherry", loader)
+    cherry_tree = obj_loader.load_obj_model("objs/legacy/cherry", loader)
     static_cherry_tree = TexturedModel(cherry_tree, ModelTexture(loader.load_texture("cherry")))
     static_cherry_tree.get_texture().set_has_transparency(True)
     static_cherry_tree.get_texture().set_shine_damper(10)
@@ -98,7 +98,7 @@ def main():
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~~~~FERN~~~~~~~~~~~~~~~~
-    fern_model = obj_loader.load_obj_model("fern", loader)
+    fern_model = obj_loader.load_obj_model("objs/legacy/fern", loader)
     fern_texture_atlas = ModelTexture(loader.load_texture("fern"))
     fern_texture_atlas.set_number_of_rows(2)
 
@@ -109,7 +109,7 @@ def main():
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~~~~CRATE~~~~~~~~~~~~~~~~
-    crate_model = normal_mapped_obj_loader.load_obj_model("crate", loader)
+    crate_model = normal_mapped_obj_loader.load_obj_model("objs/legacy/crate", loader)
     crate_texture = ModelTexture(loader.load_texture("crate"))
     crate_texture.set_shine_damper(10)
     crate_texture.set_reflectivity(0.5)
@@ -118,7 +118,7 @@ def main():
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~~~~BOULDER~~~~~~~~~~~~~~
-    boulder_model = normal_mapped_obj_loader.load_obj_model("boulder", loader)
+    boulder_model = normal_mapped_obj_loader.load_obj_model("objs/legacy/boulder", loader)
     boulder_texture = ModelTexture(loader.load_texture("boulder"))
     boulder_texture.set_shine_damper(10)
     boulder_texture.set_reflectivity(0.5)
@@ -127,7 +127,7 @@ def main():
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~~~~BARREL~~~~~~~~~~~~~~~
-    barrel_model = normal_mapped_obj_loader.load_obj_model("barrel", loader)
+    barrel_model = normal_mapped_obj_loader.load_obj_model("objs/legacy/barrel", loader)
     barrel_texture = ModelTexture(loader.load_texture("barrel"))
     barrel_texture.set_shine_damper(10)
     barrel_texture.set_reflectivity(0.5)
@@ -193,7 +193,7 @@ def main():
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~~~~~PLAYER~~~~~~~~~~~~~~
-    bunny_model = obj_loader.load_obj_model("bunny", loader)
+    bunny_model = obj_loader.load_obj_model("objs/legacy/bunny", loader)
     static_bunny_model = TexturedModel(bunny_model, ModelTexture(loader.load_texture("white")))
 
     player = ThirdPersonPlayer(static_bunny_model, [0, 0, 0], 0, 0, 0, 1)

@@ -1,5 +1,3 @@
-from OpenGL.GL import *
-
 from src.entities.entity import Entity
 from src.font_mesh_creator.font_type import FontType
 from src.font_mesh_creator.gui_text import GUIText
@@ -107,7 +105,7 @@ class MilkFoamer:
         self.__cup_placed = placed
 
     def get_fill_model(self, level, texture) -> TexturedModel:
-        return TexturedModel(self.__obj_loader.load_obj_model(f"milk_foamer_lvl_{level}", self.__loader), texture)
+        return TexturedModel(self.__obj_loader.load_obj_model(f"objs/machinery/milk_foamer_lvl_{level}", self.__loader), texture)
 
     def get_text(self) -> GUIText:
         return self.__text

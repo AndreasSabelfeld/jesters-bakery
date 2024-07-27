@@ -1,4 +1,5 @@
-from tests import test_cube, test_island, test_forest, test_cel_shading, test_text, test_audio, test_collision, test_bakery
+from tests import test_cube, test_island, test_forest, test_cel_shading, test_text, test_audio, test_collision, \
+    test_bakery, test_bakery_modelled, test_cups
 
 
 def main():
@@ -12,6 +13,8 @@ def main():
         case 5: test_audio.main()
         case 6: test_collision.main()
         case 7: test_bakery.main()
+        case 8: test_bakery_modelled.main()
+        case 9: test_cups.main()
 
 
 if __name__ == "__main__":

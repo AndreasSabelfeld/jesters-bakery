@@ -149,6 +149,12 @@ class MasterRenderer:
             self.__entities[entity_model] = [entity]
 
     def process_normal_map_entity(self, entity) -> None:
+        if isinstance(entity, GameObject):
+            if entity.has_child_0():
+                self.process_entity(entity.get_child_0())
+            if entity.has_child_1():
+                self.process_entity(entity.get_child_1())
+            entity = entity.get_entity()
         entity_model = entity.get_model()
         batch = self.__normal_map_entities.get(entity_model)
         if batch is not None:

@@ -97,7 +97,7 @@ class Order:
 
     def get_model(self) -> RawModel:
         file_name = "ticket"
-        obj = open(f"{sys.path[0]}/res/{file_name}.obj", 'w')
+        obj = open(f"{sys.path[0]}/res/objs/machinery/{file_name}.obj", 'w')
         x = 0.075
         y = (0.5 / 16) * self.__text.get_text_string().count('\n')
         obj.write(f"v -{x} {y * 0.7} -0.000000\n" +
@@ -113,7 +113,7 @@ class Order:
                   f"f 3/3/1 2/2/1 1/1/1\n" +
                   f"f 3/3/1 4/4/1 2/2/1")
         obj.close()
-        return self.__master.get_obj_loader().load_obj_model(f"{file_name}", self.__master.get_loader())
+        return self.__master.get_obj_loader().load_obj_model(f"objs/machinery/{file_name}", self.__master.get_loader())
 
     def get_game_object(self, pos: list[float], rot: list[float], size: float):
         static_model = TexturedModel(self.get_model(), self.get_texture())
@@ -341,11 +341,11 @@ class MasterOrder:
         poss.append(Possibility("Chocolatl", [], 10.0, CoffeeContainer.BIG_GLASS,
                                 content=["Milk for Chai, Ovo", "Chocolatl", "Mixed"]))
         poss.append(Possibility("Ham Sandwich", [], 5.0))
-        poss.append(Possibility("Salami Sandwich", [], 5.0))
+        poss.append(Possibility("Egg Sandwich", [], 5.0))
         poss.append(Possibility("Tuna Sandwich", [], 5.0))
         poss.append(Possibility("Mango Chutney Sandwich", [], 5.0))
         poss.append(Possibility("Tomato Sandwich", [], 5.0))
-        poss.append(Possibility("Sirserli", [], 5.0))
+        poss.append(Possibility("Silserli", [], 5.0))
         poss.append(Possibility("Croissant", [], 5.0))
         poss.append(Possibility("Chocolate Croissant", [], 5.0))
         poss.append(Possibility("Almond Croissant", [], 5.0))

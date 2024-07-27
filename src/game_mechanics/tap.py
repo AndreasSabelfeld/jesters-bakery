@@ -32,9 +32,9 @@ class Tap:
         self.__faucet_4.update()
 
     def __load_assets(self) -> None:
-        tap_base_model = self.__obj_loader.load_obj_model("tap_base", self.__loader)
+        tap_base_model = self.__obj_loader.load_obj_model("objs/machinery/tap_base", self.__loader)
         tap_base_texture = ModelTexture(self.__loader.load_texture("tap_base_texture"))
-        tap_base_texture.set_reflectivity(2)
+        tap_base_texture.set_reflectivity(0.5)
         static_tap_base_model = TexturedModel(tap_base_model, tap_base_texture)
 
         tap_base = Entity(static_tap_base_model, self.__pos, *self.__rot, self.__size)
@@ -47,11 +47,16 @@ class Tap:
         pos_2 = [self.__pos[0] - 0 * offset, self.__pos[1], self.__pos[2]]
         pos_3 = [self.__pos[0] + 1 * offset, self.__pos[1], self.__pos[2]]
         pos_4 = [self.__pos[0] + 2 * offset, self.__pos[1], self.__pos[2]]
-        self.__faucet_0 = TapFaucet(self.__obj_loader, self.__loader, pos_0, self.__rot, self.__size, self.__textures[0], "Coke")
-        self.__faucet_1 = TapFaucet(self.__obj_loader, self.__loader, pos_1, self.__rot, self.__size, self.__textures[1], "Schorle")
-        self.__faucet_2 = TapFaucet(self.__obj_loader, self.__loader, pos_2, self.__rot, self.__size, self.__textures[2], "Still Water")
-        self.__faucet_3 = TapFaucet(self.__obj_loader, self.__loader, pos_3, self.__rot, self.__size, self.__textures[3], "Sparkling Water")
-        self.__faucet_4 = TapFaucet(self.__obj_loader, self.__loader, pos_4, self.__rot, self.__size, self.__textures[4], "Beer")
+        self.__faucet_0 = TapFaucet(self.__obj_loader, self.__loader, pos_0, self.__rot, self.__size, self.__textures[0], "Coke",
+                                    "pngs/machinery/tap_faucet_coke_tex")
+        self.__faucet_1 = TapFaucet(self.__obj_loader, self.__loader, pos_1, self.__rot, self.__size, self.__textures[1], "Schorle",
+                                    "pngs/machinery/tap_faucet_schorle_tex")
+        self.__faucet_2 = TapFaucet(self.__obj_loader, self.__loader, pos_2, self.__rot, self.__size, self.__textures[2], "Still Water",
+                                    "pngs/machinery/tap_faucet_still_water_tex")
+        self.__faucet_3 = TapFaucet(self.__obj_loader, self.__loader, pos_3, self.__rot, self.__size, self.__textures[3], "Sparkling Water",
+                                    "pngs/machinery/tap_faucet_sparkling_water_tex")
+        self.__faucet_4 = TapFaucet(self.__obj_loader, self.__loader, pos_4, self.__rot, self.__size, self.__textures[4], "Beer",
+                                    "pngs/machinery/tap_faucet_beer_tex")
 
     def get_base(self) -> GameObject:
         return self.__base

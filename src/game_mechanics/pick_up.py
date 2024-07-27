@@ -75,14 +75,14 @@ class Carry:
         if isinstance(entity, GameObject):
             if not entity.is_pickup_able():
                 return
+            if self.__pick_up_special_cases(entity, side):
+                return
             if entity.get_parent():
                 if entity is entity.get_parent().get_child_0():
                     entity.get_parent().remove_child_0()
                 else:
                     entity.get_parent().remove_child_1()
                 entity.set_offset([0, 0, 0])
-            if self.__pick_up_special_cases(entity, side):
-                return
         if entity is not None:
             if side:
                 self.__is_carrying_right = True
@@ -190,6 +190,7 @@ class Carry:
                     return 1
                 elif isinstance(self.get_carrying_object(side).get_attachment(), Ingredient):
                     entity.get_attachment().append_content(self.get_carrying_object(side).get_attachment().get_content())
+                    entity.get_attachment().set_texture(self.get_carrying_object(side).get_attachment().get_texture())
                     return 1
         elif name == "PLATE":
             if isinstance(self.get_carrying_object(side), GameObject):
@@ -348,8 +349,8 @@ class Carry:
         else:
             if not isinstance(self.__carrying_object_left, GameObject):
                 return
-            if self.__carrying_object_right.get_int_name() == "COFFEE" or self.__carrying_object_right.get_int_name() == "GLASS" \
-                    or self.__carrying_object_right.get_int_name() == "MIXER_VESSEL":
+            if self.__carrying_object_left.get_int_name() == "COFFEE" or self.__carrying_object_left.get_int_name() == "GLASS" \
+                    or self.__carrying_object_left.get_int_name() == "MIXER_VESSEL":
                 if coffee_machine.get_attachment().get_coffee(1) is None:
                     coffee_machine.get_attachment().set_coffee(1, self.__carrying_object_left)
                 elif coffee_machine.get_attachment().get_coffee(2) is None:
