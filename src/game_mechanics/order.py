@@ -1,3 +1,4 @@
+import math
 import random
 import sys
 
@@ -45,19 +46,23 @@ class Possibility:
 
 
 class Order:
+
+    __unpicked_game_objects = list()
+
     def __init__(self, master: 'MasterOrder', amount_of_orders: int):
         self.__master = master
-        self.__order = master.create_order(amount_of_orders)
-        self.__time = master.calculate_time(self.__order)
+        self.__current_order = master.create_order(amount_of_orders)
+        self.__time = master.calculate_time(self.__current_order)
         self.__text = GUIText(self.get_order_string(), 10, self.__master.get_font(), [0, 0], 0.15, False)
         self.__white_texture = GuiTexture(self.__master.get_loader().load_texture("white"), [0, 0], [1920, 1080])
         self.__fulfilled = False
         self.__points = 0
         self.__right_orders = 0
         self.__wrong_orders = 0
+        self.__ticket_height = 0
 
     def get_order(self) -> list:
-        return self.__order.copy()
+        return self.__current_order.copy()
 
     def get_time(self) -> float:
         return self.__time
@@ -84,7 +89,7 @@ class Order:
     def create_fbo(x: int, y: int) -> FBO:
         return FBO(x, y, multi_target=False, depth_buffer_type=FBO.DEPTH_TEXTURE)
 
-    def get_texture(self) -> ModelTexture:
+    def __get_texture(self) -> ModelTexture:
         x = 1920
         y = 1080
         fbo = FBO(x, y, multi_target=False, depth_buffer_type=FBO.DEPTH_TEXTURE)
@@ -95,13 +100,14 @@ class Order:
         fbo.unbind_frame_buffer()
         return ModelTexture(fbo.get_color_texture())
 
-    def get_model(self) -> RawModel:
+    def __get_model(self) -> RawModel:
         file_name = "ticket"
-        obj = open(f"{sys.path[0]}/res/{file_name}.obj", 'w')
+        obj = open(f"{sys.path[0]}/res/objs/machinery/{file_name}.obj", 'w')
         x = 0.075
-        y = (0.5 / 16) * self.__text.get_text_string().count('\n')
-        obj.write(f"v -{x} {y * 0.7} -0.000000\n" +
-                  f"v {x} {y * 0.7} -0.000000\n" +
+        y = (0.5 / 16) * (self.__text.get_number_of_lines() - 1)
+        self.__ticket_height = 0.7 * y
+        obj.write(f"v -{x} {self.__ticket_height} -0.000000\n" +
+                  f"v {x} {self.__ticket_height} -0.000000\n" +
                   f"v -{x} 0.000000 0.000000\n" +
                   f"v {x} 0.000000 0.000000\n" +
                   f"vn -0.0000 -0.0000 -1.0000\n" +
@@ -113,15 +119,44 @@ class Order:
                   f"f 3/3/1 2/2/1 1/1/1\n" +
                   f"f 3/3/1 4/4/1 2/2/1")
         obj.close()
-        return self.__master.get_obj_loader().load_obj_model(f"{file_name}", self.__master.get_loader())
+        return self.__master.get_obj_loader().load_obj_model(f"objs/machinery/{file_name}", self.__master.get_loader())
 
-    def get_game_object(self, pos: list[float], rot: list[float], size: float):
-        static_model = TexturedModel(self.get_model(), self.get_texture())
+    def __get_game_object(self, pos: list[float], rot: list[float], size: float) -> GameObject:
+        static_model = TexturedModel(self.__get_model(), self.__get_texture())
         ticket_entity = Entity(static_model, pos, *rot, size)
-        return GameObject(ticket_entity, int_name="TICKET")
 
-    def check_if_fulfilled(self):
-        if self.__order:
+        white_tex = ModelTexture(self.__master.get_loader().load_texture("white"))
+        backside_static_model = TexturedModel(self.__get_model(), white_tex)
+        offset_pos = [pos[0] + 0.1 * math.sin(math.radians(rot[1])),
+                      pos[1],
+                      pos[2] + 0.1 * math.cos(math.radians(rot[1]))]
+        backside_ticket_entity = Entity(backside_static_model, offset_pos, rot[0], rot[1] + 180, rot[2], size)
+
+        game_object = GameObject(ticket_entity, int_name="TICKET")
+        game_object.set_attachment(self)
+        game_object.set_child_0(backside_ticket_entity)
+
+        return game_object
+
+    def spawn_ticket(self, ticket_machine: GameObject) -> GameObject:
+        x = 0.3 * math.sin(math.radians(ticket_machine.get_rot_y())) * ticket_machine.get_scale()
+        y = 1.8 * ticket_machine.get_scale()
+        z = 0.3 * math.cos(math.radians(ticket_machine.get_rot_y())) * ticket_machine.get_scale()
+        game_object = self.__get_game_object([ticket_machine.get_position()[0] + x,
+                                              ticket_machine.get_position()[1] + y,
+                                              ticket_machine.get_position()[2] + z],
+                                             [ticket_machine.get_rot_x(),
+                                              ticket_machine.get_rot_y(),
+                                              ticket_machine.get_rot_z()],
+                                             ticket_machine.get_scale() * 10)
+        if self.__unpicked_game_objects:
+            for go in self.__unpicked_game_objects:
+                go.increase_position(0, self.__ticket_height * ticket_machine.get_scale() * 10, 0)
+        self.__unpicked_game_objects.append(game_object)
+        return game_object
+
+    def check_if_fulfilled(self) -> None:
+        if self.__current_order:
             self.__time -= Time.get_delta_time()
         else:
             self.__fulfilled = True
@@ -137,8 +172,8 @@ class Order:
                     vessel = None
                 try:
                     index = self.get_all_contents().index(content)
-                    if vessel == self.__order[index][0].get_vessel():
-                        self.__order.pop(index)
+                    if vessel == self.__current_order[index][0].get_vessel():
+                        self.__current_order.pop(index)
                         self.__right_orders += 1
                     self.__master.get_placed_products().remove(product)
                 except ValueError:
@@ -152,6 +187,10 @@ class Order:
 
     def is_fulfilled(self) -> bool:
         return self.__fulfilled
+
+    def remove_game_object_from_list(self, game_object: GameObject) -> None:
+        if game_object in self.__unpicked_game_objects:
+            self.__unpicked_game_objects.remove(game_object)
 
 
 class MasterOrder:
@@ -188,6 +227,9 @@ class MasterOrder:
         if not wish:
             if not prod.get_content():
                 prod.set_content([prod.get_name()])
+            if prod.get_name() == "Tea":
+                wish = prod.get_wishes()[random.randint(0, len(prod.get_wishes()) - 1)]
+                prod.get_content().append(wish)
         elif wish == "Oat Milk":
             if prod.get_name() == "Milk Coffee":
                 prod.set_content(["Oat Milk", "Foam", "Oat Milk Coffee"])
@@ -219,21 +261,25 @@ class MasterOrder:
 
     def place(self, product: GameObject):
         self.__placed_products.append(product.get_attachment())
-        left_corner_offset = [-2.1, 4.3, -4]
-        right_corner_offset = [5.7, 4.3, -0.3]
+        left_corner_offset = [4 * self.__parent_object.get_scale(),
+                              4.3 * self.__parent_object.get_scale(),
+                              -2.1 * self.__parent_object.get_scale()]
+        right_corner_offset = [-0.3 * self.__parent_object.get_scale(),
+                               4.3 * self.__parent_object.get_scale(),
+                               5.7 * self.__parent_object.get_scale()]
 
         length = 7
-        width = 2
+        width = 3
         height = 3
-        offset = 0.2
+        offset = 0.4 * self.__parent_object.get_scale()
 
         j = (self.__i // length) % width
         k = (self.__i // (width * length)) % height
 
-        x = self.__parent_object.get_position()[0] + left_corner_offset[0] + offset + \
-            ((right_corner_offset[0] - left_corner_offset[0]) / length) * (self.__i % length)
+        x = self.__parent_object.get_position()[0] + left_corner_offset[0] - offset - j * (4 / width)
         y = self.__parent_object.get_position()[1] + right_corner_offset[1] + (2 * k)
-        z = self.__parent_object.get_position()[2] + left_corner_offset[2] + offset + j * (4 / width)
+        z = self.__parent_object.get_position()[2] + left_corner_offset[2] + offset + \
+            ((right_corner_offset[2] - left_corner_offset[2]) / length) * (self.__i % length)
 
         if product.get_parent():
             product.get_parent().set_position([x, y, z])
@@ -294,7 +340,7 @@ class MasterOrder:
         poss.append(Possibility("Café Latte", ["Decaffeinated", "Lactose Free", "Oat Milk"],
                                 self.__coffee_dict["Café Latte"].get_brew_length(),
                                 self.__coffee_dict["Café Latte"].get_container_type()))
-        poss.append(Possibility("Tea", [],
+        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
                                 self.__coffee_dict["Tea"].get_brew_length(),
                                 self.__coffee_dict["Tea"].get_container_type()))
         poss.append(Possibility("Hot Chocolate", ["Lactose Free", "Oat Milk"],
@@ -341,11 +387,11 @@ class MasterOrder:
         poss.append(Possibility("Chocolatl", [], 10.0, CoffeeContainer.BIG_GLASS,
                                 content=["Milk for Chai, Ovo", "Chocolatl", "Mixed"]))
         poss.append(Possibility("Ham Sandwich", [], 5.0))
-        poss.append(Possibility("Salami Sandwich", [], 5.0))
+        poss.append(Possibility("Egg Sandwich", [], 5.0))
         poss.append(Possibility("Tuna Sandwich", [], 5.0))
         poss.append(Possibility("Mango Chutney Sandwich", [], 5.0))
         poss.append(Possibility("Tomato Sandwich", [], 5.0))
-        poss.append(Possibility("Sirserli", [], 5.0))
+        poss.append(Possibility("Silserli", [], 5.0))
         poss.append(Possibility("Croissant", [], 5.0))
         poss.append(Possibility("Chocolate Croissant", [], 5.0))
         poss.append(Possibility("Almond Croissant", [], 5.0))

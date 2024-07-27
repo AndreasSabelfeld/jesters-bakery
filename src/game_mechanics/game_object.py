@@ -14,6 +14,7 @@ class GameObject:
         self.__collider = entity
         self.__parent = None
         self.__offset = [0, 0, 0]
+        self.__rot_offset = [0, 0, 0]
         if collider: self.__collider = collider
         if child_0: self.set_child_0(child_0)
         else: self.__child_0 = None
@@ -73,24 +74,24 @@ class GameObject:
                            self.get_position()[2] + dz])
 
     def set_rot_x(self, value: float) -> None:
-        self.__entity.set_rot_x(value)
-        self.__collider.set_rot_x(value)
+        self.__entity.set_rot_x(value + self.get_rot_offset()[0])
+        self.__collider.set_rot_x(value + self.get_rot_offset()[0])
         if self.has_child_0():
             self.__child_0.set_rot_x(value)
         if self.has_child_1():
             self.__child_1.set_rot_x(value)
 
     def set_rot_y(self, value: float) -> None:
-        self.__entity.set_rot_y(value)
-        self.__collider.set_rot_y(value)
+        self.__entity.set_rot_y(value + self.get_rot_offset()[1])
+        self.__collider.set_rot_y(value + self.get_rot_offset()[1])
         if self.has_child_0():
             self.__child_0.set_rot_y(value)
         if self.has_child_1():
             self.__child_1.set_rot_y(value)
 
     def set_rot_z(self, value: float) -> None:
-        self.__entity.set_rot_z(value)
-        self.__collider.set_rot_z(value)
+        self.__entity.set_rot_z(value + self.get_rot_offset()[2])
+        self.__collider.set_rot_z(value + self.get_rot_offset()[2])
         if self.has_child_0():
             self.__child_0.set_rot_z(value)
         if self.has_child_1():
@@ -114,6 +115,12 @@ class GameObject:
     def set_offset(self, offset: list[float]) -> None:
         self.__offset = offset
 
+    def get_rot_offset(self) -> list[float]:
+        return self.__rot_offset
+
+    def set_rot_offset(self, offset: list[float]) -> None:
+        self.__rot_offset = offset
+
     def get_entity(self) -> Entity:
         return self.__entity
 
@@ -135,6 +142,9 @@ class GameObject:
         self.__child_0.set_offset([self.__child_0.get_position()[0] - self.get_position()[0],
                                    self.__child_0.get_position()[1] - self.get_position()[1],
                                    self.__child_0.get_position()[2] - self.get_position()[2]])
+        self.__child_0.set_rot_offset([self.__child_0.get_rot_x() - self.get_rot_x(),
+                                       self.__child_0.get_rot_y() - self.get_rot_y(),
+                                       self.__child_0.get_rot_z() - self.get_rot_z()])
 
     def get_child_1(self) -> 'GameObject':
         return self.__child_1
@@ -148,6 +158,9 @@ class GameObject:
         self.__child_1.set_offset([self.__child_1.get_position()[0] - self.get_position()[0],
                                    self.__child_1.get_position()[1] - self.get_position()[1],
                                    self.__child_1.get_position()[2] - self.get_position()[2]])
+        self.__child_1.set_rot_offset([self.__child_0.get_rot_x() - self.get_rot_x(),
+                                       self.__child_0.get_rot_y() - self.get_rot_y(),
+                                       self.__child_0.get_rot_z() - self.get_rot_z()])
 
     def has_child_0(self) -> bool:
         if self.__child_0:

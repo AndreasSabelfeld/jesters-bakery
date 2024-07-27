@@ -38,18 +38,18 @@ void main(void){
         vec3 unit_light_vector = normalize(to_light_vector[i]);
 
         float n_dot1 = dot(unit_normal, unit_light_vector);
-        float brightness = max(n_dot1, 0.0);
+        float brightness = max(n_dot1, 0.4);
 
         vec3 light_direction = -unit_light_vector;
         vec3 reflected_light_direction = reflect(light_direction, unit_normal);
 
         float specular_factor = dot(reflected_light_direction, unit_vector_to_camera);
-        specular_factor = max(specular_factor, 0.0);
+        specular_factor = max(specular_factor, 0.2);
         float damped_factor = pow(specular_factor, shine_damper);
         total_diffuse = total_diffuse + (brightness * light_color[i]) / att_factor;
         total_specular = total_specular + (damped_factor * reflectivity * light_color[i]) / att_factor;
     }
-    total_diffuse = max(total_diffuse, 0.1);
+    total_diffuse = max(total_diffuse, 0.4);
 
     out_bright_color = vec4(0.0);
     if(uses_specular_map > 0.5){

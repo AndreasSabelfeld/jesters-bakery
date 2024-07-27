@@ -1,3 +1,4 @@
+import math
 from time import sleep
 from threading import Thread
 from src.render_engine.input_controller import KeyboardInput, ControllerInput, KeyboardInputListener
@@ -44,15 +45,15 @@ class CoffeeMachineOS:
         self.__rows = 4
         self.__size_adjustment = 2
         self.__columns = self.__rows
-        self.__background_texture = GuiTexture(loader.load_texture("coffee_machine_background"), [0, 0], [1, 1])
-        self.__selected_texture = GuiTexture(loader.load_texture("selected_test"), [0, 0], [self.__icon_size * 1.1,
-                                                                                            self.__icon_size * 1.1])
-        self.__cancel_texture = GuiTexture(loader.load_texture("cancel_test"), [-2, -2], [0.05, 0.05])
-        self.__start_texture = GuiTexture(loader.load_texture("start_test"), [-2, -2], [0.05, 0.05])
-        self.__decaffeinated_texture = GuiTexture(loader.load_texture("decaffeinated_test"), [-2, -2], [self.__icon_size, self.__icon_size])
+        self.__background_texture = GuiTexture(loader.load_texture("pngs/ui/coffee_machine_background"), [0, 0], [1, 1])
+        self.__selected_texture = GuiTexture(loader.load_texture("pngs/ui/selected"), [0, 0], [self.__icon_size * 1.1,
+                                                                                                      self.__icon_size * 1.1])
+        self.__cancel_texture = GuiTexture(loader.load_texture("pngs/ui/delete"), [-2, -2], [0.06, 0.06])
+        self.__start_texture = GuiTexture(loader.load_texture("pngs/ui/confirm"), [-2, -2], [0.05, 0.05])
+        self.__decaffeinated_texture = GuiTexture(loader.load_texture("pngs/ui/coffee_beans"), [-2, -2], [self.__icon_size, self.__icon_size])
         self.__decaffeinated_texture.set_position([(self.__icon_offset + 1 / (5 + self.__size_adjustment) * 2 * 5) - 1,
                                                    1 - (self.__icon_offset + 1 / (self.__columns + self.__size_adjustment) * 2 * 0)])
-        self.__deactivated_texture = GuiTexture(loader.load_texture("deactivated_test"), [-2, -2], [self.__icon_size, self.__icon_size])
+        self.__deactivated_texture = GuiTexture(loader.load_texture("pngs/ui/deactivated"), [-2, -2], [self.__icon_size, self.__icon_size])
 
         self.__selected_position = [0, 0]  # x y, top-left corner is 0, 0
         self.__current_page = 0
@@ -76,11 +77,11 @@ class CoffeeMachineOS:
         self.__texts = self.get_page_texts()
 
         self.__positioned_coffees = [None, None, None]      # tea, coffee1, coffee2
-        y, z = 0.35, 2.1
-        self.__offset_positions = (vec3(-0.75, y, z) * self.__render_target.get_scale(),
-                                   vec3(0, y, z) * self.__render_target.get_scale(),
-                                   vec3(-0.25, y, z) * self.__render_target.get_scale(),
-                                   vec3(0.25, y, z) * self.__render_target.get_scale())
+        y, x = 0.35, 2.1
+        self.__offset_positions = (vec3(x, y, 0.75) * self.__render_target.get_scale(),
+                                   vec3(x, y, 0) * self.__render_target.get_scale(),
+                                   vec3(x, y, -0.25) * self.__render_target.get_scale(),
+                                   vec3(x, y, 0.25) * self.__render_target.get_scale())
 
         self.__brewing_queue = []
         self.__max_queue_length = 7
@@ -259,8 +260,7 @@ class CoffeeMachineOS:
             self.__brewing_coffee = False
             return
         if self.__coffee_buffer:
-            if not self.__coffee_texture:
-                self.__coffee_texture = self.__brewing_queue[0].get_texture()
+            self.__coffee_texture = self.__brewing_queue[0].get_texture()
             self.__fill_original_thread(self.__coffee_texture)
             self.__coffee_buffer = False
         if self.__tea_buffer:
@@ -274,9 +274,9 @@ class CoffeeMachineOS:
     def __move_in_front_screen(self, camera) -> None:
         self.__original_camera_pos = camera.get_position()
         self.__original_camera_angles = [camera.get_yaw(), camera.get_pitch(), camera.get_roll()]
-        offset = vec3(0, 2.5, 3.5) * self.__render_target.get_scale()
-        rot_mat = mat3().rotation(self.__render_target.get_rot_y(), vec3(0, 1, 0))
-        offset = rot_mat * offset
+        x = 3.5 * math.sin(math.radians(self.__render_target.get_rot_y()))
+        z = 3.5 * math.cos(math.radians(self.__render_target.get_rot_y()))
+        offset = vec3(x, 2.5, z) * self.__render_target.get_scale()
 
         position = vec3(self.__render_target.get_position()) + offset
 
@@ -414,7 +414,7 @@ class CoffeeMachineOS:
         # if the container is smaller than the brewing coffee...
         if container.get_container_type() < self.__brewing_queue[0].get_container_type():
             # ... the cup should overflow
-            container.toggle_overflown()
+            container.toggle_overflown(texture)
         # if it is bigger...
         elif container.get_container_type() > self.__brewing_queue[0].get_container_type():
             # ... the cup should not be full
@@ -433,215 +433,205 @@ class CoffeeMachineOS:
 
     def __create_products(self) -> None:
         CoffeeProduct(f"Espresso",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/espresso_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=6,
                       allows_double=False,
                       container_type=CoffeeProduct.ESPRESSO_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/coffee_filling_tex")),
                       content=["Espresso"])
         CoffeeProduct(f"Doppio",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/doppio_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.COFFEE_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/coffee_filling_tex")),
                       content=["Espresso", "Espresso"])
         CoffeeProduct(f"Café Crème",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/coffee_creme_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.COFFEE_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/coffee_creme_filling_tex")),
                       content=["Café Crème"])
         CoffeeProduct(f"2 Café Crème",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/2_coffee_creme_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=10,
                       allows_double=True,
                       container_type=CoffeeProduct.COFFEE_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/coffee_creme_filling_tex")),
                       content=["Café Crème", "Café Crème"])
         CoffeeProduct(f"Milk Coffee",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/milk_coffee_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.COFFEE_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/milk_coffee_filling_tex")),
                       content=["Milk Coffee"])
         CoffeeProduct(f"2 Milk Coffee",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/2_milk_coffee_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=10,
                       allows_double=True,
                       container_type=CoffeeProduct.COFFEE_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/milk_coffee_filling_tex")),
                       content=["Milk Coffee", "Milk Coffee"])
         CoffeeProduct(f"Cappuccino",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/cappuccino_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.CAPPUCCINO_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/cappuccino_filling_tex")),
                       content=["Cappuccino"])
         CoffeeProduct(f"2 Cappuccini",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/2_cappuccino_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=10,
                       allows_double=True,
                       container_type=CoffeeProduct.CAPPUCCINO_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/cappuccino_filling_tex")),
                       content=["Cappuccino", "Cappuccino"])
         CoffeeProduct(f"Latte Macchiato",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/latte_macchiato_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.BIG_GLASS,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/latte_macchiato_filling_tex")),
                       content=["Latte Macchiato"])
         CoffeeProduct(f"Café Latte",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/latte_macchiato_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.BIG_GLASS,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/latte_macchiato_filling_tex")),
                       content=["Café Latte"])
         CoffeeProduct(f"Tea",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/tea_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=18,
                       allows_double=False,
                       container_type=CoffeeProduct.TEA_POT,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/tea_filling_tex")),
                       content=["Tea"])
         CoffeeProduct(f"Hot Chocolate",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/chocolate_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.BIG_GLASS,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/chocolate_filling_tex")),
                       content=["Hot Chocolate"])
         CoffeeProduct(f"Cold Chocolate",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/chocolate_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.BIG_GLASS,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/chocolate_filling_tex")),
                       content=["Cold Chocolate"])
         CoffeeProduct(f"Children Chocolate",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/small_chocolate_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=6,
                       allows_double=False,
                       container_type=CoffeeProduct.SMALL_GLASS,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/chocolate_filling_tex")),
                       content=["Children Chocolate"])
         CoffeeProduct(f"Milk for Chai, Ovo",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/milk_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.BIG_GLASS,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/milk_filling_tex")),
                       content=["Milk for Chai, Ovo"])
         CoffeeProduct(f"Warm Milk",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/milk_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.BIG_GLASS,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/milk_filling_tex")),
                       content=["Warm Milk"])
         CoffeeProduct(f"Cold Milk",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/milk_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.BIG_GLASS,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/milk_filling_tex")),
                       content=["Cold Milk"])
         CoffeeProduct(f"Babyccino",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/small_milk_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=6,
                       allows_double=False,
                       container_type=CoffeeProduct.SMALL_GLASS,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/milk_foam_filling_tex")),
                       content=["Babyccino"])
         CoffeeProduct(f"Americano",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/americano_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.CAPPUCCINO_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/coffee_filling_tex")),
                       content=["Americano"])
         CoffeeProduct(f"Doppio Macchiato",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/flatwhite_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.COFFEE_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/latte_macchiato_filling_tex")),
                       content=["Doppio Macchiato"])
-        CoffeeProduct(f"Oat Milk Coffee",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
-                                 [0, 0],
-                                 [self.__icon_size, self.__icon_size]),
-                      brew_length=6,
-                      allows_double=False,
-                      container_type=CoffeeProduct.COFFEE_CUP,
-                      loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
-                      content=["Oat Milk Coffee"])
 
 
 class CoffeeMachineOSLactoseFree:
@@ -676,11 +666,11 @@ class CoffeeMachineOSLactoseFree:
         self.__rows = 4
         self.__size_adjustment = 2
         self.__columns = self.__rows
-        self.__background_texture = GuiTexture(loader.load_texture("coffee_machine_background"), [0, 0], [1, 1])
-        self.__selected_texture = GuiTexture(loader.load_texture("selected_test"), [0, 0], [self.__icon_size * 1.1,
+        self.__background_texture = GuiTexture(loader.load_texture("pngs/ui/coffee_machine_background"), [0, 0], [1, 1])
+        self.__selected_texture = GuiTexture(loader.load_texture("pngs/ui/selected"), [0, 0], [self.__icon_size * 1.1,
                                                                                             self.__icon_size * 1.1])
-        self.__cancel_texture = GuiTexture(loader.load_texture("cancel_test"), [-2, -2], [0.05, 0.05])
-        self.__start_texture = GuiTexture(loader.load_texture("start_test"), [-2, -2], [0.05, 0.05])
+        self.__cancel_texture = GuiTexture(loader.load_texture("pngs/ui/delete"), [-2, -2], [0.05, 0.05])
+        self.__start_texture = GuiTexture(loader.load_texture("pngs/ui/confirm"), [-2, -2], [0.05, 0.05])
         self.__selected_position = [0, 0]  # x y, top-left corner is 0, 0
         self.__current_page = 0
         self.__product_entries = None
@@ -702,11 +692,11 @@ class CoffeeMachineOSLactoseFree:
         self.__texts = self.get_page_texts()
 
         self.__positioned_coffees = [None, None, None]  # tea, coffee1, coffee2
-        y, z = 0.35, 2.1
-        self.__offset_positions = (vec3(-0.75, y, z) * self.__render_target.get_scale(),
-                                   vec3(0, y, z) * self.__render_target.get_scale(),
-                                   vec3(-0.25, y, z) * self.__render_target.get_scale(),
-                                   vec3(0.25, y, z) * self.__render_target.get_scale())
+        y, x = 0.35, 2.1
+        self.__offset_positions = (vec3(x, y, 0.75) * self.__render_target.get_scale(),
+                                   vec3(x, y, 0) * self.__render_target.get_scale(),
+                                   vec3(x, y, -0.25) * self.__render_target.get_scale(),
+                                   vec3(x, y, 0.25) * self.__render_target.get_scale())
 
         self.__brewing_queue = []
         self.__max_queue_length = 7
@@ -1048,202 +1038,202 @@ class CoffeeMachineOSLactoseFree:
 
     def __create_products(self) -> None:
         CoffeeProductLactoseFree(f"Espresso",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/espresso_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=6,
                       allows_double=False,
                       container_type=CoffeeProduct.ESPRESSO_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/coffee_filling_tex")),
                       content=["Espresso"])
         CoffeeProductLactoseFree(f"Doppio",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/doppio_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.COFFEE_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/coffee_filling_tex")),
                       content=["Espresso", "Espresso"])
         CoffeeProductLactoseFree(f"Café Crème",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/coffee_creme_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.COFFEE_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/coffee_creme_filling_tex")),
                       content=["Café Crème"])
         CoffeeProductLactoseFree(f"2 Café Crème",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/2_coffee_creme_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=10,
                       allows_double=True,
                       container_type=CoffeeProduct.COFFEE_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/coffee_creme_filling_tex")),
                       content=["Café Crème", "Café Crème"])
         CoffeeProductLactoseFree(f"Milk Coffee Lactose Free",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/milk_coffee_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.COFFEE_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/milk_coffee_filling_tex")),
                       content=["Milk Coffee", "Lactose Free"])
         CoffeeProductLactoseFree(f"2 Milk Coffee Lactose Free",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/2_milk_coffee_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=10,
                       allows_double=True,
                       container_type=CoffeeProduct.COFFEE_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/milk_coffee_filling_tex")),
                       content=["Milk Coffee", "Lactose Free", "Milk Coffee", "Lactose Free"])
         CoffeeProductLactoseFree(f"Cappuccino Lactose Free",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/cappuccino_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.CAPPUCCINO_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/cappuccino_filling_tex")),
                       content=["Cappuccino", "Lactose Free"])
         CoffeeProductLactoseFree(f"2 Cappuccini Lactose Free",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/2_cappuccino_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=10,
                       allows_double=True,
                       container_type=CoffeeProduct.CAPPUCCINO_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/cappuccino_filling_tex")),
                       content=["Cappuccino", "Lactose Free", "Cappuccino", "Lactose Free"])
         CoffeeProductLactoseFree(f"Latte Macchiato Lactose Free",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/latte_macchiato_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.BIG_GLASS,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/latte_macchiato_filling_tex")),
                       content=["Latte Macchiato", "Lactose Free"])
         CoffeeProductLactoseFree(f"Café Latte Lactose Free",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/latte_macchiato_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.BIG_GLASS,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/latte_macchiato_filling_tex")),
                       content=["Café Latte", "Lactose Free"])
         CoffeeProductLactoseFree(f"Tea",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/tea_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=18,
                       allows_double=False,
                       container_type=CoffeeProduct.TEA_POT,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/tea_filling_tex")),
                       content=["Tea"])
         CoffeeProductLactoseFree(f"Hot Chocolate Lactose Free",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/chocolate_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.BIG_GLASS,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/chocolate_filling_tex")),
                       content=["Hot Chocolate", "Lactose Free"])
         CoffeeProductLactoseFree(f"Cold Chocolate Lactose Free",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/chocolate_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.BIG_GLASS,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/chocolate_filling_tex")),
                       content=["Cold Chocolate", "Lactose Free"])
         CoffeeProductLactoseFree(f"Children Chocolate Lactose Free",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/small_chocolate_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=6,
                       allows_double=False,
                       container_type=CoffeeProduct.SMALL_GLASS,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/chocolate_filling_tex")),
                       content=["Children Chocolate", "Lactose Free"])
         CoffeeProductLactoseFree(f"Milk for Chai, Ovo Lactose Free",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/milk_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.BIG_GLASS,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/milk_filling_tex")),
                       content=["Milk for Chai, Ovo", "Lactose Free"])
         CoffeeProductLactoseFree(f"Warm Milk Lactose Free",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/milk_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.BIG_GLASS,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/milk_filling_tex")),
                       content=["Warm Milk", "Lactose Free"])
         CoffeeProductLactoseFree(f"Cold Milk Lactose Free",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/milk_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.BIG_GLASS,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/milk_filling_tex")),
                       content=["Cold Milk", "Lactose Free"])
         CoffeeProductLactoseFree(f"Babyccino Lactose Free",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/small_milk_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=6,
                       allows_double=False,
                       container_type=CoffeeProduct.SMALL_GLASS,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/milk_foam_filling_tex")),
                       content=["Babyccino", "Lactose Free"])
         CoffeeProductLactoseFree(f"Americano",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/americano_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.CAPPUCCINO_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/coffee_filling_tex")),
                       content=["Americano"])
         CoffeeProductLactoseFree(f"Doppio Macchiato Lactose Free",
-                      GuiTexture(self.__loader.load_texture("product_icon_test"),
+                      GuiTexture(self.__loader.load_texture("pngs/ui/flatwhite_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
                       brew_length=8,
                       allows_double=False,
                       container_type=CoffeeProduct.COFFEE_CUP,
                       loader=self.__loader,
-                      texture=ModelTexture(self.__loader.load_texture("grass_block")),
+                      texture=ModelTexture(self.__loader.load_texture("pngs/cups/latte_macchiato_filling_tex")),
                       content=["Doppio Macchiato", "Lactose Free"])

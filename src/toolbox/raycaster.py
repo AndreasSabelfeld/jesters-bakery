@@ -62,20 +62,20 @@ class TerrainRaycaster(Raycaster):
         super().__init__(camera, projection_matrix)
         self.__current_terrain_point = None
 
-    def update(self):
+    def update(self) -> None:
         super().update()
         if self.intersection_in_range(0, self.__RAY_RANGE, self.get_current_ray()):
             self.__current_terrain_point = self.binary_search(0, 0, self.__RAY_RANGE, self.get_current_ray())
         else:
             self.__current_terrain_point = None
 
-    def get_point_on_ray(self, ray: list[float], distance: float):
+    def get_point_on_ray(self, ray: list[float], distance: float) -> list[float]:
         cam_pos = self.get_camera().get_position()
         start = [cam_pos[0], cam_pos[1], cam_pos[2]]
         scaled_ray = [ray[0] * distance, ray[1] * distance, ray[2] * distance]
         return [start[0] + scaled_ray[0], start[1] + scaled_ray[1], start[2] + scaled_ray[2]]
 
-    def binary_search(self, count: int, start: float, finish: float, ray: list[float]):
+    def binary_search(self, count: int, start: float, finish: float, ray: list[float]) -> list[float]:
         half = start + ((finish - start) / 2)
         if count >= self.__RECURSION_COUNT:
             end_point = self.get_point_on_ray(ray, half)
@@ -89,7 +89,7 @@ class TerrainRaycaster(Raycaster):
         else:
             return self.binary_search(count+1, half, finish, ray)
 
-    def intersection_in_range(self, start: float, finish: float, ray: list[float]):
+    def intersection_in_range(self, start: float, finish: float, ray: list[float]) -> bool:
         start_point = self.get_point_on_ray(ray, start)
         end_point = self.get_point_on_ray(ray, finish)
         if not self.is_under_ground(start_point) and self.is_under_ground(end_point):
@@ -97,7 +97,7 @@ class TerrainRaycaster(Raycaster):
         else:
             return False
 
-    def is_under_ground(self, test_point: list[float]):
+    def is_under_ground(self, test_point: list[float]) -> bool:
         terrain = self.get_terrain(test_point[0], test_point[2])
         height = 0
         if terrain is not None:
@@ -111,7 +111,7 @@ class TerrainRaycaster(Raycaster):
     def get_terrain(world_x: float, world_z: float):
         return Terrain.get_existing_terrains().get((world_x // Terrain.get_size(), world_z // Terrain.get_size()))
 
-    def get_current_terrain_point(self):
+    def get_current_terrain_point(self) -> list[float]:
         return self.__current_terrain_point
 
 

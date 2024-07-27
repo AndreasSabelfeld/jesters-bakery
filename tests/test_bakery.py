@@ -1,13 +1,6 @@
 from OpenGL.GLUT import *
-from OpenGL.GL import *
-import random
 
 from src.game_mechanics.coffee_container import CoffeeContainer
-from src.game_mechanics.food import Food
-from src.game_mechanics.food_spawn import FoodSpawn
-from src.game_mechanics.fridge import Fridge
-from src.game_mechanics.mixer import Mixer
-from src.game_mechanics.mixer_vessel import MixerVessel
 from src.game_mechanics.order import MasterOrder, Order
 from src.game_mechanics.tap import Tap
 from src.render_engine.display_manager import DisplayManager
@@ -15,7 +8,7 @@ from src.render_engine.gui_renderer import GuiRenderer
 from src.render_engine.master_renderer import MasterRenderer
 from src.render_engine.loader import Loader
 from src.render_engine.time import Time
-from src.render_engine.input_controller import KeyboardInput, KeyboardInputListener, ControllerInput
+from src.render_engine.input_controller import KeyboardInput
 
 from src.textures.model_texture import ModelTexture
 from src.textures.terrain_texture import TerrainTexture
@@ -26,7 +19,7 @@ from src.models.textured_model import TexturedModel
 from src.entities.entity import Entity
 from src.entities.camera import Camera
 from src.entities.light import Light
-from src.entities.player import ThirdPersonPlayer, FirstPersonPlayer
+from src.entities.player import FirstPersonPlayer
 
 from src.terrain.terrain import Terrain
 
@@ -38,22 +31,10 @@ from src.font_rendering.text_master import TextMaster
 from src.font_mesh_creator.font_type import FontType
 from src.font_mesh_creator.gui_text import GUIText
 
-from src.post_processing.fbo import FBO
-from src.post_processing.image_renderer import ImageRenderer
-
-from src.collision.sap import SAP
-from src.collision.box import Box
-from src.collision.detection import Detection
-
 from src.game_mechanics.pick_up import Carry
-from src.game_mechanics.coffee_machine_os import CoffeeMachineOS, CoffeeMachineOSLactoseFree
-from src.game_mechanics.coffee_product import CoffeeProduct
-from src.game_mechanics.game_object import GameObject
-from src.game_mechanics.fridge_object import FridgeObject
 from src.game_mechanics.scanner import Scanner
-from src.game_mechanics.milk_foamer import MilkFoamer
 
-import src.game_mechanics.prefabs as prefabs
+import src.master.prefabs as prefabs
 
 
 def main():
@@ -87,17 +68,17 @@ def main():
     text3.set_border_edge(0.1)
 
     # ~~~~~~~~~~~~TERRAIN~~~~~~~~~~~~~~~
-    background_texture = TerrainTexture(loader.load_texture("grass"))
-    r_texture = TerrainTexture(loader.load_texture("mud"))
-    g_texture = TerrainTexture(loader.load_texture("grassFlowers"))
-    b_texture = TerrainTexture(loader.load_texture("grass"))
+    background_texture = TerrainTexture(loader.load_texture("asphalt"))
+    r_texture = TerrainTexture(loader.load_texture("floor_tiles"))
+    g_texture = TerrainTexture(loader.load_texture("asphalt"))
+    b_texture = TerrainTexture(loader.load_texture(""))
 
     texture_pack = TerrainTexturePack(background_texture, r_texture, g_texture, b_texture)
-    blend_map = TerrainTexture(loader.load_texture("black"))
+    blend_map = TerrainTexture(loader.load_texture("bakery_blendmap"))
 
     terrains = []
-    Terrain.set_size(400)
-    terrain = Terrain(0, 0, loader, texture_pack, blend_map, "heightmap_island")
+    Terrain.set_size(300)
+    terrain = Terrain(0, 0, loader, texture_pack, blend_map, "bakery_heightmap")
     terrains.append(terrain)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -128,7 +109,11 @@ def main():
     collider_entities = []
 
     grass_texture = ModelTexture(loader.load_texture("grass_block"))
-    textures = [grass_texture] * 5
+    textures = [ModelTexture(loader.load_texture("pngs/cups/coke_filling_tex")),
+                ModelTexture(loader.load_texture("pngs/cups/schorle_filling_tex")),
+                ModelTexture(loader.load_texture("pngs/cups/water_filling_tex")),
+                ModelTexture(loader.load_texture("pngs/cups/water_filling_tex")),
+                ModelTexture(loader.load_texture("pngs/cups/beer_filling_tex"))]
 
     machine_size = 1.75
     food_size = 0.5
@@ -183,12 +168,20 @@ def main():
     lactose_free_milk = prefabs.lactose_free_milk([82, 10, 50], [0, 0, 0], 1, loader, obj_loader)
     oat_milk = prefabs.oat_milk([84, 10, 50], [0, 0, 0], 1, loader, obj_loader)
 
+    tea_size = 0.5
+    prefabs.english_breakfast([90, 10, 50], [0, 0, 0], tea_size, loader, obj_loader, entities, collider_entities)
+    prefabs.earl_grey([92, 10, 50], [0, 0, 0], tea_size, loader, obj_loader, entities, collider_entities)
+    prefabs.ginger([94, 10, 50], [0, 0, 0], tea_size, loader, obj_loader, entities, collider_entities)
+    prefabs.verveine([96, 10, 50], [0, 0, 0], tea_size, loader, obj_loader, entities, collider_entities)
+    prefabs.nana_mint([98, 10, 50], [0, 0, 0], tea_size, loader, obj_loader, entities, collider_entities)
+    prefabs.rooibos([100, 10, 50], [0, 0, 0], tea_size, loader, obj_loader, entities, collider_entities)
+
     prefabs.ham_sandwich([50, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
-    prefabs.salami_sandwich([52, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.egg_sandwich([52, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
     prefabs.tuna_sandwich([54, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
     prefabs.mango_chutney_sandwich([56, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
     prefabs.tomato_sandwich([58, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
-    prefabs.sirserli([60, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
+    prefabs.silserli([60, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
     prefabs.croissant([62, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
     prefabs.chocolate_croissant([64, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
     prefabs.almond_croissant([66, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
@@ -204,6 +197,7 @@ def main():
     prefabs.carrot_cake([86, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
     prefabs.citron_cake([88, 10, 70], [0, 0, 0], food_size, loader, obj_loader, entities, collider_entities)
     prefabs.lemons([90, 10, 70], [0, 0, 0], 1, loader, obj_loader, entities, collider_entities)
+    plate_spawn = prefabs.plate_spawn([94, 10, 70], [0, 0, 0], 0.5, loader, obj_loader, entities, collider_entities)
 
     print("finished loading food")
 
@@ -211,7 +205,7 @@ def main():
                      milk_foamer_screen, mixer_game_object, mixer_vessel_game_object,
                      coffee_machine_lactose_free_game_object, counter_game_object, *tap.get_game_objects(),
                      prosecco_bottle, chai_bottle, coke_zero, sprite, orange_juice, topfit_juice, lactose_free_milk,
-                     oat_milk, ovomaltine, caotina, chocolatl, ice_machine_door])
+                     oat_milk, ovomaltine, caotina, chocolatl, ice_machine_door, plate_spawn])
     collider_entities.extend(entities.copy())
     collider_entities.extend([fridge_game_object.get_child_0(), fridge_game_object.get_child_1(),
                               milk_foamer_game_object.get_child_0(), milk_foamer_game_object.get_child_1(),
@@ -244,7 +238,7 @@ def main():
     entities.append(order_1_ga)
     collider_entities.append(order_1_ga)
 
-    cube_model = obj_loader.load_obj_model("cube", loader)
+    cube_model = obj_loader.load_obj_model("objs/legacy/cube", loader)
     static_cube_model = TexturedModel(cube_model, ModelTexture(loader.load_texture("grass_block")))
     cube_texture = static_cube_model.get_texture()
 

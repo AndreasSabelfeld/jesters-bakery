@@ -1,3 +1,4 @@
+import math
 from threading import Thread
 from time import sleep
 
@@ -8,7 +9,8 @@ from src.textures.model_texture import ModelTexture
 
 
 class TapFaucet:
-    def __init__(self, obj_loader, loader, pos: list[float], rotation: list[float], size: int, texture, content: str):
+    def __init__(self, obj_loader, loader, pos: list[float], rotation: list[float], size: int, fill_texture, content: str,
+                 sign_texture: str):
         self.__obj_loader = obj_loader
         self.__loader = loader
         self.__pos = pos
@@ -17,14 +19,16 @@ class TapFaucet:
         self.__content = content
 
         self.__faucet = None
-        self.__fill_texture = texture
+        self.__fill_texture = fill_texture
         self.__filling = False
-        self.__offset = [0, 2, 0.75]
+        x_offset = 0.75 * math.sin(math.radians(self.__rot[1]))
+        z_offset = -0.75 * math.cos(math.radians(self.__rot[1]))
+        self.__offset = [x_offset, 2, z_offset]
         self.__brewing_length = 6
         self.__placed_glass = None
         self.__timing_buffer = False
 
-        self.__load_assets()
+        self.__load_assets(sign_texture)
 
     def update(self):
         if self.__timing_buffer:
@@ -55,17 +59,17 @@ class TapFaucet:
     def __fill(self, glass: GameObject):
         glass.get_attachment().fill(self.__fill_texture)
 
-    def __load_assets(self) -> None:
-        tap_tap_model = self.__obj_loader.load_obj_model("tap_tap", self.__loader)
+    def __load_assets(self, sign_texture: str) -> None:
+        tap_tap_model = self.__obj_loader.load_obj_model("objs/machinery/tap_tap", self.__loader)
         tap_tap_texture = ModelTexture(self.__loader.load_texture("white"))
         tap_tap_texture.set_reflectivity(5)
         static_tap_tap_model = TexturedModel(tap_tap_model, tap_tap_texture)
-        static_tap_tap_collider = TexturedModel(self.__obj_loader.load_obj_model("tap_tap_collider", self.__loader),
+        static_tap_tap_collider = TexturedModel(self.__obj_loader.load_obj_model("objs/machinery/tap_tap_collider", self.__loader),
                                                 ModelTexture(self.__loader.load_texture("")))
 
-        tap_sign_model = self.__obj_loader.load_obj_model("tap_sign", self.__loader)
-        tap_sign_texture = ModelTexture(self.__loader.load_texture(""))
-        tap_sign_texture.set_reflectivity(1)
+        tap_sign_model = self.__obj_loader.load_obj_model("objs/machinery/tap_sign", self.__loader)
+        tap_sign_texture = ModelTexture(self.__loader.load_texture(sign_texture))
+        tap_sign_texture.set_reflectivity(0)
         static_tap_sign_model = TexturedModel(tap_sign_model, tap_sign_texture)
 
         tap_tap = Entity(static_tap_tap_model, self.__pos, *self.__rot, self.__size)

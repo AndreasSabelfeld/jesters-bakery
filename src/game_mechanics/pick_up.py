@@ -1,8 +1,10 @@
 from src.game_mechanics.coffee_container import CoffeeContainer
+from src.game_mechanics.cup_spawn import CupSpawn
 from src.game_mechanics.food import Food
 from src.game_mechanics.food_spawn import FoodSpawn
 from src.game_mechanics.order import MasterOrder
 from src.game_mechanics.ingredient import Ingredient
+from src.game_mechanics.tea_bag_spawn import TeaBagSpawn
 from src.render_engine.input_controller import KeyboardInput, ControllerInput
 from src.game_mechanics.game_object import GameObject
 from src.game_mechanics.coffee_machine_os import CoffeeMachineOS, CoffeeMachineOSLactoseFree
@@ -27,7 +29,7 @@ class Carry:
         self.__coffee_machine = coffee_machine
         self.__coffee_machine_lf = coffee_machine_lf
 
-        self.__forward_distance = 3
+        self.__forward_distance = 5
         self.__sideways_distance = 3.5
 
         self.__c_pressed = False
@@ -75,14 +77,14 @@ class Carry:
         if isinstance(entity, GameObject):
             if not entity.is_pickup_able():
                 return
+            if self.__pick_up_special_cases(entity, side):
+                return
             if entity.get_parent():
                 if entity is entity.get_parent().get_child_0():
                     entity.get_parent().remove_child_0()
                 else:
                     entity.get_parent().remove_child_1()
                 entity.set_offset([0, 0, 0])
-            if self.__pick_up_special_cases(entity, side):
-                return
         if entity is not None:
             if side:
                 self.__is_carrying_right = True
@@ -129,16 +131,25 @@ class Carry:
         elif isinstance(entity.get_attachment(), FoodSpawn):
             self.set_carrying_object(side, entity.get_attachment().spawn())
             return 1
+        elif isinstance(entity.get_attachment(), CupSpawn):
+            self.set_carrying_object(side, entity.get_attachment().spawn())
+            return 1
+        elif isinstance(entity.get_attachment(), TeaBagSpawn):
+            self.set_carrying_object(side, entity.get_attachment().spawn())
+            return 1
         elif name == "DOOR":
-            if entity.get_rot_x() == 90:
-                entity.set_rot_x(0)
+            if entity.get_rot_z() == 90:
+                entity.set_rot_z(0)
                 entity.get_collider().set_position(entity.get_position())
             else:
-                entity.set_rot_x(90)
+                entity.set_rot_z(90)
                 entity.get_collider().set_position([entity.get_position()[0],
                                                    entity.get_position()[1] - 1,
                                                    entity.get_position()[2]])
             return 1
+        elif name == "TICKET":
+            entity.get_attachment().remove_game_object_from_list(entity)
+            return 0
 
     def __lay_down_special_cases(self, entity, side):
         name = entity.get_int_name()
@@ -190,6 +201,7 @@ class Carry:
                     return 1
                 elif isinstance(self.get_carrying_object(side).get_attachment(), Ingredient):
                     entity.get_attachment().append_content(self.get_carrying_object(side).get_attachment().get_content())
+                    entity.get_attachment().set_texture(self.get_carrying_object(side).get_attachment().get_texture())
                     return 1
         elif name == "PLATE":
             if isinstance(self.get_carrying_object(side), GameObject):
@@ -235,6 +247,15 @@ class Carry:
                         self.get_carrying_object(side).set_pickup_able(False)
                         self.movable_entities.remove(self.remove_carrying_object(side))
                         return 1
+            elif entity.get_attachment().get_container_type() == CoffeeContainer.TEA_POT:
+                if isinstance(self.get_carrying_object(side), GameObject) and self.get_carrying_object(side).get_int_name() == "TEA_BAG":
+                    entity.get_attachment().append_content(self.get_carrying_object(side).get_info())
+                    self.get_carrying_object(side).set_position([entity.get_position()[0] + 0.4,
+                                                                 entity.get_position()[1] + 1.1,
+                                                                 entity.get_position()[2]])
+                    self.get_carrying_object(side).set_pickup_able(False)
+                    entity.set_child_1(self.get_carrying_object(side))
+                    self.remove_carrying_object(side)
 
         elif name == "FINISHED":
             if isinstance(entity.get_attachment(), MasterOrder):
@@ -262,14 +283,22 @@ class Carry:
                 self.__lay_down_coffee(side, entity)
                 self.remove_carrying_object(side)
                 return
+
+        # there isn't really ever a situation, where you want to put something below this height, mostly it's caused by
+        # a faulty collision detection, so this is kind of a way to fight that
+        min_height = 12.75
         if entity is not None:
-            carrying_entity.set_position(self.__object_picker.get_current_object_point())
+            pos = self.__object_picker.get_current_object_point()
+            pos[1] = max(min_height, pos[1])
+            carrying_entity.set_position([pos[0], pos[1], pos[2]])
             self.remove_carrying_object(side)
         else:
             self.__terrain_picker.update()
             terrain = self.__terrain_picker.get_current_terrain_point()
             if terrain is not None:
                 self.remove_carrying_object(side)
+                terrain[1] = max(min_height, terrain[1])
+                terrain = [terrain[0], terrain[1], terrain[2]]
                 carrying_entity.set_position(terrain)
 
     def set_carrying_object(self, side: int, entity) -> None:
@@ -348,8 +377,8 @@ class Carry:
         else:
             if not isinstance(self.__carrying_object_left, GameObject):
                 return
-            if self.__carrying_object_right.get_int_name() == "COFFEE" or self.__carrying_object_right.get_int_name() == "GLASS" \
-                    or self.__carrying_object_right.get_int_name() == "MIXER_VESSEL":
+            if self.__carrying_object_left.get_int_name() == "COFFEE" or self.__carrying_object_left.get_int_name() == "GLASS" \
+                    or self.__carrying_object_left.get_int_name() == "MIXER_VESSEL":
                 if coffee_machine.get_attachment().get_coffee(1) is None:
                     coffee_machine.get_attachment().set_coffee(1, self.__carrying_object_left)
                 elif coffee_machine.get_attachment().get_coffee(2) is None:

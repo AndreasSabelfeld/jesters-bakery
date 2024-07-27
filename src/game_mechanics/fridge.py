@@ -1,3 +1,5 @@
+import math
+
 from src.game_mechanics.fridge_object import FridgeObject
 from src.game_mechanics.pick_up import Carry
 from src.guis.gui_texture import GuiTexture
@@ -12,14 +14,16 @@ class Fridge:
     __TOP_DRAWER = 1
     __BOTTOM_DRAWER = 2
 
-    def __init__(self, top_drawer: GameObject, bottom_drawer: GameObject, object_picker, loader, gui_renderer):
+    def __init__(self, top_drawer: GameObject, bottom_drawer: GameObject, object_picker, loader, gui_renderer, camera_offset: list[float]):
         self.__top_drawer = top_drawer
         self.__top_drawer_is_open = False
         self.__top_drawer_inventory = [[None] * 4 for _ in range(5)]
         self.__bottom_drawer = bottom_drawer
         self.__bottom_drawer_is_open = False
         self.__bottom_drawer_inventory = [[None] * 4 for _ in range(5)]
-        self.__opening_offset = vec3(0, 0, 1) * 6.5
+        x = -6.5 * math.sin(math.radians(abs(self.__top_drawer.get_rot_y())))
+        z = -6.5 * math.cos(math.radians(abs(self.__top_drawer.get_rot_y())))
+        self.__opening_offset = vec3(x, 0, z)
 
         self.__interaction_key = b'f'
         self.__is_interacting = 0
@@ -33,6 +37,7 @@ class Fridge:
 
         self.__selected_texture = GuiTexture(loader.load_texture("selected_test"), [0, 0], [self.__icon_size_x, self.__icon_size_y])
         self.__selected_pos = [0, 0]
+        self.__camera_offset = camera_offset
 
         self.__listener = KeyboardInputListener()
 
@@ -52,22 +57,22 @@ class Fridge:
 
     def move_top_drawer(self):
         if self.__top_drawer_is_open:
-            self.__top_drawer.set_position(vec3(self.__top_drawer.get_position()) - self.__opening_offset)
-            [x.increase_position(0, 0, -self.__opening_offset.z) for x in set([x for xs in self.__top_drawer_inventory for x in xs if x is not None])]
-            self.__top_drawer_is_open = False
-        else:
             self.__top_drawer.set_position(vec3(self.__top_drawer.get_position()) + self.__opening_offset)
             [x.increase_position(0, 0, self.__opening_offset.z) for x in set([x for xs in self.__top_drawer_inventory for x in xs if x is not None])]
+            self.__top_drawer_is_open = False
+        else:
+            self.__top_drawer.set_position(vec3(self.__top_drawer.get_position()) - self.__opening_offset)
+            [x.increase_position(0, 0, -self.__opening_offset.z) for x in set([x for xs in self.__top_drawer_inventory for x in xs if x is not None])]
             self.__top_drawer_is_open = True
 
     def move_bottom_drawer(self):
         if self.__bottom_drawer_is_open:
-            self.__bottom_drawer.set_position(vec3(self.__bottom_drawer.get_position()) - self.__opening_offset)
-            [x.increase_position(0, 0, -self.__opening_offset.z) for x in set([x for xs in self.__bottom_drawer_inventory for x in xs if x is not None])]
-            self.__bottom_drawer_is_open = False
-        else:
             self.__bottom_drawer.set_position(vec3(self.__bottom_drawer.get_position()) + self.__opening_offset)
             [x.increase_position(0, 0, self.__opening_offset.z) for x in set([x for xs in self.__bottom_drawer_inventory for x in xs if x is not None])]
+            self.__bottom_drawer_is_open = False
+        else:
+            self.__bottom_drawer.set_position(vec3(self.__bottom_drawer.get_position()) - self.__opening_offset)
+            [x.increase_position(0, 0, -self.__opening_offset.z) for x in set([x for xs in self.__bottom_drawer_inventory for x in xs if x is not None])]
             self.__bottom_drawer_is_open = True
 
     def interact(self, player, camera) -> None:
@@ -233,17 +238,20 @@ class Fridge:
         self.__original_camera_pos = camera.get_position()
         self.__original_camera_angles = [camera.get_yaw(), camera.get_pitch(), camera.get_roll()]
 
+        x = 1 * math.sin(math.radians(abs(self.__top_drawer.get_rot_y()))) + self.__camera_offset[0]
+        z = 1 * math.cos(math.radians(abs(self.__top_drawer.get_rot_y()))) + self.__camera_offset[1]
+        print(x)
+        print(z)
+
         if drawer == self.__top_drawer.get_collider():
-            offset = vec3(0, 6.85, 1) * drawer.get_scale()
+            offset = vec3(x, 6.85, z) * drawer.get_scale()
         else:
-            offset = vec3(0, 5, 1) * drawer.get_scale()
-        rot_mat = mat3().rotation(drawer.get_rot_y(), vec3(0, 1, 0))
-        offset = rot_mat * offset
+            offset = vec3(x, 5, z) * drawer.get_scale()
 
         position = vec3(drawer.get_position()) + offset
 
         camera.set_position(position)
-        camera.set_yaw(0)
+        camera.set_yaw(-abs(self.__top_drawer.get_rot_y()))
         camera.set_pitch(90)
         camera.set_roll(0)
 
