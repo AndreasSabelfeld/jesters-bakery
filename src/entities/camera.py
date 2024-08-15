@@ -1,6 +1,9 @@
-from src.render_engine.input_controller import KeyboardInput, ControllerInput
+from threading import Thread
+
+from src.render_engine.input_controller import KeyboardInput, ControllerInput, UniversalInput
 from math import sin, cos, radians
 from src.entities.player import FirstPersonPlayer
+from src.render_engine.time import Time
 
 
 class Camera:
@@ -108,22 +111,12 @@ class Camera:
     def calculate_pitch(self) -> None:
         """Calculates the pitch from the input controller"""
         inverse = -1 if self.get_inverse_y() else 1
-        if ControllerInput.is_using_controller:
-            pitch_change = 0
-            if abs(ControllerInput.RightJoystickY) > ControllerInput.get_dead_zone():
-                pitch_change = ControllerInput.RightJoystickY * inverse * ControllerInput.get_sensitivity()
-        else:
-            pitch_change = KeyboardInput.get_dy() * 0.1 * inverse
+        pitch_change = UniversalInput.get_y_axis_rotation() * 0.1 * inverse
         self.set_pitch(self.get_pitch() + pitch_change)
 
     def calculate_angle_around_player(self) -> None:
         """Calculates the angle change of the camera from the input controller"""
-        if ControllerInput.is_using_controller:
-            angle_change = 0
-            if abs(ControllerInput.RightJoystickX) > ControllerInput.get_dead_zone():
-                angle_change = -ControllerInput.RightJoystickX * ControllerInput.get_sensitivity()
-        else:
-            angle_change = KeyboardInput.get_dx() * 0.3
+        angle_change = UniversalInput.get_x_axis_rotation() * 0.3
         self.__angle_around_player += angle_change
 
     def set_inverse_y(self, b: bool):

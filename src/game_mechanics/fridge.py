@@ -6,7 +6,7 @@ from src.guis.gui_texture import GuiTexture
 from src.pycgtypes import vec3, mat3
 from src.game_mechanics.game_object import GameObject
 from src.render_engine.display_manager import DisplayManager
-from src.render_engine.input_controller import KeyboardInput, KeyboardInputListener
+from src.render_engine.input_controller import KeyboardInput, KeyboardInputListener, UniversalInputListener
 
 
 class Fridge:
@@ -25,7 +25,6 @@ class Fridge:
         z = -6.5 * math.cos(math.radians(abs(self.__top_drawer.get_rot_y())))
         self.__opening_offset = vec3(x, 0, z)
 
-        self.__interaction_key = b'f'
         self.__is_interacting = 0
         self.__original_camera_pos = None
         self.__original_camera_angles = None
@@ -35,15 +34,14 @@ class Fridge:
         self.__icon_size_x = 100 * (1 / DisplayManager.get_width())
         self.__icon_size_y = 100 * (1 / DisplayManager.get_height())
 
-        self.__selected_texture = GuiTexture(loader.load_texture("selected_test"), [0, 0], [self.__icon_size_x, self.__icon_size_y])
+        self.__selected_texture = GuiTexture(loader.load_texture("pngs/ui/selected"), [0, 0], [self.__icon_size_x, self.__icon_size_y])
         self.__selected_pos = [0, 0]
         self.__camera_offset = camera_offset
 
-        self.__listener = KeyboardInputListener()
+        self.__listener = UniversalInputListener()
 
     def update(self, pick_up: Carry):
         if self.__is_interacting:
-            self.__gui_renderer.render([self.__selected_texture])
             self.__move_cursor()
             self.place(pick_up)
 
@@ -54,6 +52,10 @@ class Fridge:
                 if pick_up.get_carrying_object(Carry.LEFT):
                     if isinstance(pick_up.get_carrying_object(Carry.LEFT).get_attachment(), FridgeObject):
                         pick_up.get_carrying_object(Carry.LEFT).get_attachment().rotate()
+
+    def render_selected_texture(self) -> None:
+        if self.__is_interacting:
+            self.__gui_renderer.render([self.__selected_texture])
 
     def move_top_drawer(self):
         if self.__top_drawer_is_open:
@@ -76,7 +78,7 @@ class Fridge:
             self.__bottom_drawer_is_open = True
 
     def interact(self, player, camera) -> None:
-        if self.__listener.on_key_down(self.__interaction_key):
+        if self.__listener.get_interact():
             collision = self.__object_picker.update([self.__top_drawer.get_collider(), self.__bottom_drawer.get_collider()])
             if self.__is_interacting:
                 self.__is_interacting = 0
@@ -100,7 +102,7 @@ class Fridge:
         return bool(self.__is_interacting)
 
     def place(self, hands):
-        if KeyboardInput.on_key_down(b'e'):
+        if self.__listener.get_r2():
             entity = hands.get_carrying_object(Carry.RIGHT)
             if not entity:
                 self.take(Carry.RIGHT, hands)
@@ -113,7 +115,7 @@ class Fridge:
                 if self.__check_for_room(entity, self.__bottom_drawer_inventory):
                     self.__place_in_bottom_drawer(hands.remove_carrying_object(Carry.RIGHT))
                     hands.movable_entities.remove(entity)
-        elif KeyboardInput.on_key_down(b'q'):
+        elif self.__listener.get_l2():
             entity = hands.get_carrying_object(Carry.LEFT)
             if not entity:
                 self.take(Carry.LEFT, hands)
@@ -240,8 +242,6 @@ class Fridge:
 
         x = 1 * math.sin(math.radians(abs(self.__top_drawer.get_rot_y()))) + self.__camera_offset[0]
         z = 1 * math.cos(math.radians(abs(self.__top_drawer.get_rot_y()))) + self.__camera_offset[1]
-        print(x)
-        print(z)
 
         if drawer == self.__top_drawer.get_collider():
             offset = vec3(x, 6.85, z) * drawer.get_scale()
@@ -262,16 +262,16 @@ class Fridge:
         camera.set_position(self.__original_camera_pos)
 
     def __move_cursor(self):
-        if KeyboardInput.on_key_down(b'w'):
+        if self.__listener.get_up():
             if self.__selected_pos[1] > 0:
                 self.__selected_pos[1] -= 1
-        if KeyboardInput.on_key_down(b's'):
+        if self.__listener.get_down():
             if self.__selected_pos[1] < 4:
                 self.__selected_pos[1] += 1
-        if KeyboardInput.on_key_down(b'a'):
+        if self.__listener.get_left():
             if self.__selected_pos[0] > 0:
                 self.__selected_pos[0] -= 1
-        if KeyboardInput.on_key_down(b'd'):
+        if self.__listener.get_right():
             if self.__selected_pos[0] < 3:
                 self.__selected_pos[0] += 1
         self.__move_selected_texture()

@@ -1,6 +1,7 @@
 from src.entities.entity import Entity
 from src.game_mechanics.food import Food
 from src.game_mechanics.game_object import GameObject
+from src.render_engine.input_controller import Binds
 
 
 class FoodSpawn:
@@ -15,7 +16,8 @@ class FoodSpawn:
         entity = Entity(food.get_model(), pos, *rot, size)
         collider = Entity(food.get_collider(), pos, *rot, size)
         self.__game_object = GameObject(entity, collider=collider, int_name="FOOD")
-        self.__game_object.set_info(food.get_food())
+        self.__game_object.set_ext_name(food.get_food())
+        self.__game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
         self.__game_object.set_attachment(self)
         self.__entity_list.append(self.__game_object)
         self.__collider_list.append(self.__game_object)
@@ -36,7 +38,8 @@ class FoodSpawn:
         collider = Entity(collider, self.__pos, *self.__rot, self.__size)
         game_object = GameObject(entity, collider=collider, int_name="FOOD")
         game_object.set_attachment(self.__food)
-        game_object.set_info(food_name)
+        game_object.set_ext_name(food_name)
+        game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
         self.__entity_list.append(game_object)
         self.__collider_list.append(game_object)
         return game_object

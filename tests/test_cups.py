@@ -83,7 +83,7 @@ def main():
                   loader=loader,
                   texture=ModelTexture(loader.load_texture("pngs/cups/coffee_filling_tex")),
                   content=["Espresso", "Espresso"])
-    CoffeeProduct(f"Café Crème",
+    CoffeeProduct(f"Cafe Creme",
                   GuiTexture(loader.load_texture("product_icon_test"),
                              [0, 0],
                              [1, 1]),
@@ -92,8 +92,8 @@ def main():
                   container_type=CoffeeProduct.COFFEE_CUP,
                   loader=loader,
                   texture=ModelTexture(loader.load_texture("pngs/cups/coffee_creme_filling_tex")),
-                  content=["Café Crème"])
-    CoffeeProduct(f"2 Café Crème",
+                  content=["Cafe Creme"])
+    CoffeeProduct(f"2 Cafe Creme",
                   GuiTexture(loader.load_texture("product_icon_test"),
                              [0, 0],
                              [1, 1]),
@@ -102,7 +102,7 @@ def main():
                   container_type=CoffeeProduct.COFFEE_CUP,
                   loader=loader,
                   texture=ModelTexture(loader.load_texture("pngs/cups/coffee_creme_filling_tex")),
-                  content=["Café Crème", "Café Crème"])
+                  content=["Cafe Creme", "Cafe Creme"])
     CoffeeProduct(f"Milk Coffee",
                   GuiTexture(loader.load_texture("product_icon_test"),
                              [0, 0],
@@ -153,7 +153,7 @@ def main():
                   loader=loader,
                   texture=ModelTexture(loader.load_texture("pngs/cups/latte_macchiato_filling_tex")),
                   content=["Latte Macchiato"])
-    CoffeeProduct(f"Café Latte",
+    CoffeeProduct(f"Cafe Latte",
                   GuiTexture(loader.load_texture("product_icon_test"),
                              [0, 0],
                              [1, 1]),
@@ -162,7 +162,7 @@ def main():
                   container_type=CoffeeProduct.BIG_GLASS,
                   loader=loader,
                   texture=ModelTexture(loader.load_texture("pngs/cups/latte_macchiato_filling_tex")),
-                  content=["Café Latte"])
+                  content=["Cafe Latte"])
     CoffeeProduct(f"Tea",
                   GuiTexture(loader.load_texture("product_icon_test"),
                              [0, 0],

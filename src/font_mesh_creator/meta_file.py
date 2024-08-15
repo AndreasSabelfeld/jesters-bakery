@@ -67,7 +67,10 @@ class MetaFile:
         return True
 
     def get_value_of_variable(self, variable: str) -> int:
-        return int(self.__values.get(variable))
+        value = self.__values.get(variable)
+        if not value:
+            value = 0
+        return int(value)
 
     def get_values_of_variable(self, variable: str) -> list[int]:
         numbers = self.__values.get(variable).split(self.__NUMBER_SEPERATOR)

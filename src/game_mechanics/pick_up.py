@@ -5,7 +5,7 @@ from src.game_mechanics.food_spawn import FoodSpawn
 from src.game_mechanics.order import MasterOrder
 from src.game_mechanics.ingredient import Ingredient
 from src.game_mechanics.tea_bag_spawn import TeaBagSpawn
-from src.render_engine.input_controller import KeyboardInput, ControllerInput
+from src.render_engine.input_controller import KeyboardInput, ControllerInput, UniversalInput
 from src.game_mechanics.game_object import GameObject
 from src.game_mechanics.coffee_machine_os import CoffeeMachineOS, CoffeeMachineOSLactoseFree
 from src.game_mechanics.fridge_object import FridgeObject
@@ -38,6 +38,7 @@ class Carry:
     def update(self, can_pick_up: bool = True) -> None:
         relevant_entities = [_ for _ in self.movable_entities if
                              _ not in (self.__carrying_object_right, self.__carrying_object_left)]
+
         if self.__is_carrying_right:
             self.__move_right()
         if self.__is_carrying_left:
@@ -46,28 +47,28 @@ class Carry:
         if not can_pick_up:
             return
 
-        if KeyboardInput.on_key_down(b'e'):
+        if UniversalInput.get_r2():
             if self.__is_carrying_right:
                 self.__lay_down(self.RIGHT, self.__carrying_object_right, relevant_entities)
             else:
                 self.__pick_up(self.RIGHT, relevant_entities)
 
-        if KeyboardInput.on_key_down(b'q'):
+        if UniversalInput.get_l2():
             if self.__is_carrying_left:
                 self.__lay_down(self.LEFT, self.__carrying_object_left, relevant_entities)
             else:
                 self.__pick_up(self.LEFT, relevant_entities)
 
-        if KeyboardInput.on_key_down(b'c') or self.__c_pressed:
+        if UniversalInput.get_r1() or self.__c_pressed:
             self.__c_pressed = True
-            if KeyboardInput.on_key_down(b'y'):
+            if UniversalInput.get_l1():
                 self.__put_right_in_left()
                 self.__c_pressed = False
                 self.__y_pressed = False
 
-        if KeyboardInput.on_key_down(b'y') or self.__y_pressed:
+        if UniversalInput.get_l1() or self.__y_pressed:
             self.__y_pressed = True
-            if KeyboardInput.on_key_down(b'c') or self.__c_pressed:
+            if UniversalInput.get_r1() or self.__c_pressed:
                 self.__put_left_in_right()
                 self.__y_pressed = False
                 self.__c_pressed = False
@@ -265,7 +266,7 @@ class Carry:
                     self.remove_carrying_object(side)
                     return 1
                 if self.get_carrying_object(side).get_int_name() == "PLATE":
-                    if isinstance(self.get_carrying_object(side).get_child_0().get_attachment(), Food):
+                    if isinstance(self.get_carrying_object(side).get_child_0(), GameObject) and isinstance(self.get_carrying_object(side).get_child_0().get_attachment(), Food):
                         entity.get_attachment().place(self.get_carrying_object(side).get_child_0())
                         self.get_carrying_object(side).set_pickup_able(False)
                         self.get_carrying_object(side).get_child_0().set_pickup_able(False)

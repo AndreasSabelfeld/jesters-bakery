@@ -26,8 +26,8 @@ class Terrain:
             self.__texture_pack = TerrainTexturePack(TerrainTexture(texture_pack), TerrainTexture(texture_pack),
                                                      TerrainTexture(texture_pack), TerrainTexture(texture_pack))
             black = Image.new(mode="RGB", size=(2, 2), color=(0, 0, 0))
-            black.save(f"{sys.path[0]}/res/black.png", 'PNG')
-            self.__blend_map = TerrainTexture(Loader.load_texture("black"))
+            black.save(f"{sys.path[0]}/res/pngs/black.png", 'PNG')
+            self.__blend_map = TerrainTexture(Loader.load_texture("pngs/black"))
         else:
             self.__texture_pack = texture_pack
             self.__blend_map = blend_map
@@ -39,8 +39,8 @@ class Terrain:
         except Exception as e:
             print(e)
             white = Image.new(mode="L", size=(256, 256), color=255)
-            white.save(f"{sys.path[0]}/res/white.png", 'PNG')
-            img = Image.open(f"{sys.path[0]}/res/white.png").convert('L')
+            white.save(f"{sys.path[0]}/res/pngs/white.png", 'PNG')
+            img = Image.open(f"{sys.path[0]}/res/pngs/white.png").convert('L')
             self.__max_height = 0
         self.__vertex_count = img.height
         self.__heights = [[0.0 for _ in range(self.__vertex_count)] for _ in range(self.__vertex_count)]

@@ -79,7 +79,7 @@ class CoffeeContainer:
             self.__parent_entity.get_entity().get_model().set_texture(texture)
 
     def get_content(self) -> list:
-        return self.__content.copy()
+        return self.__content
 
     def append_content(self, content: str | list) -> None:
         if isinstance(content, str):

@@ -1,7 +1,8 @@
 import math
 from time import sleep
 from threading import Thread
-from src.render_engine.input_controller import KeyboardInput, ControllerInput, KeyboardInputListener
+from src.render_engine.input_controller import KeyboardInput, ControllerInput, KeyboardInputListener, UniversalInput, \
+    UniversalInputListener
 from src.render_engine.time import Time
 from src.game_mechanics.coffee_product import CoffeeProduct, CoffeeProductLactoseFree
 from src.game_mechanics.coffee_page import CoffeePage, CoffeePageLactoseFree
@@ -28,7 +29,6 @@ class CoffeeMachineOS:
         :param gui_renderer: the GuiRendered object
         """
         self.__render_target = render_target
-        self.__interaction_key = b'f'
         self.__is_interacting = False
         self.__original_camera_pos = None
         self.__original_camera_angles = None
@@ -60,9 +60,9 @@ class CoffeeMachineOS:
         self.__product_entries = None
         self.__create_products()
         self.__time_remaining = GUIText("", 18,
-                                        FontType(self.__loader.load_texture("candara"), "res/candara.fnt"),
+                                        FontType(self.__loader.load_texture("fnts/arial"), "res/fnts/arial.fnt"),
                                         [0.07, 0.75], 1, False)
-        self.__time_remaining.set_color(1, 0, 0)
+        self.__time_remaining.set_color(250 / 255, 218 / 255, 94 / 255)
         self.__time_remaining.set_border_width(0.7)
         self.__time_remaining.set_border_edge(0.1)
         self.__time_passed = 0
@@ -86,7 +86,7 @@ class CoffeeMachineOS:
         self.__brewing_queue = []
         self.__max_queue_length = 7
 
-        self.__listener = KeyboardInputListener()
+        self.__listener = UniversalInputListener()
 
     def render_screen(self) -> None:
         self.__update_time_remaining()
@@ -107,7 +107,7 @@ class CoffeeMachineOS:
         self.__render_target.get_model().set_texture(ModelTexture(self.__fbo.get_color_texture()))
 
     def interact(self, player, camera) -> None:
-        if self.__listener.on_key_down(self.__interaction_key):
+        if self.__listener.get_interact() or self.__listener.get_deny():
             collision = self.__object_picker.update([self.__render_target])
             if self.__is_interacting:
                 self.__is_interacting = False
@@ -181,23 +181,23 @@ class CoffeeMachineOS:
     def __move_cursor(self) -> None:
         """Updates the cursor of the coffee machine. Method is being called from the render_screen method."""
         if self.__is_interacting:
-            if KeyboardInput.on_key_down(b'w'):
+            if UniversalInput.get_up():
                 if self.__selected_position[1] == 4:
                     self.__selected_position[0] = self.__current_page * 4
                 self.__selected_position[1] -= 1 if self.__selected_position[1] > 0 else 0
-            if KeyboardInput.on_key_down(b's'):
+            if UniversalInput.get_down():
                 self.__selected_position[1] += 1 if self.__selected_position[1] < 5 else 0
                 if self.__selected_position[1] == 4:
                     self.__selected_position[0] = 0
-            if KeyboardInput.on_key_down(b'a'):
+            if UniversalInput.get_left():
                 if self.__selected_position[1] < 4:
                     self.__selected_position[0] -= 1 if self.__selected_position[0] > -1 else 0
-            if KeyboardInput.on_key_down(b'd'):
+            if UniversalInput.get_right():
                 if self.__selected_position[1] == 4:
                     self.__selected_position[0] += 1 if self.__selected_position[0] < self.__max_queue_length - 1 else 0
                 elif self.__selected_position[0] < 4 * len(CoffeePage.get_instances()) - 1:
                     self.__selected_position[0] += 1
-            if KeyboardInput.on_key_down(b'\r'):    # enter key
+            if UniversalInput.get_confirm():    # enter key
                 if self.__selected_position[1] == 4:
                     self.__remove_beverage_from_queue(self.__selected_position[0])
                 elif self.__selected_position[1] == 5:
@@ -452,7 +452,7 @@ class CoffeeMachineOS:
                       loader=self.__loader,
                       texture=ModelTexture(self.__loader.load_texture("pngs/cups/coffee_filling_tex")),
                       content=["Espresso", "Espresso"])
-        CoffeeProduct(f"Café Crème",
+        CoffeeProduct(f"Cafe Creme",
                       GuiTexture(self.__loader.load_texture("pngs/ui/coffee_creme_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
@@ -461,8 +461,8 @@ class CoffeeMachineOS:
                       container_type=CoffeeProduct.COFFEE_CUP,
                       loader=self.__loader,
                       texture=ModelTexture(self.__loader.load_texture("pngs/cups/coffee_creme_filling_tex")),
-                      content=["Café Crème"])
-        CoffeeProduct(f"2 Café Crème",
+                      content=["Cafe Creme"])
+        CoffeeProduct(f"2 Cafe Creme",
                       GuiTexture(self.__loader.load_texture("pngs/ui/2_coffee_creme_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
@@ -471,7 +471,7 @@ class CoffeeMachineOS:
                       container_type=CoffeeProduct.COFFEE_CUP,
                       loader=self.__loader,
                       texture=ModelTexture(self.__loader.load_texture("pngs/cups/coffee_creme_filling_tex")),
-                      content=["Café Crème", "Café Crème"])
+                      content=["Cafe Creme", "Cafe Creme"])
         CoffeeProduct(f"Milk Coffee",
                       GuiTexture(self.__loader.load_texture("pngs/ui/milk_coffee_icon"),
                                  [0, 0],
@@ -522,7 +522,7 @@ class CoffeeMachineOS:
                       loader=self.__loader,
                       texture=ModelTexture(self.__loader.load_texture("pngs/cups/latte_macchiato_filling_tex")),
                       content=["Latte Macchiato"])
-        CoffeeProduct(f"Café Latte",
+        CoffeeProduct(f"Cafe Latte",
                       GuiTexture(self.__loader.load_texture("pngs/ui/latte_macchiato_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
@@ -531,7 +531,7 @@ class CoffeeMachineOS:
                       container_type=CoffeeProduct.BIG_GLASS,
                       loader=self.__loader,
                       texture=ModelTexture(self.__loader.load_texture("pngs/cups/latte_macchiato_filling_tex")),
-                      content=["Café Latte"])
+                      content=["Cafe Latte"])
         CoffeeProduct(f"Tea",
                       GuiTexture(self.__loader.load_texture("pngs/ui/tea_icon"),
                                  [0, 0],
@@ -649,7 +649,6 @@ class CoffeeMachineOSLactoseFree:
         :param gui_renderer: the GuiRendered object
         """
         self.__render_target = render_target
-        self.__interaction_key = b'f'
         self.__is_interacting = False
         self.__original_camera_pos = None
         self.__original_camera_angles = None
@@ -676,7 +675,7 @@ class CoffeeMachineOSLactoseFree:
         self.__product_entries = None
         self.__create_products()
         self.__time_remaining = GUIText("", 18,
-                                        FontType(self.__loader.load_texture("candara"), "res/candara.fnt"),
+                                        FontType(self.__loader.load_texture("fnts/arial"), "res/fnts/arial.fnt"),
                                         [0.07, 0.75], 1, False)
         self.__time_remaining.set_color(1, 0, 0)
         self.__time_remaining.set_border_width(0.7)
@@ -701,7 +700,7 @@ class CoffeeMachineOSLactoseFree:
         self.__brewing_queue = []
         self.__max_queue_length = 7
 
-        self.__listener = KeyboardInputListener()
+        self.__listener = UniversalInputListener()
 
     def render_screen(self) -> None:
         self.__update_time_remaining()
@@ -721,7 +720,7 @@ class CoffeeMachineOSLactoseFree:
         self.__render_target.get_model().set_texture(ModelTexture(self.__fbo.get_color_texture()))
 
     def interact(self, player, camera) -> None:
-        if self.__listener.on_key_down(self.__interaction_key):
+        if self.__listener.get_interact() or self.__listener.get_deny():
             collision = self.__object_picker.update([self.__render_target])
             if self.__is_interacting:
                 self.__is_interacting = False
@@ -787,22 +786,22 @@ class CoffeeMachineOSLactoseFree:
     def __move_cursor(self) -> None:
         """Updates the cursor of the coffee machine. Method is being called from the render_screen method."""
         if self.__is_interacting:
-            if KeyboardInput.on_key_down(b'w'):
+            if UniversalInput.get_up():
                 if self.__selected_position[1] == 4:
                     self.__selected_position[0] = self.__current_page * 4
                 self.__selected_position[1] -= 1 if self.__selected_position[1] > 0 else 0
-            if KeyboardInput.on_key_down(b's'):
+            if UniversalInput.get_down():
                 self.__selected_position[1] += 1 if self.__selected_position[1] < 5 else 0
                 if self.__selected_position[1] == 4:
                     self.__selected_position[0] = 0
-            if KeyboardInput.on_key_down(b'a'):
+            if UniversalInput.get_left():
                 self.__selected_position[0] -= 1 if self.__selected_position[0] > 0 else 0
-            if KeyboardInput.on_key_down(b'd'):
+            if UniversalInput.get_right():
                 if self.__selected_position[1] == 4:
                     self.__selected_position[0] += 1 if self.__selected_position[0] < self.__max_queue_length - 1 else 0
                 elif self.__selected_position[0] < 4 * len(CoffeePage.get_instances()) - 1:
                     self.__selected_position[0] += 1
-            if KeyboardInput.on_key_down(b'\r'):    # enter key
+            if UniversalInput.get_confirm():    # enter key
                 if self.__selected_position[1] == 4:
                     self.__remove_beverage_from_queue(self.__selected_position[0])
                 elif self.__selected_position[1] == 5:
@@ -894,9 +893,9 @@ class CoffeeMachineOSLactoseFree:
     def __move_in_front_screen(self, camera) -> None:
         self.__original_camera_pos = camera.get_position()
         self.__original_camera_angles = [camera.get_yaw(), camera.get_pitch(), camera.get_roll()]
-        offset = vec3(0, 2.5, 3.5) * self.__render_target.get_scale()
-        rot_mat = mat3().rotation(self.__render_target.get_rot_y(), vec3(0, 1, 0))
-        offset = rot_mat * offset
+        x = 3.5 * math.sin(math.radians(self.__render_target.get_rot_y()))
+        z = 3.5 * math.cos(math.radians(self.__render_target.get_rot_y()))
+        offset = vec3(x, 2.5, z) * self.__render_target.get_scale()
 
         position = vec3(self.__render_target.get_position()) + offset
 
@@ -1057,7 +1056,7 @@ class CoffeeMachineOSLactoseFree:
                       loader=self.__loader,
                       texture=ModelTexture(self.__loader.load_texture("pngs/cups/coffee_filling_tex")),
                       content=["Espresso", "Espresso"])
-        CoffeeProductLactoseFree(f"Café Crème",
+        CoffeeProductLactoseFree(f"Cafe Creme",
                       GuiTexture(self.__loader.load_texture("pngs/ui/coffee_creme_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
@@ -1066,8 +1065,8 @@ class CoffeeMachineOSLactoseFree:
                       container_type=CoffeeProduct.COFFEE_CUP,
                       loader=self.__loader,
                       texture=ModelTexture(self.__loader.load_texture("pngs/cups/coffee_creme_filling_tex")),
-                      content=["Café Crème"])
-        CoffeeProductLactoseFree(f"2 Café Crème",
+                      content=["Cafe Creme"])
+        CoffeeProductLactoseFree(f"2 Cafe Creme",
                       GuiTexture(self.__loader.load_texture("pngs/ui/2_coffee_creme_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
@@ -1076,7 +1075,7 @@ class CoffeeMachineOSLactoseFree:
                       container_type=CoffeeProduct.COFFEE_CUP,
                       loader=self.__loader,
                       texture=ModelTexture(self.__loader.load_texture("pngs/cups/coffee_creme_filling_tex")),
-                      content=["Café Crème", "Café Crème"])
+                      content=["Cafe Creme", "Cafe Creme"])
         CoffeeProductLactoseFree(f"Milk Coffee Lactose Free",
                       GuiTexture(self.__loader.load_texture("pngs/ui/milk_coffee_icon"),
                                  [0, 0],
@@ -1127,7 +1126,7 @@ class CoffeeMachineOSLactoseFree:
                       loader=self.__loader,
                       texture=ModelTexture(self.__loader.load_texture("pngs/cups/latte_macchiato_filling_tex")),
                       content=["Latte Macchiato", "Lactose Free"])
-        CoffeeProductLactoseFree(f"Café Latte Lactose Free",
+        CoffeeProductLactoseFree(f"Cafe Latte Lactose Free",
                       GuiTexture(self.__loader.load_texture("pngs/ui/latte_macchiato_icon"),
                                  [0, 0],
                                  [self.__icon_size, self.__icon_size]),
@@ -1136,7 +1135,7 @@ class CoffeeMachineOSLactoseFree:
                       container_type=CoffeeProduct.BIG_GLASS,
                       loader=self.__loader,
                       texture=ModelTexture(self.__loader.load_texture("pngs/cups/latte_macchiato_filling_tex")),
-                      content=["Café Latte", "Lactose Free"])
+                      content=["Cafe Latte", "Lactose Free"])
         CoffeeProductLactoseFree(f"Tea",
                       GuiTexture(self.__loader.load_texture("pngs/ui/tea_icon"),
                                  [0, 0],

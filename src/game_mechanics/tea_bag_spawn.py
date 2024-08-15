@@ -2,6 +2,7 @@ from src.entities.entity import Entity
 from src.game_mechanics.game_object import GameObject
 from src.models.textured_model import TexturedModel
 from src.obj_converter.obj_loader import OBJLoader
+from src.render_engine.input_controller import Binds
 from src.render_engine.loader import Loader
 from src.textures.model_texture import ModelTexture
 
@@ -30,7 +31,8 @@ class TeaBagSpawn:
         collider = Entity(static_collider, self.__pos, *self.__rot, self.__size)
         self.__packaging_go = GameObject(ent, collider=collider)
         self.__packaging_go.set_attachment(self)
-        self.__packaging_go.set_info(name)
+        self.__packaging_go.set_ext_name(name)
+        self.__packaging_go.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up")
         self.__entities.append(self.__packaging_go)
         self.__colliders.append(self.__packaging_go)
 
@@ -43,7 +45,8 @@ class TeaBagSpawn:
         ent = Entity(static_model, self.__pos, *self.__rot, self.__size)
         collider = Entity(static_collider, self.__pos, *self.__rot, self.__size)
         bag = GameObject(ent, collider=collider, int_name="TEA_BAG")
-        bag.set_info(self.__name)
+        bag.set_ext_name(self.__name)
+        bag.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up")
         self.__entities.append(bag)
         self.__colliders.append(bag)
         return bag

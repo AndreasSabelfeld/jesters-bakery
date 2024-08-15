@@ -35,7 +35,7 @@ class Tap:
 
     def __load_assets(self) -> None:
         tap_base_model = self.__obj_loader.load_obj_model("objs/machinery/tap_base", self.__loader)
-        tap_base_texture = ModelTexture(self.__loader.load_texture("tap_base_texture"))
+        tap_base_texture = ModelTexture(self.__loader.load_texture("pngs/machinery/tap_base_texture"))
         tap_base_texture.set_reflectivity(0.5)
         static_tap_base_model = TexturedModel(tap_base_model, tap_base_texture)
 

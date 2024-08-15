@@ -14,6 +14,7 @@ from src.guis.gui_texture import GuiTexture
 from src.models.raw_model import RawModel
 from src.models.textured_model import TexturedModel
 from src.post_processing.fbo import FBO
+from src.render_engine.input_controller import Binds
 from src.render_engine.time import Time
 from src.textures.model_texture import ModelTexture
 
@@ -52,9 +53,11 @@ class Order:
     def __init__(self, master: 'MasterOrder', amount_of_orders: int):
         self.__master = master
         self.__current_order = master.create_order(amount_of_orders)
-        self.__time = master.calculate_time(self.__current_order)
-        self.__text = GUIText(self.get_order_string(), 10, self.__master.get_font(), [0, 0], 0.15, False)
-        self.__white_texture = GuiTexture(self.__master.get_loader().load_texture("white"), [0, 0], [1920, 1080])
+        self.__initial_time = master.calculate_time(self.__current_order)
+        self.__time = self.__initial_time
+        font_size = 8
+        self.__text = GUIText(self.get_order_string(), font_size, self.__master.get_font(), [0, 0], 0.15, False)
+        self.__white_texture = GuiTexture(self.__master.get_loader().load_texture("pngs/machinery/white"), [0, 0], [1920, 1080])
         self.__fulfilled = False
         self.__points = 0
         self.__right_orders = 0
@@ -66,6 +69,9 @@ class Order:
 
     def get_time(self) -> float:
         return self.__time
+
+    def get_initial_time(self) -> float:
+        return self.__initial_time
 
     def get_order_string(self) -> str:
         string = ""
@@ -104,7 +110,7 @@ class Order:
         file_name = "ticket"
         obj = open(f"{sys.path[0]}/res/objs/machinery/{file_name}.obj", 'w')
         x = 0.075
-        y = (0.5 / 16) * (self.__text.get_number_of_lines() - 1)
+        y = (0.5 / 16) * (self.__text.get_number_of_lines() - 2)
         self.__ticket_height = 0.7 * y
         obj.write(f"v -{x} {self.__ticket_height} -0.000000\n" +
                   f"v {x} {self.__ticket_height} -0.000000\n" +
@@ -125,7 +131,7 @@ class Order:
         static_model = TexturedModel(self.__get_model(), self.__get_texture())
         ticket_entity = Entity(static_model, pos, *rot, size)
 
-        white_tex = ModelTexture(self.__master.get_loader().load_texture("white"))
+        white_tex = ModelTexture(self.__master.get_loader().load_texture("pngs/machinery/white"))
         backside_static_model = TexturedModel(self.__get_model(), white_tex)
         offset_pos = [pos[0] + 0.1 * math.sin(math.radians(rot[1])),
                       pos[1],
@@ -149,6 +155,8 @@ class Order:
                                               ticket_machine.get_rot_y(),
                                               ticket_machine.get_rot_z()],
                                              ticket_machine.get_scale() * 10)
+        game_object.set_ext_name("Ticket")
+        game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up")
         if self.__unpicked_game_objects:
             for go in self.__unpicked_game_objects:
                 go.increase_position(0, self.__ticket_height * ticket_machine.get_scale() * 10, 0)
@@ -205,7 +213,7 @@ class MasterOrder:
 
         self.__loader = loader
         self.__obj_loader = obj_loader
-        self.__font = FontType(self.__loader.load_texture("candara"), "res/candara.fnt")
+        self.__font = FontType(self.__loader.load_texture("fnts/receipt"), "res/fnts/receipt.fnt")
         self.__gui_renderer = gui_renderer
         self.__parent_object = parent_object
 
@@ -216,11 +224,14 @@ class MasterOrder:
         for _ in range(amount_of_orders):
             prod = self.__possibilities[random.randint(0, len(self.__possibilities)-1)]
             wish = None
+            wish_time = 0
             if random.random() < self.__chance_for_wish:
                 if prod.get_wishes():
                     wish = prod.get_wishes()[random.randint(0, len(prod.get_wishes())-1)]
+                    if wish == "Oat Milk":
+                        wish_time = 30
             self.load_content(prod, wish)
-            order.append([prod, wish, prod.get_time()])
+            order.append([prod, wish, prod.get_time() + wish_time])
         return order
 
     def load_content(self, prod: Possibility, wish: str) -> None:
@@ -237,8 +248,8 @@ class MasterOrder:
                 prod.set_content(["Oat Milk", "Foam", "Espresso"])
             if prod.get_name() == "Cappuccino":
                 prod.set_content(["Oat Milk", "Foam", "Espresso"])
-            if prod.get_name() == "Café Latte":
-                prod.set_content(["Oat Milk", "Foam", "Café Crème"])
+            if prod.get_name() == "Cafe Latte":
+                prod.set_content(["Oat Milk", "Foam", "Cafe Creme"])
             if prod.get_name() == "Hot Chocolate":
                 prod.set_content(["Oat Milk", "Caotina"])
             if prod.get_name() == "Cold Chocolate":
@@ -325,9 +336,9 @@ class MasterOrder:
         poss.append(Possibility("Doppio", ["Decaffeinated"],
                                 self.__coffee_dict["Doppio"].get_brew_length(),
                                 self.__coffee_dict["Doppio"].get_container_type()))
-        poss.append(Possibility("Café Crème", ["Decaffeinated"],
-                                self.__coffee_dict["Café Crème"].get_brew_length(),
-                                self.__coffee_dict["Café Crème"].get_container_type()))
+        poss.append(Possibility("Cafe Creme", ["Decaffeinated"],
+                                self.__coffee_dict["Cafe Creme"].get_brew_length(),
+                                self.__coffee_dict["Cafe Creme"].get_container_type()))
         poss.append(Possibility("Milk Coffee", ["Decaffeinated", "Lactose Free", "Oat Milk"],
                                 self.__coffee_dict["Milk Coffee"].get_brew_length(),
                                 self.__coffee_dict["Milk Coffee"].get_container_type()))
@@ -337,9 +348,9 @@ class MasterOrder:
         poss.append(Possibility("Latte Macchiato", ["Decaffeinated", "Lactose Free", "Oat Milk"],
                                 self.__coffee_dict["Latte Macchiato"].get_brew_length(),
                                 self.__coffee_dict["Latte Macchiato"].get_container_type()))
-        poss.append(Possibility("Café Latte", ["Decaffeinated", "Lactose Free", "Oat Milk"],
-                                self.__coffee_dict["Café Latte"].get_brew_length(),
-                                self.__coffee_dict["Café Latte"].get_container_type()))
+        poss.append(Possibility("Cafe Latte", ["Decaffeinated", "Lactose Free", "Oat Milk"],
+                                self.__coffee_dict["Cafe Latte"].get_brew_length(),
+                                self.__coffee_dict["Cafe Latte"].get_container_type()))
         poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
                                 self.__coffee_dict["Tea"].get_brew_length(),
                                 self.__coffee_dict["Tea"].get_container_type()))
@@ -378,7 +389,7 @@ class MasterOrder:
         poss.append(Possibility("Orange Juice", ["Ice", "Lemon"], 5.0, CoffeeContainer.BIG_GLASS))
         poss.append(Possibility("Topfit Juice", ["Ice", "Lemon"], 5.0, CoffeeContainer.BIG_GLASS))
         poss.append(Possibility("Prosecco", [], 5.0, CoffeeContainer.PROSECCO))
-        poss.append(Possibility("Panaché", [], 8.0, CoffeeContainer.BEER,
+        poss.append(Possibility("Panache", [], 8.0, CoffeeContainer.BEER,
                                 content=["Sprite", "Beer"]))
         poss.append(Possibility("Ovomaltine", [], 10.0, CoffeeContainer.BIG_GLASS,
                                 content=["Milk for Chai, Ovo", "Ovomaltine", "Mixed"]))

@@ -5,6 +5,7 @@ from time import sleep
 from src.entities.entity import Entity
 from src.game_mechanics.game_object import GameObject
 from src.models.textured_model import TexturedModel
+from src.render_engine.input_controller import Binds
 from src.textures.model_texture import ModelTexture
 
 
@@ -61,7 +62,7 @@ class TapFaucet:
 
     def __load_assets(self, sign_texture: str) -> None:
         tap_tap_model = self.__obj_loader.load_obj_model("objs/machinery/tap_tap", self.__loader)
-        tap_tap_texture = ModelTexture(self.__loader.load_texture("white"))
+        tap_tap_texture = ModelTexture(self.__loader.load_texture("pngs/machinery/white"))
         tap_tap_texture.set_reflectivity(5)
         static_tap_tap_model = TexturedModel(tap_tap_model, tap_tap_texture)
         static_tap_tap_collider = TexturedModel(self.__obj_loader.load_obj_model("objs/machinery/tap_tap_collider", self.__loader),
@@ -78,6 +79,9 @@ class TapFaucet:
         self.__faucet = GameObject(tap_tap, child_0=tap_sign, collider=tap_tap_collider, int_name="TAP")
         self.__faucet.set_attachment(self)
         self.__faucet.set_pickup_able(False)
+        self.__faucet.set_ext_name("Tap Faucet")
+        self.__faucet.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to place a glass.")
+        self.__faucet.set_info(self.__content)
 
     def set_brewing_length(self, length: float) -> None:
         self.__brewing_length = length

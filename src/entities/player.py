@@ -1,5 +1,5 @@
 from .entity import Entity
-from src.render_engine.input_controller import KeyboardInput, ControllerInput
+from src.render_engine.input_controller import KeyboardInput, ControllerInput, UniversalInput
 from src.render_engine.time import Time
 from src.terrain.terrain import Terrain
 from src.pycgtypes import vec3
@@ -69,8 +69,6 @@ class ThirdPersonPlayer(Player):
         self.__speed_vector = vec3()
         self.__collision_detection = Detection(vec3(1, 1, 1))
         self.__collision_recursion_depth = 0
-        self.__controller = ControllerInput(False)
-        self.__controller.set_sensitivity(7)
         self.__player_under_control = True
         super().__init__(model, position, rot_x, rot_y, rot_z, scale)
         Player.set_instance(self)
@@ -191,27 +189,9 @@ class ThirdPersonPlayer(Player):
         self.__current_z_speed = 0
         self.__current_x_speed = 0
         self.__current_turn_speed = 0
-        if ControllerInput.is_using_controller:
-            if abs(ControllerInput.LeftJoystickY) > ControllerInput.get_dead_zone():
-                self.__current_z_speed = -ControllerInput.LeftJoystickY * super().get_run_speed()
-            if abs(ControllerInput.LeftJoystickX) > self.__controller.get_dead_zone():
-                self.__current_x_speed = ControllerInput.LeftJoystickX * super().get_run_speed()
-            if ControllerInput.A_cross:
-                self.jump()
-        else:
-            keys_held = KeyboardInput.get_keys_held()
-            if keys_held.get(b's'):
-                self.__current_z_speed = super().get_run_speed()
-            if keys_held.get(b'w'):
-                self.__current_z_speed = -super().get_run_speed()
-            if keys_held.get(b'd'):
-                # self.__current_turn_speed = -super().get_turn_speed()
-                self.__current_x_speed = super().get_run_speed()
-            if keys_held.get(b'a'):
-                # self.__current_turn_speed = super().get_turn_speed()
-                self.__current_x_speed = -super().get_run_speed()
-            if keys_held.get(b' '):
-                self.jump()
+
+        self.__current_x_speed = UniversalInput.get_x_axis_movement() * super().get_run_speed()
+        self.__current_z_speed = UniversalInput.get_y_axis_movement() * super().get_run_speed()
 
 
 class FirstPersonPlayer(ThirdPersonPlayer):

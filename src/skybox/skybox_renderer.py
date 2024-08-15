@@ -50,8 +50,10 @@ class SkyboxRenderer:
         __SIZE, -__SIZE, __SIZE
     ]
 
-    __DAY_TEXTURE_FILES = ["dayRight", "dayLeft", "dayTop", "dayBottom", "dayBack", "dayFront"]
-    __NIGHT_TEXTURE_FILES = ["nightRight", "nightLeft", "nightTop", "nightBottom", "nightBack", "nightFront"]
+    __DAY_TEXTURE_FILES = ["pngs/skybox/dayRight", "pngs/skybox/dayLeft", "pngs/skybox/dayTop",
+                           "pngs/skybox/dayBottom", "pngs/skybox/dayBack", "pngs/skybox/dayFront"]
+    __NIGHT_TEXTURE_FILES = ["pngs/skybox/nightRight", "pngs/skybox/nightLeft", "pngs/skybox/nightTop",
+                             "pngs/skybox/nightBottom", "pngs/skybox/nightBack", "pngs/skybox/nightFront"]
 
     def __init__(self, loader, projection_matrix: list[list]):
         self.__cube = loader.load_gui_to_vao(self.__VERTICES, 3)

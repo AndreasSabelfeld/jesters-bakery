@@ -1,5 +1,3 @@
-import math
-
 from src.entities.entity import Entity
 from src.game_mechanics.coffee_container import CoffeeContainer
 from src.game_mechanics.coffee_machine_os import CoffeeMachineOS, CoffeeMachineOSLactoseFree
@@ -17,6 +15,7 @@ from src.game_mechanics.tea_bag_spawn import TeaBagSpawn
 from src.models.textured_model import TexturedModel
 from src.obj_converter.obj_loader import OBJLoader, NormalMappedOBJLoader
 from src.post_processing.fbo import FBO
+from src.render_engine.input_controller import Binds
 from src.render_engine.loader import Loader
 from src.textures.model_texture import ModelTexture
 
@@ -32,7 +31,7 @@ def coffee_machine(pos: list[float], rot: list[float], size: float, loader: Load
                                                    ModelTexture(loader.load_texture("")))
 
     coffee_machine_screen_model = obj_loader.load_obj_model("objs/machinery/coffee_machine_screen", loader)
-    coffee_machine_screen_texture = ModelTexture(loader.load_texture("white"))
+    coffee_machine_screen_texture = ModelTexture(loader.load_texture("pngs/machinery/white"))
     coffee_machine_screen_texture.set_shine_damper(10)
     coffee_machine_screen_texture.set_reflectivity(0.5)
     static_coffee_machine_screen_model = TexturedModel(coffee_machine_screen_model, coffee_machine_screen_texture)
@@ -43,7 +42,8 @@ def coffee_machine(pos: list[float], rot: list[float], size: float, loader: Load
     coffee_machine_game_object = GameObject(machine, coffee_machine_screen, int_name=CoffeeMachineOS.get_name(),
                                             collider=coffee_machine_collider)
     coffee_machine_game_object.set_pickup_able(False)
-    coffee_machine_game_object.set_prompt("Press the 'F' Key to interact.")
+    coffee_machine_game_object.set_prompt(f"Press the {Binds.get_bind(Binds.INTERACT)} Key to interact.")
+    coffee_machine_game_object.set_ext_name("Coffee Machine")
 
     coffee_fbo = FBO(1920, 1080, multi_target=False, depth_buffer_type=FBO.DEPTH_TEXTURE)
     coffee_os = CoffeeMachineOS(coffee_machine_screen, loader, obj_loader, coffee_fbo, gui_renderer, object_picker)
@@ -63,7 +63,7 @@ def lactose_free_coffee_machine(pos: list[float], rot: list[float], size: float,
                                                    ModelTexture(loader.load_texture("")))
 
     coffee_machine_screen_model = obj_loader.load_obj_model("objs/machinery/coffee_machine_screen", loader)
-    coffee_machine_screen_texture = ModelTexture(loader.load_texture("white"))
+    coffee_machine_screen_texture = ModelTexture(loader.load_texture("pngs/machinery/white"))
     coffee_machine_screen_texture.set_shine_damper(10)
     coffee_machine_screen_texture.set_reflectivity(0.5)
     static_coffee_machine_screen_model = TexturedModel(coffee_machine_screen_model, coffee_machine_screen_texture)
@@ -76,7 +76,8 @@ def lactose_free_coffee_machine(pos: list[float], rot: list[float], size: float,
                                                          int_name=CoffeeMachineOSLactoseFree.get_name(),
                                                          collider=coffee_machine_lactose_free_collider)
     coffee_machine_lactose_free_game_object.set_pickup_able(False)
-    coffee_machine_lactose_free_game_object.set_prompt("Press the 'F' Key to interact.")
+    coffee_machine_lactose_free_game_object.set_prompt(f"Press the {Binds.get_bind(Binds.INTERACT)} Key to interact.")
+    coffee_machine_lactose_free_game_object.set_ext_name("Coffee Machine (Lactose Free)")
 
     lactose_free_coffee_fbo = FBO(1920, 1080, multi_target=False, depth_buffer_type=FBO.DEPTH_TEXTURE)
     coffee_os_lactose_free = CoffeeMachineOSLactoseFree(coffee_machine_lactose_free_screen, loader, obj_loader,
@@ -89,7 +90,7 @@ def lactose_free_coffee_machine(pos: list[float], rot: list[float], size: float,
 def fridge(pos: list[float], rot: list[float], size: float, loader: Loader, obj_loader: OBJLoader,
            gui_renderer, object_picker) -> GameObject:
     fridge_case_model = obj_loader.load_obj_model("objs/machinery/fridge_case", loader)
-    fridge_case_texture = ModelTexture(loader.load_texture("counter"))
+    fridge_case_texture = ModelTexture(loader.load_texture("pngs/machinery/counter"))
     fridge_case_texture.set_shine_damper(10)
     fridge_case_texture.set_reflectivity(0.5)
     static_fridge_case_model = TexturedModel(fridge_case_model, fridge_case_texture)
@@ -97,7 +98,7 @@ def fridge(pos: list[float], rot: list[float], size: float, loader: Loader, obj_
                                                 ModelTexture(loader.load_texture("")))
 
     fridge_top_drawer_model = obj_loader.load_obj_model("objs/machinery/fridge_top_drawer", loader)
-    fridge_top_drawer_texture = ModelTexture(loader.load_texture("drawer"))
+    fridge_top_drawer_texture = ModelTexture(loader.load_texture("pngs/machinery/drawer"))
     fridge_top_drawer_texture.set_shine_damper(10)
     fridge_top_drawer_texture.set_reflectivity(0.5)
     static_fridge_top_drawer_model = TexturedModel(fridge_top_drawer_model, fridge_top_drawer_texture)
@@ -105,7 +106,7 @@ def fridge(pos: list[float], rot: list[float], size: float, loader: Loader, obj_
                                                       ModelTexture(loader.load_texture("")))
 
     fridge_bottom_drawer_model = obj_loader.load_obj_model("objs/machinery/fridge_bottom_drawer", loader)
-    fridge_bottom_drawer_texture = ModelTexture(loader.load_texture("drawer"))
+    fridge_bottom_drawer_texture = ModelTexture(loader.load_texture("pngs/machinery/drawer"))
     fridge_bottom_drawer_texture.set_shine_damper(10)
     fridge_bottom_drawer_texture.set_reflectivity(0.5)
     static_fridge_bottom_drawer_model = TexturedModel(fridge_bottom_drawer_model, fridge_bottom_drawer_texture)
@@ -126,8 +127,12 @@ def fridge(pos: list[float], rot: list[float], size: float, loader: Loader, obj_
     fridge_game_object.get_child_1().set_collider(fridge_bottom_drawer_collider)
     fridge_game_object.get_child_0().set_int_name("TOP_DRAWER")
     fridge_game_object.get_child_1().set_int_name("BOTTOM_DRAWER")
-    fridge_game_object.get_child_0().set_prompt("Press 'E' or 'Q' to open. Press the 'F' Key to interact.")
-    fridge_game_object.get_child_1().set_prompt("Press 'E' or 'Q' to open. Press the 'F' Key to interact.")
+    fridge_game_object.get_child_0().set_ext_name("Top Drawer")
+    fridge_game_object.get_child_1().set_ext_name("Bottom Drawer")
+    fridge_game_object.get_child_0().set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to open. "
+                                                f"Press the {Binds.get_bind(Binds.INTERACT)} Key to interact.")
+    fridge_game_object.get_child_1().set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to open. "
+                                                f"Press the {Binds.get_bind(Binds.INTERACT)} Key to interact.")
 
     fri = Fridge(fridge_game_object.get_child_0(), fridge_game_object.get_child_1(), object_picker, loader,
                  gui_renderer, [0, 0])
@@ -164,8 +169,8 @@ def cup_heater(pos: list[float], rot: list[float], size: float, loader: Loader, 
     big_cup_collider = Entity(static_big_cup_collider, pos, *rot, size)
     big_cup_game_object = GameObject(big_cup_ent, collider=big_cup_collider)
 
-    cup_spawn = CupSpawn(CoffeeContainer.CAPPUCCINO_CUP, pos, rot, 1, loader, obj_loader, entities, colliders)
-    big_cup_game_object.set_attachment(cup_spawn)
+    cup_spawn1 = CupSpawn(CoffeeContainer.CAPPUCCINO_CUP, pos, rot, 1, loader, obj_loader, entities, colliders)
+    big_cup_game_object.set_attachment(cup_spawn1)
 
     small_cup_model = obj_loader.load_obj_model("objs/machinery/heater_small_cups", loader)
     static_small_cup_model = TexturedModel(small_cup_model, cup_texture)
@@ -177,11 +182,16 @@ def cup_heater(pos: list[float], rot: list[float], size: float, loader: Loader, 
     small_cup_collider = Entity(static_small_cup_collider, pos, *rot, size)
     small_cup_game_object = GameObject(small_cup_ent, collider=small_cup_collider)
 
-    cup_spawn = CupSpawn(CoffeeContainer.COFFEE_CUP, pos, rot, 1, loader, obj_loader, entities, colliders)
-    small_cup_game_object.set_attachment(cup_spawn)
+    cup_spawn2 = CupSpawn(CoffeeContainer.COFFEE_CUP, pos, rot, 1, loader, obj_loader, entities, colliders)
+    small_cup_game_object.set_attachment(cup_spawn2)
 
     heater_game_object.set_child_0(big_cup_game_object)
     heater_game_object.set_child_1(small_cup_game_object)
+    big_cup_game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
+    big_cup_game_object.set_ext_name(f"Cappuccino Cup")
+    small_cup_game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
+    small_cup_game_object.set_ext_name(f"Coffee Cup")
+    heater_game_object.set_pickup_able(False)
 
     return heater_game_object
 
@@ -189,29 +199,29 @@ def cup_heater(pos: list[float], rot: list[float], size: float, loader: Loader, 
 def milk_foamer(pos: list[float], rot: list[float], size: float, loader: Loader, obj_loader: OBJLoader,
                 gui_renderer, object_picker) -> GameObject:
     milk_foamer_vessel_model = obj_loader.load_obj_model("objs/machinery/milk_foamer_vessel", loader)
-    milk_foamer_vessel_texture = ModelTexture(loader.load_texture("milk_foamer_vessel_tex"))
+    milk_foamer_vessel_texture = ModelTexture(loader.load_texture("pngs/machinery/milk_foamer_vessel_tex"))
     milk_foamer_vessel_texture.set_reflectivity(0.75)
     static_milk_foamer_vessel_model = TexturedModel(milk_foamer_vessel_model, milk_foamer_vessel_texture)
     static_milk_foamer_vessel_collider = TexturedModel(obj_loader.load_obj_model("objs/machinery/milk_foamer_vessel_collider", loader),
                                                        ModelTexture(loader.load_texture("")))
 
     milk_foamer_screen_model = obj_loader.load_obj_model("objs/machinery/milk_foamer_screen", loader)
-    milk_foamer_screen_texture = ModelTexture(loader.load_texture("black"))
+    milk_foamer_screen_texture = ModelTexture(loader.load_texture("pngs/machinery/black"))
     static_milk_foamer_screen_model = TexturedModel(milk_foamer_screen_model, milk_foamer_screen_texture)
 
     milk_foamer_cup_model = obj_loader.load_obj_model("objs/machinery/milk_foamer_cup", loader)
-    milk_foamer_cup_texture = ModelTexture(loader.load_texture("milk_foamer_cup_tex"))
+    milk_foamer_cup_texture = ModelTexture(loader.load_texture("pngs/machinery/milk_foamer_cup_tex"))
     milk_foamer_cup_texture.set_reflectivity(0.75)
     static_milk_foamer_cup_model = TexturedModel(milk_foamer_cup_model, milk_foamer_cup_texture)
     static_milk_foamer_cup_collider = TexturedModel(obj_loader.load_obj_model("objs/machinery/milk_foamer_cup_collider", loader),
                                                     ModelTexture(loader.load_texture("")))
 
     milk_foamer_rotator_model = obj_loader.load_obj_model("objs/machinery/milk_foamer_rotator", loader)
-    milk_foamer_rotator_texture = ModelTexture(loader.load_texture("milk_foamer_rotator_tex"))
+    milk_foamer_rotator_texture = ModelTexture(loader.load_texture("pngs/machinery/milk_foamer_rotator_tex"))
     static_milk_foamer_rotator_model = TexturedModel(milk_foamer_rotator_model, milk_foamer_rotator_texture)
 
     milk_foamer_lid_model = obj_loader.load_obj_model("objs/machinery/milk_foamer_lid", loader)
-    milk_foamer_lid_texture = ModelTexture(loader.load_texture("milk_foamer_lid_tex"))
+    milk_foamer_lid_texture = ModelTexture(loader.load_texture("pngs/machinery/milk_foamer_lid_tex"))
     milk_foamer_lid_texture.set_reflectivity(0.75)
     static_milk_foamer_lid_model = TexturedModel(milk_foamer_lid_model, milk_foamer_lid_texture)
     static_milk_foamer_lid_collider = TexturedModel(obj_loader.load_obj_model("objs/machinery/milk_foamer_lid_collider", loader),
@@ -230,11 +240,16 @@ def milk_foamer(pos: list[float], rot: list[float], size: float, loader: Loader,
                                          collider=milk_foamer_vessel_collider,
                                          int_name="MILK_FOAMER_VESSEL")
     milk_foamer_game_object.set_pickup_able(False)
-    milk_foamer_game_object.set_prompt("Press 'F' to interact")
+    milk_foamer_game_object.set_ext_name("Milk Foamer")
+    milk_foamer_game_object.set_prompt(f"Press {Binds.get_bind(Binds.INTERACT)} to interact")
     milk_foamer_game_object.get_child_0().set_collider(milk_foamer_lid_collider)
     milk_foamer_game_object.get_child_0().set_int_name("MILK_FOAMER_LID")
+    milk_foamer_game_object.get_child_0().set_ext_name("Milk Foamer Lid")
+    milk_foamer_game_object.get_child_0().set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
     milk_foamer_game_object.get_child_1().set_collider(milk_foamer_cup_collider)
     milk_foamer_game_object.get_child_1().set_int_name("MILK_FOAMER_CUP")
+    milk_foamer_game_object.get_child_1().set_ext_name("Milk Foamer Cup")
+    milk_foamer_game_object.get_child_1().set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
     milk_foamer_game_object.get_child_1().set_child_0(milk_foamer_rotator)
 
     milk_fbo = FBO(1920, 1080, multi_target=False, depth_buffer_type=FBO.DEPTH_TEXTURE)
@@ -259,6 +274,7 @@ def mixer(pos: list[float], rot: list[float], size: float, loader: Loader, obj_l
     mixer_collider = Entity(static_mixer_collider, pos, *rot, size)
     mixer_game_object = GameObject(mix, collider=mixer_collider, int_name="MIXER")
     mixer_game_object.set_pickup_able(False)
+    mixer_game_object.set_ext_name("Mixer")
 
     mixer_os = Mixer(mixer_game_object)
     mixer_game_object.set_attachment(mixer_os)
@@ -277,6 +293,8 @@ def mixer_vessel(pos: list[float], rot: list[float], size: float, loader: Loader
     mix_vessel = Entity(static_mixer_vessel_model, pos, *rot, size)
     mixer_vessel_collider = Entity(static_mixer_vessel_collider, pos, *rot, size)
     mixer_vessel_game_object = GameObject(mix_vessel, collider=mixer_vessel_collider, int_name="MIXER_VESSEL")
+    mixer_vessel_game_object.set_ext_name("Mixer Vessel")
+    mixer_vessel_game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
 
     mixer_vessel_os = MixerVessel(mixer_vessel_game_object, obj_loader, loader)
     mixer_vessel_game_object.set_attachment(mixer_vessel_os)
@@ -299,7 +317,9 @@ def espresso_cup(pos: list[float], rot: list[float], size: float, loader: Loader
     espresso_cup_collider = Entity(static_espresso_collider, pos, *rot, size)
     espresso_cup_game_object = GameObject(esp_cup, int_name="COFFEE", collider=espresso_cup_collider)
     espresso_cup_game_object.set_attachment(CoffeeContainer(CoffeeContainer.ESPRESSO_CUP, espresso_cup_game_object))
-    espresso_cup_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
+    espresso_cup_game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
+    espresso_cup_game_object.set_ext_name("Espresso Cup")
+    espresso_cup_game_object.set_info(espresso_cup_game_object.get_attachment().get_content())
 
     return espresso_cup_game_object
 
@@ -317,7 +337,9 @@ def coffee_cup(pos: list[float], rot: list[float], size: float, loader: Loader, 
     small_coffee_collider = Entity(static_small_coffee_collider, pos, *rot, size)
     small_coffee_game_object = GameObject(small_coffee, int_name="COFFEE", collider=small_coffee_collider)
     small_coffee_game_object.set_attachment(CoffeeContainer(CoffeeContainer.COFFEE_CUP, small_coffee_game_object))
-    small_coffee_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
+    small_coffee_game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
+    small_coffee_game_object.set_ext_name(f"Coffee Cup")
+    small_coffee_game_object.set_info(small_coffee_game_object.get_attachment().get_content())
 
     return small_coffee_game_object
 
@@ -336,7 +358,9 @@ def cappuccino_cup(pos: list[float], rot: list[float], size: float, loader: Load
     big_coffee_collider = Entity(static_big_coffee_collider, pos, *rot, size)
     big_coffee_game_object = GameObject(big_coffee, int_name="COFFEE", collider=big_coffee_collider)
     big_coffee_game_object.set_attachment(CoffeeContainer(CoffeeContainer.CAPPUCCINO_CUP, big_coffee_game_object))
-    big_coffee_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
+    big_coffee_game_object.set_ext_name("Cappuccino Cup")
+    big_coffee_game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
+    big_coffee_game_object.set_info(big_coffee_game_object.get_attachment().get_content())
 
     return big_coffee_game_object
 
@@ -355,7 +379,9 @@ def big_glass(pos: list[float], rot: list[float], size: float, loader: Loader, o
     big_glass_collider = Entity(static_big_glass_collider, pos, *rot, size)
     big_glass_game_object = GameObject(big_gla, int_name="GLASS", collider=big_glass_collider)
     big_glass_game_object.set_attachment(CoffeeContainer(CoffeeContainer.BIG_GLASS, big_glass_game_object))
-    big_glass_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
+    big_glass_game_object.set_ext_name("Big Glass")
+    big_glass_game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
+    big_glass_game_object.set_info(big_glass_game_object.get_attachment().get_content())
 
     return big_glass_game_object
 
@@ -374,7 +400,9 @@ def small_glass(pos: list[float], rot: list[float], size: float, loader: Loader,
     small_glass_collider = Entity(static_small_glass_collider, pos, *rot, size)
     small_glass_game_object = GameObject(small_gla, int_name="GLASS", collider=small_glass_collider)
     small_glass_game_object.set_attachment(CoffeeContainer(CoffeeContainer.SMALL_GLASS, small_glass_game_object))
-    small_glass_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
+    small_glass_game_object.set_ext_name("Small Glass")
+    small_glass_game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
+    small_glass_game_object.set_info(small_glass_game_object.get_attachment().get_content())
 
     return small_glass_game_object
 
@@ -396,7 +424,9 @@ def tea(pos: list[float], rot: list[float], size: float, loader: Loader, obj_loa
     tea_pot_collider = Entity(static_tea_pot_collider, pos, *rot, size)
     tea_pot_game_object = GameObject(tea_pot, tea_pot_lid, int_name="TEA", collider=tea_pot_collider)
     tea_pot_game_object.set_attachment(CoffeeContainer(CoffeeContainer.TEA_POT, tea_pot_game_object))
-    tea_pot_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
+    tea_pot_game_object.set_ext_name("Tea")
+    tea_pot_game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
+    tea_pot_game_object.set_info(tea_pot_game_object.get_attachment().get_content())
 
     return tea_pot_game_object
 
@@ -415,7 +445,9 @@ def beer(pos: list[float], rot: list[float], size: float, loader: Loader, obj_lo
     beer_collider = Entity(static_beer_collider, pos, *rot, size)
     beer_game_object = GameObject(beer_glass, int_name="GLASS", collider=beer_collider)
     beer_game_object.set_attachment(CoffeeContainer(CoffeeContainer.BEER, beer_game_object))
-    beer_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
+    beer_game_object.set_ext_name("Stange")
+    beer_game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
+    beer_game_object.set_info(beer_game_object.get_attachment().get_content())
 
     return beer_game_object
 
@@ -434,7 +466,9 @@ def prosecco_glass(pos: list[float], rot: list[float], size: float, loader: Load
     prosecco_collider = Entity(static_prosecco_collider, pos, *rot, size)
     prosecco_game_object = GameObject(prosecco_gla, int_name="GLASS", collider=prosecco_collider)
     prosecco_game_object.set_attachment(CoffeeContainer(CoffeeContainer.PROSECCO, prosecco_game_object))
-    prosecco_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
+    prosecco_game_object.set_ext_name("Prosecco Glass")
+    prosecco_game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
+    prosecco_game_object.set_info(prosecco_game_object.get_attachment().get_content())
 
     return prosecco_game_object
 
@@ -457,7 +491,8 @@ def prosecco_bottle(pos: list[float], rot: list[float], size: float, loader: Loa
     prosecco_collider = Entity(static_collider, pos, *rot, size)
     prosecco_game_object = GameObject(prosecco, int_name="FRIDGE", collider=prosecco_collider)
     prosecco_game_object.set_attachment(FridgeObject((1, 1), prosecco, filling_texture, "Prosecco"))
-    prosecco_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
+    prosecco_game_object.set_ext_name("Prosecco")
+    prosecco_game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
 
     return prosecco_game_object
 
@@ -480,7 +515,8 @@ def chai_bottle(pos: list[float], rot: list[float], size: float, loader: Loader,
     collider = Entity(static_collider, pos, *rot, size)
     game_object = GameObject(ent, int_name="FRIDGE", collider=collider)
     game_object.set_attachment(FridgeObject((1, 1), ent, filling_texture, "Chai"))
-    game_object.set_prompt("Press 'E' or 'Q' to pick up.")
+    game_object.set_ext_name("Chai")
+    game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
 
     return game_object
 
@@ -504,6 +540,8 @@ def coke_zero(pos: list[float], rot: list[float], size: float, loader: Loader, o
     game_object = GameObject(ent, int_name="COKE", collider=collider)
     game_object.set_attachment(FridgeObject((1, 1), ent, filling_texture, "Coke Zero"))
     game_object.set_prompt("Press 'E' or 'Q' to pick up.")
+    game_object.set_ext_name("Coke Zero")
+    game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
 
     return game_object
 
@@ -526,7 +564,8 @@ def sprite(pos: list[float], rot: list[float], size: float, loader: Loader, obj_
     collider = Entity(static_collider, pos, *rot, size)
     game_object = GameObject(ent, int_name="SPRITE", collider=collider)
     game_object.set_attachment(FridgeObject((1, 1), ent, filling_texture, "Sprite"))
-    game_object.set_prompt("Press 'E' or 'Q' to pick up.")
+    game_object.set_ext_name("Sprite")
+    game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
 
     return game_object
 
@@ -549,7 +588,8 @@ def orange_juice(pos: list[float], rot: list[float], size: float, loader: Loader
     collider = Entity(static_collider, pos, *rot, size)
     game_object = GameObject(ent, int_name="JUICE", collider=collider)
     game_object.set_attachment(FridgeObject((2, 1), ent, filling_texture, "Orange Juice"))
-    game_object.set_prompt("Press 'E' or 'Q' to pick up.")
+    game_object.set_ext_name("Orange Juice")
+    game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
 
     return game_object
 
@@ -572,7 +612,8 @@ def topfit_juice(pos: list[float], rot: list[float], size: float, loader: Loader
     collider = Entity(static_collider, pos, *rot, size)
     game_object = GameObject(ent, int_name="JUICE", collider=collider)
     game_object.set_attachment(FridgeObject((2, 1), ent, filling_texture, "Topfit Juice"))
-    game_object.set_prompt("Press 'E' or 'Q' to pick up.")
+    game_object.set_ext_name("Topfit Juice")
+    game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
 
     return game_object
 
@@ -595,7 +636,8 @@ def milk_sac(pos: list[float], rot: list[float], size: float, loader: Loader, ob
     milk_sac_collider = Entity(static_milk_sac_collider, pos, *rot, size)
     milk_sac_game_object = GameObject(milk_sa, int_name="FRIDGE", collider=milk_sac_collider)
     milk_sac_game_object.set_attachment(FridgeObject((3, 2), milk_sa, filling_texture, "Milk"))
-    milk_sac_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
+    milk_sac_game_object.set_ext_name("Milk Sac")
+    milk_sac_game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
 
     return milk_sac_game_object
 
@@ -617,7 +659,8 @@ def lactose_free_milk(pos: list[float], rot: list[float], size: float, loader: L
     milk_collider = Entity(static_milk_collider, pos, *rot, size)
     milk_game_object = GameObject(milk, int_name="MILK", collider=milk_collider)
     milk_game_object.set_attachment(FridgeObject((1, 1), milk, filling_texture, ["Milk", "Lactose Free"]))
-    milk_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
+    milk_game_object.set_ext_name("Lactose Free Milk")
+    milk_game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
 
     return milk_game_object
 
@@ -639,7 +682,8 @@ def oat_milk(pos: list[float], rot: list[float], size: float, loader: Loader, ob
     milk_collider = Entity(static_milk_collider, pos, *rot, size)
     milk_game_object = GameObject(milk, int_name="MILK", collider=milk_collider)
     milk_game_object.set_attachment(FridgeObject((1, 1), milk, filling_texture, "Oat Milk"))
-    milk_game_object.set_prompt("Press 'E' or 'Q' to pick up.")
+    milk_game_object.set_ext_name("Oat Milk")
+    milk_game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
 
     return milk_game_object
 
@@ -655,6 +699,8 @@ def plate(pos: list[float], rot: list[float], size: float, loader: Loader, obj_l
     plat = Entity(static_plate_model, pos, *rot, size)
     plate_collider = Entity(static_plate_collider, pos, *rot, size)
     plate_game_object = GameObject(plat, int_name="PLATE", collider=plate_collider)
+    plate_game_object.set_ext_name("Plate")
+    plate_game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
 
     return plate_game_object
 
@@ -672,6 +718,8 @@ def plate_spawn(pos: list[float], rot: list[float], size: float, loader: Loader,
     ent = Entity(static_model, pos, *rot, size)
     collider = Entity(static_collider, pos, *rot, size)
     game_object = GameObject(ent, collider=collider)
+    game_object.set_ext_name("Plate")
+    game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
 
     cup_spawn = CupSpawn(-1, pos, rot, size, loader, obj_loader, entities, colliders)
     game_object.set_attachment(cup_spawn)
@@ -933,8 +981,8 @@ def ovomaltine(pos: list[float], rot: list[float], size: float, loader: Loader, 
     collider = Entity(static_collider, pos, *rot, size)
     game_object = GameObject(ent, int_name="INGREDIENT", collider=collider)
     game_object.set_attachment(Ingredient("Ovomaltine", loader, "pngs/cups/chocolate_filling_tex"))
-    game_object.set_prompt("Press 'E' or 'Q' to pick up.")
-    game_object.set_info("Ovomaltine")
+    game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
+    game_object.set_ext_name("Ovomaltine")
 
     return game_object
 
@@ -953,8 +1001,8 @@ def caotina(pos: list[float], rot: list[float], size: float, loader: Loader, obj
     collider = Entity(static_collider, pos, *rot, size)
     game_object = GameObject(ent, int_name="INGREDIENT", collider=collider)
     game_object.set_attachment(Ingredient("Caotina", loader, "pngs/cups/chocolate_filling_tex"))
-    game_object.set_prompt("Press 'E' or 'Q' to pick up.")
-    game_object.set_info("Caotina")
+    game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
+    game_object.set_ext_name("Caotina")
 
     return game_object
 
@@ -973,8 +1021,8 @@ def chocolatl(pos: list[float], rot: list[float], size: float, loader: Loader, o
     collider = Entity(static_collider, pos, *rot, size)
     game_object = GameObject(ent, int_name="INGREDIENT", collider=collider)
     game_object.set_attachment(Ingredient("Chocolatl", loader, "pngs/cups/chocolate_filling_tex"))
-    game_object.set_prompt("Press 'E' or 'Q' to pick up.")
-    game_object.set_info("Chocolatl")
+    game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
+    game_object.set_ext_name("Chocolatl")
 
     return game_object
 
@@ -999,6 +1047,8 @@ def finished_collider(pos: list[float], rot: list[float], size: float, loader: L
                                              ModelTexture(loader.load_texture("")))
     finished_col = Entity(static_finished_collider, pos, *rot, size)
     finished_game_object = GameObject(finished_col, int_name="FINISHED")
+    finished_game_object.set_ext_name("Finished Collider")
+    finished_game_object.set_prompt("Place finished orders here!")
     finished_game_object.set_pickup_able(False)
     return finished_game_object
 
@@ -1060,7 +1110,8 @@ def ice_machine(pos: list[float], rot: list[float], size: float, loader: Loader,
     ent = Entity(door_static_model, door_pos, 0, 0, 0, size)
     collider = Entity(door_static_collider, door_pos, 0, 0, 0, size)
     game_object = GameObject(ent, int_name="DOOR", collider=collider)
-    game_object.set_prompt("Press 'E' or 'Q' to open/close.")
+    game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to open or close.")
+    game_object.set_ext_name(f"Ice Machine")
 
     return game_object
 
@@ -1320,9 +1371,13 @@ def workplate1(pos: list[float], rot: list[float], size: float, loader: Loader, 
     fridge_game_object.get_child_0().set_collider(fridge_top_drawer_collider)
     fridge_game_object.get_child_1().set_collider(fridge_bottom_drawer_collider)
     fridge_game_object.get_child_0().set_int_name("TOP_DRAWER")
+    fridge_game_object.get_child_0().set_ext_name("Top Drawer")
     fridge_game_object.get_child_1().set_int_name("BOTTOM_DRAWER")
-    fridge_game_object.get_child_0().set_prompt("Press 'E' or 'Q' to open. Press the 'F' Key to interact.")
-    fridge_game_object.get_child_1().set_prompt("Press 'E' or 'Q' to open. Press the 'F' Key to interact.")
+    fridge_game_object.get_child_1().set_ext_name("Bottom Drawer")
+    fridge_game_object.get_child_0().set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to open. "
+                                                f"Press the {Binds.get_bind(Binds.INTERACT)} Key to interact.")
+    fridge_game_object.get_child_1().set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to open. "
+                                                f"Press the {Binds.get_bind(Binds.INTERACT)} Key to interact.")
 
     fri = Fridge(fridge_game_object.get_child_0(), fridge_game_object.get_child_1(), object_picker, loader,
                  gui_renderer, [0, 1.6])
@@ -1363,6 +1418,8 @@ def glas_ablage(pos: list[float], rot: list[float], size: float, loader: Loader,
     ent = Entity(static_model, pos, *rot, size)
     collider = Entity(static_collider, pos, *rot, size)
     game_object = GameObject(ent, collider=collider)
+    game_object.set_ext_name("Big Glass")
+    game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
 
     cup_spawn = CupSpawn(CoffeeContainer.BIG_GLASS, pos, rot, 1, loader, obj_loader, entities, colliders)
     game_object.set_attachment(cup_spawn)
@@ -1383,6 +1440,8 @@ def tee_ablage(pos: list[float], rot: list[float], size: float, loader: Loader, 
     ent = Entity(static_model, pos, *rot, size)
     collider = Entity(static_collider, pos, *rot, size)
     game_object = GameObject(ent, collider=collider)
+    game_object.set_ext_name("Tea")
+    game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
 
     cup_spawn = CupSpawn(CoffeeContainer.TEA_POT, pos, rot, 1, loader, obj_loader, entities, colliders)
     game_object.set_attachment(cup_spawn)
@@ -1403,6 +1462,8 @@ def bier_ablage(pos: list[float], rot: list[float], size: float, loader: Loader,
     ent = Entity(static_model, pos, *rot, size)
     collider = Entity(static_collider, pos, *rot, size)
     game_object = GameObject(ent, collider=collider)
+    game_object.set_ext_name("Beer Stange")
+    game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
 
     cup_spawn = CupSpawn(CoffeeContainer.BEER, pos, rot, 1, loader, obj_loader, entities, colliders)
     game_object.set_attachment(cup_spawn)
@@ -1423,6 +1484,8 @@ def prosecco_ablage(pos: list[float], rot: list[float], size: float, loader: Loa
     ent = Entity(static_model, pos, *rot, size)
     collider = Entity(static_collider, pos, *rot, size)
     game_object = GameObject(ent, collider=collider)
+    game_object.set_ext_name("Prosecco Glass")
+    game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
 
     cup_spawn = CupSpawn(CoffeeContainer.PROSECCO, pos, rot, 1, loader, obj_loader, entities, colliders)
     game_object.set_attachment(cup_spawn)
@@ -1443,6 +1506,8 @@ def small_glass_spawn(pos: list[float], rot: list[float], size: float, loader: L
     ent = Entity(static_model, pos, *rot, size)
     collider = Entity(static_collider, pos, *rot, size)
     game_object = GameObject(ent, collider=collider)
+    game_object.set_ext_name("Small Glass")
+    game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
 
     cup_spawn = CupSpawn(CoffeeContainer.SMALL_GLASS, pos, rot, size, loader, obj_loader, entities, colliders)
     game_object.set_attachment(cup_spawn)
@@ -1463,6 +1528,8 @@ def espresso_spawn(pos: list[float], rot: list[float], size: float, loader: Load
     ent = Entity(static_model, pos, *rot, size)
     collider = Entity(static_collider, pos, *rot, size)
     game_object = GameObject(ent, collider=collider)
+    game_object.set_ext_name("Espresso")
+    game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
 
     cup_spawn = CupSpawn(CoffeeContainer.ESPRESSO_CUP, pos, rot, size, loader, obj_loader, entities, colliders)
     game_object.set_attachment(cup_spawn)
@@ -1833,7 +1900,7 @@ def column(pos: list[float], rot: list[float], size: float, loader: Loader, obj_
 
 
 def outside_essbereich(pos: list[float], rot: list[float], size: float, loader: Loader, obj_loader: OBJLoader) -> GameObject:
-    texture = ModelTexture(loader.load_texture("white"))
+    texture = ModelTexture(loader.load_texture("pngs/machinery/white"))
     texture.set_shine_damper(10)
     texture.set_reflectivity(0.5)
 
@@ -1851,7 +1918,7 @@ def outside_essbereich(pos: list[float], rot: list[float], size: float, loader: 
 
 
 def outside_hecke(pos: list[float], rot: list[float], size: float, loader: Loader, obj_loader: OBJLoader) -> GameObject:
-    texture = ModelTexture(loader.load_texture("white"))
+    texture = ModelTexture(loader.load_texture("pngs/machinery/white"))
     texture.set_shine_damper(10)
     texture.set_reflectivity(0.5)
 
@@ -1869,7 +1936,7 @@ def outside_hecke(pos: list[float], rot: list[float], size: float, loader: Loade
 
 
 def outside_streets(pos: list[float], rot: list[float], size: float, loader: Loader, obj_loader: OBJLoader) -> GameObject:
-    texture = ModelTexture(loader.load_texture("white"))
+    texture = ModelTexture(loader.load_texture("pngs/machinery/white"))
     texture.set_shine_damper(10)
     texture.set_reflectivity(0.5)
 

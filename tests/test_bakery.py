@@ -53,7 +53,7 @@ def main():
 
     # ~~~~~~~~~~~~~TEXT~~~~~~~~~~~~~~~~
     TextMaster(loader)
-    font = FontType(loader.load_texture("candara"), "res/candara.fnt")
+    font = FontType(loader.load_texture("fnts/candara"), "res/fnts/candara.fnt")
     text1 = GUIText("a sample text!", 15, font, [0, 0.02], 1, False)
     text1.set_color(1, 0, 0)
     text1.set_border_width(0.7)
@@ -202,7 +202,8 @@ def main():
     print("finished loading food")
 
     entities.extend([coffee_machine_game_object, fridge_game_object, milk_sac_game_object, milk_foamer_game_object,
-                     milk_foamer_screen, mixer_game_object, mixer_vessel_game_object,
+                     milk_foamer_screen, mixer_game_object, mixer_vessel_game_object, milk_foamer_game_object.get_child_0(),
+                     milk_foamer_game_object.get_child_1(),
                      coffee_machine_lactose_free_game_object, counter_game_object, *tap.get_game_objects(),
                      prosecco_bottle, chai_bottle, coke_zero, sprite, orange_juice, topfit_juice, lactose_free_milk,
                      oat_milk, ovomaltine, caotina, chocolatl, ice_machine_door, plate_spawn])
@@ -234,9 +235,6 @@ def main():
     finished_col.set_attachment(master_order)
     order_1 = Order(master_order, 4)
     order_1.get_gui_text()
-    order_1_ga = order_1.get_game_object([40, 10, 55], [0, 0, 0], 10)
-    entities.append(order_1_ga)
-    collider_entities.append(order_1_ga)
 
     cube_model = obj_loader.load_obj_model("objs/legacy/cube", loader)
     static_cube_model = TexturedModel(cube_model, ModelTexture(loader.load_texture("grass_block")))

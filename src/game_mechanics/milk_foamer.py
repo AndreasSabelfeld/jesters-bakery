@@ -5,7 +5,7 @@ from src.font_rendering.text_master import TextMaster
 from src.game_mechanics.game_object import GameObject
 from src.guis.gui_texture import GuiTexture
 from src.models.textured_model import TexturedModel
-from src.render_engine.input_controller import KeyboardInputListener
+from src.render_engine.input_controller import KeyboardInputListener, UniversalInputListener
 from src.render_engine.time import Time
 from src.textures.model_texture import ModelTexture
 
@@ -14,6 +14,7 @@ class MilkFoamer:
 
     def __init__(self, milk_foamer: GameObject, render_target, loader, obj_loader, fbo, gui_renderer, object_picker):
         self.__milk_foamer = milk_foamer
+        self.__milk_foamer_vessel = self.__milk_foamer.get_child_1()
         self.__render_target = render_target
         self.__interaction_key = b'f'
         self.__loader = loader
@@ -22,9 +23,9 @@ class MilkFoamer:
         self.__gui_renderer = gui_renderer
         self.__object_picker = object_picker
 
-        self.__text = GUIText("", 216, FontType(self.__loader.load_texture("candara"), "res/candara.fnt"), [0, 0.2], 1, True)
-        self.__black_texture = GuiTexture(self.__loader.load_texture("black"), [0, 0], [1920, 1080])
-        self.__text.set_color(1, 0, 0)
+        self.__text = GUIText("", 132, FontType(self.__loader.load_texture("fnts/clock"), "res/fnts/clock.fnt"), [0, 0.2], 1, True)
+        self.__black_texture = GuiTexture(self.__loader.load_texture("pngs/machinery/black"), [0, 0], [1920, 1080])
+        self.__text.set_color(1, 1, 1)
         self.__text.set_border_width(0.7)
         self.__text.set_border_edge(0.1)
         self.__lid_closed = True
@@ -35,10 +36,10 @@ class MilkFoamer:
         self.__max_fill_lvl = 3
         self.__fill_cooldown = 0.0
         self.__brewing_time = 30.0
-        self.__processed_fill_texture = ModelTexture(loader.load_texture("grass_block"))
+        self.__processed_fill_texture = ModelTexture(loader.load_texture("pngs/cups/milk_foam_filling_tex"))
         self.__content = list()
 
-        self.__listener = KeyboardInputListener()
+        self.__listener = UniversalInputListener()
 
     def update(self):
         self.interact()
@@ -57,7 +58,7 @@ class MilkFoamer:
             self.__text.set_text_string(f"{self.__brewing_time:.2f}")
 
     def interact(self) -> None:
-        if self.__listener.on_key_down(self.__interaction_key) and not self.__is_finished and not self.__is_brewing:
+        if self.__listener.get_interact() and not self.__is_finished and not self.__is_brewing:
             collision = self.__object_picker.update([self.__milk_foamer])
             if collision == self.__milk_foamer and self.__fill_lvl == self.__max_fill_lvl:
                 if self.__cup_placed and self.__lid_closed:
@@ -67,13 +68,13 @@ class MilkFoamer:
     def fill(self, texture: ModelTexture) -> None:
         if self.__fill_cooldown == 0.0 and self.__fill_lvl < self.__max_fill_lvl:
             entity = Entity(self.get_fill_model(self.__fill_lvl, texture),
-                            self.__milk_foamer.get_child_1().get_position(), 0, 0, 0, 1)
-            self.__milk_foamer.get_child_1().set_child_1(entity)
+                            self.__milk_foamer_vessel.get_position(), 0, 0, 0, 1)
+            self.__milk_foamer_vessel.set_child_1(entity)
             self.__fill_lvl += 1
             self.__fill_cooldown = 1.5
 
     def empty(self) -> None:
-        self.__milk_foamer.get_child_1().remove_child_1()
+        self.__milk_foamer_vessel.remove_child_1()
         self.__fill_lvl = 0
 
     def display(self) -> None:
@@ -86,10 +87,10 @@ class MilkFoamer:
 
     def __finished(self):
         entity = Entity(self.get_fill_model(self.__fill_lvl, self.__processed_fill_texture),
-                        self.__milk_foamer.get_child_1().get_position(), 0, 0, 0, 1)
+                        self.__milk_foamer_vessel.get_position(), 0, 0, 0, 1)
         # child_1 = cup
         # child_1.child_1 = filling
-        self.__milk_foamer.get_child_1().set_child_1(entity)
+        self.__milk_foamer_vessel.set_child_1(entity)
         self.append_content("Foam")
 
     def get_lid_closed(self) -> bool:

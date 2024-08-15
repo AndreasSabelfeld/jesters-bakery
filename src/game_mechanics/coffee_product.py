@@ -42,18 +42,19 @@ class CoffeeProduct:
         self.__texture = texture
         self.__content = content
         self.__lactose_free = lactose_free
-        self.__font = FontType(self.__loader.load_texture("candara"), "res/candara.fnt")
+        self.__font = FontType(self.__loader.load_texture("fnts/arial"), "res/fnts/arial.fnt")
         self.__icon_size = 0.125    # same as in CoffeeMachineOS class
         self.__text_offset = 0.04   # same as in CoffeeMachineOS class
         self.__text = GUIText(self.__name,
-                              18,
+                              14,
                               self.__font,
                               [(self.__icon.get_position()[0] + 1) / 2 - self.__icon_size / 2,
                                (1 - self.__icon.get_position()[1]) / 2 + self.__text_offset],
                               self.__icon_size,
                               True)
-        self.__text.set_color(1, 0, 0)
-        self.__text.set_border_width(0.7)
+        self.__text.set_color(1, 1, 1)
+        self.__text.set_outline_color(0, 0, 0)
+        self.__text.set_border_width(0.9)
         self.__text.set_border_edge(0.1)
         if add_to_coffee_page:
             if not lactose_free:

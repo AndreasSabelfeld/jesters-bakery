@@ -143,8 +143,8 @@ class Loader:
         except Exception as e:
             print(e)
             missing_texture = Image.new(mode="RGB", size=(2, 2), color=(210, 0, 160))
-            missing_texture.save(f"{path[0]}/res/missing_texture.png")
-            img = Image.open(f"{path[0]}/res/missing_texture.png").convert('RGBA')
+            missing_texture.save(f"{path[0]}/res/pngs/missing_texture.png")
+            img = Image.open(f"{path[0]}/res/pngs/missing_texture.png").convert('RGBA')
             img = img.transpose(Image.FLIP_TOP_BOTTOM)  # flip image upside down
         width, height, data = img.size[0], img.size[1], img.tobytes("raw", "RGBA", 0, -1)
         return TextureData(data, width, height)
