@@ -53,3 +53,6 @@ class TeaBagSpawn:
 
     def get_name(self) -> str:
         return self.__name
+
+    def get_packaging_game_object(self) -> GameObject:
+        return self.__packaging_go

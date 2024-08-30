@@ -10,6 +10,9 @@ from src.collision.utility import convert_to_ellipsoid_space, convert_to_r3_spac
 
 import math
 
+from ..audio.audio_master import AudioMaster
+from ..audio.source import Source
+
 
 class Player(Entity):
     """
@@ -70,6 +73,11 @@ class ThirdPersonPlayer(Player):
         self.__collision_detection = Detection(vec3(1, 1, 1))
         self.__collision_recursion_depth = 0
         self.__player_under_control = True
+        self.__music_source = None
+        self.__bg_sfx_source = None
+        self.__sfx_source = None
+        self.__steps_sfx = None
+        self.__load_audio()
         super().__init__(model, position, rot_x, rot_y, rot_z, scale)
         Player.set_instance(self)
 
@@ -102,6 +110,7 @@ class ThirdPersonPlayer(Player):
         self.__collision_detection.get_packet().base_point = pos
         self.__collision_detection.get_packet().found_collision = False
         self.__collision_detection.get_packet().nearest_distance = 999
+
         for entity in entities:
             self.__collision_detection.detect_object(entity)
         if not self.__collision_detection.get_packet().found_collision:
@@ -173,6 +182,12 @@ class ThirdPersonPlayer(Player):
             self.__is_in_air = False
             super().get_position()[1] = terrain_height
 
+        AudioMaster.set_listener_data(self.get_position(), self.get_speed_vector())
+        self.__sfx_source.set_position(*self.get_position())
+        self.__music_source.set_position(*self.get_position())
+        self.__steps_sfx.set_position(*self.get_position())
+        self.play_footsteps()
+
     def jump(self):
         if not self.__is_in_air:
             self.__current_upwards_speed = super().get_jump_power()
@@ -184,12 +199,44 @@ class ThirdPersonPlayer(Player):
     def set_player_under_control(self, is_under_control: bool) -> None:
         self.__player_under_control = is_under_control
 
+    def __load_audio(self) -> None:
+        self.__steps_sfx = Source()
+        self.__steps_sfx.set_looping(True)
+        self.__steps_sfx.play(AudioMaster.load_sound("res/audio/footsteps.wav"))
+        self.__steps_sfx.set_volume(0.5)
+        self.__steps_sfx.pause()
+        self.__sfx_source = Source()
+        self.__bg_sfx_source = Source()
+        self.__bg_sfx_source.set_position(186, 5.18, 89)
+        self.__bg_sfx_source.set_looping(True)
+        self.__bg_sfx_source.play(AudioMaster.load_sound("res/audio/dinner_atmo.wav"))
+        self.__bg_sfx_source.set_volume(0.2)
+        self.__bg_sfx_source.pause()
+        self.__music_source = Source()
+        self.__music_source.set_looping(True)
+        self.__music_source.play(AudioMaster.load_sound("res/audio/music_loop.wav"))
+        self.__music_source.set_volume(0.1)
+        self.__music_source.pause()
+
+    def get_sfx_source(self) -> Source:
+        return self.__sfx_source
+
+    def get_bg_sfx_source(self) -> Source:
+        return self.__bg_sfx_source
+
+    def start_music(self) -> None:
+        self.__bg_sfx_source.continue_playing()
+        self.__music_source.continue_playing()
+
+    def play_footsteps(self) -> None:
+        if math.sqrt(self.get_speed_vector()[0]**2 + self.get_speed_vector()[1]**2 + self.get_speed_vector()[2]**2) > 2:
+            if not self.__steps_sfx.is_playing():
+                self.__steps_sfx.continue_playing()
+        else:
+            self.__steps_sfx.pause()
+
     def __check_inputs(self):
         """Private function getting inputs from the input controller"""
-        self.__current_z_speed = 0
-        self.__current_x_speed = 0
-        self.__current_turn_speed = 0
-
         self.__current_x_speed = UniversalInput.get_x_axis_movement() * super().get_run_speed()
         self.__current_z_speed = UniversalInput.get_y_axis_movement() * super().get_run_speed()
 

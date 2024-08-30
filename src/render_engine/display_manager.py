@@ -43,6 +43,7 @@ class DisplayManager:
         glutInitWindowSize(self.get_width(), self.get_height())  # set windows size
         glutInitWindowPosition(0, 0)                             # set window position
         glutCreateWindow(f"{window_name}")                       # create window (with a name) and set window attribute
+        glutFullScreen()                                         # make it fullscreen
         glutSetWindow(1)
         glutDisplayFunc(self.update_display)
 

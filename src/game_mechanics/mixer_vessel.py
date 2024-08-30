@@ -1,3 +1,4 @@
+from src.audio.audio_master import AudioMaster
 from src.entities.entity import Entity
 from src.game_mechanics.coffee_container import CoffeeContainer
 from src.game_mechanics.game_object import GameObject
@@ -17,6 +18,7 @@ class MixerVessel:
         self.__fill_cooldown = 0
         self.__content = []
         self.__texture = None
+        self.__pour_sound = AudioMaster.load_sound("res/audio/pour.wav")
 
     def update(self):
         if self.__fill_cooldown > 0:
@@ -31,6 +33,7 @@ class MixerVessel:
         return self.__lvl
 
     def set_level(self, level: int, texture) -> None:
+        self.__vessel.get_sfx_source().play(self.__pour_sound)
         self.__lvl = level
         self.__vessel.set_child_0(Entity(self.get_model(self.__lvl, texture), self.__vessel.get_position(), 0, 0, 0,
                                          self.__vessel.get_scale()))
@@ -51,6 +54,7 @@ class MixerVessel:
                                              self.__vessel.get_rot_y(),
                                              self.__vessel.get_rot_z(),
                                              self.__vessel.get_scale()))
+            self.__vessel.get_sfx_source().play(self.__pour_sound)
             self.__lvl += 1
             self.__fill_cooldown = 1.5
             self.__texture = texture

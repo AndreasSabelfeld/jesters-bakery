@@ -1,6 +1,7 @@
 from threading import Thread
 from time import sleep
 
+from src.audio.audio_master import AudioMaster
 from src.game_mechanics.game_object import GameObject
 
 
@@ -9,11 +10,13 @@ class Mixer:
         self.__mixer = mixer_game_object
         self.__mixing_time = 3
         self.__mixing = False
+        self.__blend_sound = AudioMaster.load_sound("res/audio/short_blend.wav")
 
     def place_vessel(self, vessel: GameObject) -> None:
         vessel.set_position(self.__mixer.get_position())
 
     def start_mix(self, vessel: GameObject) -> None:
+        self.__mixer.get_sfx_source().play(self.__blend_sound)
         vessel.set_pickup_able(False)
         process = Thread(target=self.__mix, args=(vessel,))
         process.start()

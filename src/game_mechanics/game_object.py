@@ -1,3 +1,4 @@
+from src.audio.source import Source
 from src.entities.entity import Entity
 
 
@@ -15,6 +16,8 @@ class GameObject:
         self.__parent = None
         self.__offset = [0, 0, 0]
         self.__rot_offset = [0, 0, 0]
+        self.__sfx_source = Source()
+        self.__sfx_source.set_position(*entity.get_position())
         if collider: self.__collider = collider
         if child_0: self.set_child_0(child_0)
         else: self.__child_0 = None
@@ -55,6 +58,7 @@ class GameObject:
         pos = [pos[0] + self.get_offset()[0],
                pos[1] + self.get_offset()[1],
                pos[2] + self.get_offset()[2]]
+        self.__sfx_source.set_position(*pos)
         self.__entity.set_position(pos)
         self.__collider.set_position(pos)
         if self.has_child_0():
@@ -189,3 +193,6 @@ class GameObject:
 
     def get_info(self) -> str:
         return self.__info
+
+    def get_sfx_source(self) -> Source:
+        return self.__sfx_source

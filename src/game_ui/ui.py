@@ -1,5 +1,7 @@
 from OpenGL.GLUT import *
 
+from src.audio.audio_master import AudioMaster
+from src.audio.source import Source
 from src.entities.camera import Camera
 from src.font_mesh_creator.font_type import FontType
 from src.font_mesh_creator.gui_text import GUIText
@@ -20,16 +22,19 @@ class UI:
     MAIN_MENU = 1
     GAME_LOOP = 2
 
-    def __init__(self, loader: Loader, gui_renderer: GuiRenderer, level_master: Levels, display: DisplayManager):
+    def __init__(self, loader: Loader, gui_renderer: GuiRenderer, level_master: Levels, display: DisplayManager, sfx_source: Source):
         self.__time_zero = Time.time_current_time()
         self.__loader = loader
         self.__gui_renderer = gui_renderer
         self.__level_master = level_master
         self.__display = display
+        self.__sfx_source = sfx_source
         self.__clear_tex = GuiTexture(self.__loader.load_texture("pngs/machinery/black"), [0, 0], [1920, 1080])
         self.__current_screen = self.NO_SCREEN
         self.__current_texts = list()
         self.__current_textures = list()
+        self.__menu_scroll = AudioMaster.load_sound("res/audio/menu_scroll.wav")
+        self.__select = AudioMaster.load_sound("res/audio/menu_selected.wav")
 
     def render(self) -> None:
         self.__gui_renderer.render(self.__current_textures)
@@ -45,8 +50,10 @@ class UI:
         self.__current_texts.clear()
         self.__current_textures.clear()
         self.clear()
-        loading_time = 26000
+        loading_time = 30000
         percentage = ((elapsed_time - self.__time_zero) / loading_time) * 100
+        if percentage > 100:
+            percentage = 100
 
         font = FontType(self.__loader.load_texture("fnts/joystix"), "res/fnts/joystix.fnt")
         text = GUIText(f"LOADING... \n{percentage:.2f}% DONE", 15, font, [0, 0.5], 1, True)
@@ -122,15 +129,18 @@ class UI:
 
             if UniversalInput.get_up():
                 if selected_item > 0:
+                    self.__sfx_source.play(self.__menu_scroll)
                     items[selected_item].set_color(1, 1, 1)
                     selected_item -= 1
                     icon_right.set_position([icon_right.get_position()[0], icon_right.get_position()[1] + 0.25])
             if UniversalInput.get_down():
                 if selected_item < 2:
+                    self.__sfx_source.play(self.__menu_scroll)
                     items[selected_item].set_color(1, 1, 1)
                     selected_item += 1
                     icon_right.set_position([icon_right.get_position()[0], icon_right.get_position()[1] - 0.25])
             if UniversalInput.get_confirm():  # enter key
+                self.__sfx_source.play(self.__select)
                 if selected_item == 0:
                     return
                 if selected_item == 1:
@@ -232,15 +242,18 @@ class UI:
         while True:
             if UniversalInput.get_up():
                 if selected_item > 0:
+                    self.__sfx_source.play(self.__menu_scroll)
                     items[selected_item].set_color(1, 1, 1)
                     selected_item -= 1
                     icon_right.set_position([icon_right.get_position()[0], icon_right.get_position()[1] + 0.25])
             elif UniversalInput.get_down():
                 if selected_item < 2:
+                    self.__sfx_source.play(self.__menu_scroll)
                     items[selected_item].set_color(1, 1, 1)
                     selected_item += 1
                     icon_right.set_position([icon_right.get_position()[0], icon_right.get_position()[1] - 0.25])
             elif UniversalInput.get_confirm():
+                self.__sfx_source.play(self.__select)
                 if selected_item == 0:
                     return
                 if selected_item == 1:

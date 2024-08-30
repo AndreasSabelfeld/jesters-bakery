@@ -21,7 +21,7 @@ from src.textures.model_texture import ModelTexture
 
 
 def coffee_machine(pos: list[float], rot: list[float], size: float, loader: Loader, obj_loader: OBJLoader,
-                   gui_renderer, object_picker) -> GameObject:
+                   gui_renderer, object_picker, sfx_source) -> GameObject:
     coffee_machine_model = obj_loader.load_obj_model("objs/machinery/coffee_machine", loader)
     coffee_machine_texture = ModelTexture(loader.load_texture("pngs/machinery/coffee_machine_tex"))
     coffee_machine_texture.set_shine_damper(10)
@@ -46,14 +46,14 @@ def coffee_machine(pos: list[float], rot: list[float], size: float, loader: Load
     coffee_machine_game_object.set_ext_name("Coffee Machine")
 
     coffee_fbo = FBO(1920, 1080, multi_target=False, depth_buffer_type=FBO.DEPTH_TEXTURE)
-    coffee_os = CoffeeMachineOS(coffee_machine_screen, loader, obj_loader, coffee_fbo, gui_renderer, object_picker)
+    coffee_os = CoffeeMachineOS(coffee_machine_screen, loader, obj_loader, coffee_fbo, gui_renderer, object_picker, sfx_source)
     coffee_machine_game_object.set_attachment(coffee_os)
 
     return coffee_machine_game_object
 
 
 def lactose_free_coffee_machine(pos: list[float], rot: list[float], size: float, loader: Loader, obj_loader: OBJLoader,
-                                gui_renderer, object_picker) -> GameObject:
+                                gui_renderer, object_picker, sfx_source) -> GameObject:
     coffee_machine_model = obj_loader.load_obj_model("objs/machinery/coffee_machine", loader)
     coffee_machine_texture = ModelTexture(loader.load_texture("pngs/machinery/coffee_machine_tex"))
     coffee_machine_texture.set_shine_damper(10)
@@ -81,7 +81,7 @@ def lactose_free_coffee_machine(pos: list[float], rot: list[float], size: float,
 
     lactose_free_coffee_fbo = FBO(1920, 1080, multi_target=False, depth_buffer_type=FBO.DEPTH_TEXTURE)
     coffee_os_lactose_free = CoffeeMachineOSLactoseFree(coffee_machine_lactose_free_screen, loader, obj_loader,
-                                                        lactose_free_coffee_fbo, gui_renderer, object_picker)
+                                                        lactose_free_coffee_fbo, gui_renderer, object_picker, sfx_source)
     coffee_machine_lactose_free_game_object.set_attachment(coffee_os_lactose_free)
 
     return coffee_machine_lactose_free_game_object
@@ -635,7 +635,7 @@ def milk_sac(pos: list[float], rot: list[float], size: float, loader: Loader, ob
     milk_sa = Entity(static_milk_sac_model, pos, *rot, size)
     milk_sac_collider = Entity(static_milk_sac_collider, pos, *rot, size)
     milk_sac_game_object = GameObject(milk_sa, int_name="FRIDGE", collider=milk_sac_collider)
-    milk_sac_game_object.set_attachment(FridgeObject((3, 2), milk_sa, filling_texture, "Milk"))
+    milk_sac_game_object.set_attachment(FridgeObject((2, 2), milk_sa, filling_texture, "Milk"))
     milk_sac_game_object.set_ext_name("Milk Sac")
     milk_sac_game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
 
@@ -1954,7 +1954,7 @@ def outside_streets(pos: list[float], rot: list[float], size: float, loader: Loa
 
 
 def english_breakfast(pos: list[float], rot: list[float], size: float, loader: Loader, obj_loader: OBJLoader,
-                      entities: list, colliders: list) -> None:
+                      entities: list, colliders: list) -> GameObject:
     packaging = ModelTexture(loader.load_texture("pngs/ingredients/english_breakfast_packaging_tex"))
     packaging.set_shine_damper(10)
     packaging.set_reflectivity(0.5)
@@ -1963,11 +1963,12 @@ def english_breakfast(pos: list[float], rot: list[float], size: float, loader: L
     bag.set_shine_damper(10)
     bag.set_reflectivity(0.5)
 
-    TeaBagSpawn(pos, rot, size, packaging, bag, loader, obj_loader, entities, colliders, "English Breakfast")
+    spawn = TeaBagSpawn(pos, rot, size, packaging, bag, loader, obj_loader, entities, colliders, "English Breakfast")
+    return spawn.get_packaging_game_object()
 
 
 def earl_grey(pos: list[float], rot: list[float], size: float, loader: Loader, obj_loader: OBJLoader,
-                      entities: list, colliders: list) -> None:
+                      entities: list, colliders: list) -> GameObject:
     packaging = ModelTexture(loader.load_texture("pngs/ingredients/earl_grey_packaging_tex"))
     packaging.set_shine_damper(10)
     packaging.set_reflectivity(0.5)
@@ -1976,11 +1977,12 @@ def earl_grey(pos: list[float], rot: list[float], size: float, loader: Loader, o
     bag.set_shine_damper(10)
     bag.set_reflectivity(0.5)
 
-    TeaBagSpawn(pos, rot, size, packaging, bag, loader, obj_loader, entities, colliders, "Earl Grey")
+    spawn = TeaBagSpawn(pos, rot, size, packaging, bag, loader, obj_loader, entities, colliders, "Earl Grey")
+    return spawn.get_packaging_game_object()
 
 
 def ginger(pos: list[float], rot: list[float], size: float, loader: Loader, obj_loader: OBJLoader,
-           entities: list, colliders: list) -> None:
+           entities: list, colliders: list) -> GameObject:
     packaging = ModelTexture(loader.load_texture("pngs/ingredients/ginger_packaging_tex"))
     packaging.set_shine_damper(10)
     packaging.set_reflectivity(0.5)
@@ -1989,11 +1991,12 @@ def ginger(pos: list[float], rot: list[float], size: float, loader: Loader, obj_
     bag.set_shine_damper(10)
     bag.set_reflectivity(0.5)
 
-    TeaBagSpawn(pos, rot, size, packaging, bag, loader, obj_loader, entities, colliders, "Ginger")
+    spawn = TeaBagSpawn(pos, rot, size, packaging, bag, loader, obj_loader, entities, colliders, "Ginger")
+    return spawn.get_packaging_game_object()
 
 
 def nana_mint(pos: list[float], rot: list[float], size: float, loader: Loader, obj_loader: OBJLoader,
-              entities: list, colliders: list) -> None:
+              entities: list, colliders: list) -> GameObject:
     packaging = ModelTexture(loader.load_texture("pngs/ingredients/nana_mint_packaging_tex"))
     packaging.set_shine_damper(10)
     packaging.set_reflectivity(0.5)
@@ -2002,11 +2005,12 @@ def nana_mint(pos: list[float], rot: list[float], size: float, loader: Loader, o
     bag.set_shine_damper(10)
     bag.set_reflectivity(0.5)
 
-    TeaBagSpawn(pos, rot, size, packaging, bag, loader, obj_loader, entities, colliders, "Nana-Mint")
+    spawn = TeaBagSpawn(pos, rot, size, packaging, bag, loader, obj_loader, entities, colliders, "Nana Mint")
+    return spawn.get_packaging_game_object()
 
 
 def rooibos(pos: list[float], rot: list[float], size: float, loader: Loader, obj_loader: OBJLoader,
-            entities: list, colliders: list) -> None:
+            entities: list, colliders: list) -> GameObject:
     packaging = ModelTexture(loader.load_texture("pngs/ingredients/rooibos_packaging_tex"))
     packaging.set_shine_damper(10)
     packaging.set_reflectivity(0.5)
@@ -2015,11 +2019,12 @@ def rooibos(pos: list[float], rot: list[float], size: float, loader: Loader, obj
     bag.set_shine_damper(10)
     bag.set_reflectivity(0.5)
 
-    TeaBagSpawn(pos, rot, size, packaging, bag, loader, obj_loader, entities, colliders, "Rooibos")
+    spawn = TeaBagSpawn(pos, rot, size, packaging, bag, loader, obj_loader, entities, colliders, "Rooibos")
+    return spawn.get_packaging_game_object()
 
 
 def verveine(pos: list[float], rot: list[float], size: float, loader: Loader, obj_loader: OBJLoader,
-             entities: list, colliders: list) -> None:
+             entities: list, colliders: list) -> GameObject:
     packaging = ModelTexture(loader.load_texture("pngs/ingredients/verveine_packaging_tex"))
     packaging.set_shine_damper(10)
     packaging.set_reflectivity(0.5)
@@ -2028,7 +2033,8 @@ def verveine(pos: list[float], rot: list[float], size: float, loader: Loader, ob
     bag.set_shine_damper(10)
     bag.set_reflectivity(0.5)
 
-    TeaBagSpawn(pos, rot, size, packaging, bag, loader, obj_loader, entities, colliders, "Verveine")
+    spawn = TeaBagSpawn(pos, rot, size, packaging, bag, loader, obj_loader, entities, colliders, "Verveine")
+    return spawn.get_packaging_game_object()
 
 
 def ticket_machine(pos: list[float], rot: list[float], size: float, loader: Loader, obj_loader: OBJLoader) -> GameObject:

@@ -141,7 +141,8 @@ class ObjectRaycaster(Raycaster):
         self.__collision_detection.get_packet().nearest_distance = 999
 
         self.__sort_list(collider_entities)
-        for entity in collider_entities:
+        filtered_list = self.__filter_list(collider_entities)
+        for entity in filtered_list:
             self.__collision_detection.detect_object(entity)
             if self.__collision_detection.get_packet().found_collision:
                 self.__current_object_point = list(self.__collision_detection.get_packet().intersection_point)
@@ -151,6 +152,22 @@ class ObjectRaycaster(Raycaster):
         collider_entities.sort(key=lambda x: abs(sqrt((x.get_position()[0] - self.get_camera().get_position()[0])**2 +
                                                       (x.get_position()[1] - self.get_camera().get_position()[1])**2 +
                                                       (x.get_position()[2] - self.get_camera().get_position()[2])**2)))
+
+    def __filter_list(self, collider_entities: list) -> list:
+        """
+        Takes in the sorted collider entity list and creates a new one where the entities have a max distance
+        from the player
+        """
+        new_list = list()
+        for i in range(len(collider_entities)):
+            dist = abs(sqrt((collider_entities[i].get_position()[0] - self.get_camera().get_position()[0])**2 +
+                        (collider_entities[i].get_position()[1] - self.get_camera().get_position()[1])**2 +
+                        (collider_entities[i].get_position()[2] - self.get_camera().get_position()[2])**2))
+            if dist > self.__RAY_RANGE:
+                new_list.extend(collider_entities[0:i+1])
+                return new_list
+        else:
+            return collider_entities
 
     def get_current_object_point(self) -> list[float]:
         return self.__current_object_point

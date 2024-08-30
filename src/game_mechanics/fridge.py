@@ -1,5 +1,6 @@
 import math
 
+from src.audio.audio_master import AudioMaster
 from src.game_mechanics.fridge_object import FridgeObject
 from src.game_mechanics.pick_up import Carry
 from src.guis.gui_texture import GuiTexture
@@ -11,8 +12,8 @@ from src.render_engine.input_controller import KeyboardInput, KeyboardInputListe
 
 class Fridge:
 
-    __TOP_DRAWER = 1
-    __BOTTOM_DRAWER = 2
+    TOP_DRAWER = 1
+    BOTTOM_DRAWER = 2
 
     def __init__(self, top_drawer: GameObject, bottom_drawer: GameObject, object_picker, loader, gui_renderer, camera_offset: list[float]):
         self.__top_drawer = top_drawer
@@ -24,6 +25,10 @@ class Fridge:
         x = -6.5 * math.sin(math.radians(abs(self.__top_drawer.get_rot_y())))
         z = -6.5 * math.cos(math.radians(abs(self.__top_drawer.get_rot_y())))
         self.__opening_offset = vec3(x, 0, z)
+        self.__x_tile_size = 1.16
+        self.__z_tile_size = 1.21
+        self.__top_drawer_offset = [-1.45 + self.__z_tile_size / 2, 3.66, 1.2 + self.__x_tile_size / 2]
+        self.__bottom_drawer_offset = [-1.45 + self.__z_tile_size / 2, 0.46, 1.2 + self.__x_tile_size / 2]
 
         self.__is_interacting = 0
         self.__original_camera_pos = None
@@ -39,6 +44,8 @@ class Fridge:
         self.__camera_offset = camera_offset
 
         self.__listener = UniversalInputListener()
+        self.__open_sound = AudioMaster.load_sound("res/audio/drawer_open.wav")
+        self.__close_sound = AudioMaster.load_sound("res/audio/drawer_close.wav")
 
     def update(self, pick_up: Carry):
         if self.__is_interacting:
@@ -59,22 +66,26 @@ class Fridge:
 
     def move_top_drawer(self):
         if self.__top_drawer_is_open:
+            self.__top_drawer.get_sfx_source().play(self.__close_sound)
             self.__top_drawer.set_position(vec3(self.__top_drawer.get_position()) + self.__opening_offset)
-            [x.increase_position(0, 0, self.__opening_offset.z) for x in set([x for xs in self.__top_drawer_inventory for x in xs if x is not None])]
+            [x.increase_position(self.__opening_offset.x, 0, self.__opening_offset.z) for x in set([x for xs in self.__top_drawer_inventory for x in xs if x is not None])]
             self.__top_drawer_is_open = False
         else:
+            self.__top_drawer.get_sfx_source().play(self.__open_sound)
             self.__top_drawer.set_position(vec3(self.__top_drawer.get_position()) - self.__opening_offset)
-            [x.increase_position(0, 0, -self.__opening_offset.z) for x in set([x for xs in self.__top_drawer_inventory for x in xs if x is not None])]
+            [x.increase_position(-self.__opening_offset.x, 0, -self.__opening_offset.z) for x in set([x for xs in self.__top_drawer_inventory for x in xs if x is not None])]
             self.__top_drawer_is_open = True
 
     def move_bottom_drawer(self):
         if self.__bottom_drawer_is_open:
+            self.__bottom_drawer.get_sfx_source().play(self.__close_sound)
             self.__bottom_drawer.set_position(vec3(self.__bottom_drawer.get_position()) + self.__opening_offset)
-            [x.increase_position(0, 0, self.__opening_offset.z) for x in set([x for xs in self.__bottom_drawer_inventory for x in xs if x is not None])]
+            [x.increase_position(self.__opening_offset.x, 0, self.__opening_offset.z) for x in set([x for xs in self.__bottom_drawer_inventory for x in xs if x is not None])]
             self.__bottom_drawer_is_open = False
         else:
+            self.__bottom_drawer.get_sfx_source().play(self.__open_sound)
             self.__bottom_drawer.set_position(vec3(self.__bottom_drawer.get_position()) - self.__opening_offset)
-            [x.increase_position(0, 0, -self.__opening_offset.z) for x in set([x for xs in self.__bottom_drawer_inventory for x in xs if x is not None])]
+            [x.increase_position(-self.__opening_offset.x, 0, -self.__opening_offset.z) for x in set([x for xs in self.__bottom_drawer_inventory for x in xs if x is not None])]
             self.__bottom_drawer_is_open = True
 
     def interact(self, player, camera) -> None:
@@ -87,12 +98,12 @@ class Fridge:
             elif collision in [self.__top_drawer.get_collider(), self.__bottom_drawer.get_collider()]:
                 if collision == self.__top_drawer.get_collider():
                     if self.__top_drawer_is_open:
-                        self.__is_interacting = self.__TOP_DRAWER
+                        self.__is_interacting = self.TOP_DRAWER
                     else:
                         return
                 else:
                     if self.__bottom_drawer_is_open:
-                        self.__is_interacting = self.__BOTTOM_DRAWER
+                        self.__is_interacting = self.BOTTOM_DRAWER
                     else:
                         return
                 player.set_player_under_control(False)
@@ -101,36 +112,36 @@ class Fridge:
     def get_is_interacting(self) -> bool:
         return bool(self.__is_interacting)
 
-    def place(self, hands):
-        if self.__listener.get_r2():
+    def place(self, hands: Carry, side=None):
+        if self.__listener.get_r2() or side == Carry.RIGHT:
             entity = hands.get_carrying_object(Carry.RIGHT)
             if not entity:
                 self.take(Carry.RIGHT, hands)
                 return
-            if self.__is_interacting == self.__TOP_DRAWER:
+            if self.__is_interacting == self.TOP_DRAWER:
                 if self.__check_for_room(entity, self.__top_drawer_inventory):
-                    self.__place_in_top_drawer(hands.remove_carrying_object(Carry.RIGHT))
+                    self.place_in_top_drawer(hands.remove_carrying_object(Carry.RIGHT))
                     hands.movable_entities.remove(entity)
             else:
                 if self.__check_for_room(entity, self.__bottom_drawer_inventory):
-                    self.__place_in_bottom_drawer(hands.remove_carrying_object(Carry.RIGHT))
+                    self.place_in_bottom_drawer(hands.remove_carrying_object(Carry.RIGHT))
                     hands.movable_entities.remove(entity)
-        elif self.__listener.get_l2():
+        elif self.__listener.get_l2() or side == Carry.LEFT:
             entity = hands.get_carrying_object(Carry.LEFT)
             if not entity:
                 self.take(Carry.LEFT, hands)
                 return
-            if self.__is_interacting == self.__TOP_DRAWER:
+            if self.__is_interacting == self.TOP_DRAWER:
                 if self.__check_for_room(entity, self.__top_drawer_inventory):
-                    self.__place_in_top_drawer(entity)
+                    self.place_in_top_drawer(entity)
                     hands.movable_entities.remove(entity)
             else:
-                if self.__check_for_room(entity, self.__top_drawer_inventory):
-                    self.__place_in_bottom_drawer(entity)
+                if self.__check_for_room(entity, self.__bottom_drawer_inventory):
+                    self.place_in_bottom_drawer(entity)
                     hands.movable_entities.remove(entity)
 
     def take(self, side: int, hands: Carry):
-        if self.__is_interacting == self.__TOP_DRAWER:
+        if self.__is_interacting == self.TOP_DRAWER:
             entity = self.__top_drawer_inventory[self.__selected_pos[1]][self.__selected_pos[0]]
             if not entity:
                 return
@@ -146,53 +157,45 @@ class Fridge:
                                       self.__bottom_drawer_inventory[self.__selected_pos[1]][self.__selected_pos[0]])
             self.__sort_out_inventory(entity, self.__bottom_drawer_inventory)
 
-    def __place_in_top_drawer(self, entity) -> None:
-        x_tile_size = 1.16
-        z_tile_size = 1.21
-        offset = [-2.4 + x_tile_size / 2, 3.66, -1.45 + z_tile_size / 2]
+    def place_in_top_drawer(self, entity) -> None:
+        entity.set_rot_y(self.__top_drawer.get_rot_y())
 
-        if isinstance(entity.get_attachment(), FridgeObject):
-            if entity.get_attachment().get_size()[1] > 1 and entity.get_attachment().get_orientation():
-                offset[0] += x_tile_size  * (entity.get_attachment().get_size()[1] - 1)
-            if entity.get_attachment().get_orientation():
-                entity.set_rot_y(-90)
-            else:
-                entity.set_rot_y(0)
-        else:
-            entity.set_rot_y(0)
-
-        x_pos = offset[0] + self.__selected_pos[0] * x_tile_size + self.__top_drawer.get_position()[0]
-        y_pos = offset[1] + self.__top_drawer.get_position()[1]
-        z_pos = offset[2] + self.__selected_pos[1] * z_tile_size + self.__top_drawer.get_position()[2]
+        # the position is 'hard coded' to fit into the rotation of the fridge in the shop level, due to time
+        # constraints
+        x_pos = self.__top_drawer_offset[0] + self.__selected_pos[1] * self.__z_tile_size + self.__top_drawer.get_position()[0]
+        y_pos = self.__top_drawer_offset[1]                                               + self.__top_drawer.get_position()[1]
+        z_pos = self.__top_drawer_offset[2] - self.__selected_pos[0] * self.__x_tile_size + self.__top_drawer.get_position()[2]
 
         self.__sort_in_inventory(entity, self.__top_drawer_inventory)
         entity.set_position([x_pos, y_pos, z_pos])
         entity.set_rot_x(0)
         entity.set_rot_z(0)
 
-    def __place_in_bottom_drawer(self, entity) -> None:
-        x_tile_size = 1.16
-        z_tile_size = 1.21
-        offset = [-2.4 + x_tile_size / 2, 0.46, -1.45 + z_tile_size / 2]
+    def place_in_bottom_drawer(self, entity) -> None:
+        entity.set_rot_y(self.__bottom_drawer.get_rot_y())
 
-        if isinstance(entity.get_attachment(), FridgeObject):
-            if entity.get_attachment().get_size()[1] > 1 and entity.get_attachment().get_orientation():
-                offset[0] += x_tile_size * (entity.get_attachment().get_size()[1] - 1)
-            if entity.get_attachment().get_orientation():
-                entity.set_rot_y(-90)
-            else:
-                entity.set_rot_y(0)
-        else:
-            entity.set_rot_y(0)
-
-        x_pos = offset[0] + self.__selected_pos[0] * x_tile_size + self.__bottom_drawer.get_position()[0]
-        y_pos = offset[1]                                        + self.__bottom_drawer.get_position()[1]
-        z_pos = offset[2] + self.__selected_pos[1] * z_tile_size + self.__bottom_drawer.get_position()[2]
+        # the position is 'hard coded' to fit into the rotation of the fridge in the shop level, due to time
+        # constraints
+        x_pos = self.__bottom_drawer_offset[0] + self.__selected_pos[1] * self.__z_tile_size + self.__bottom_drawer.get_position()[0]
+        y_pos = self.__bottom_drawer_offset[1]                                               + self.__bottom_drawer.get_position()[1]
+        z_pos = self.__bottom_drawer_offset[2] - self.__selected_pos[0] * self.__x_tile_size + self.__bottom_drawer.get_position()[2]
 
         self.__sort_in_inventory(entity, self.__bottom_drawer_inventory)
         entity.set_position([x_pos, y_pos, z_pos])
         entity.set_rot_x(0)
         entity.set_rot_z(0)
+
+    def set_selected_pos(self, x: int, y: int) -> None:
+        self.__selected_pos = [x, y]
+
+    def set_is_interacting(self, interacting: bool) -> None:
+        self.__is_interacting = interacting
+
+    def set_top_drawer_offset(self, x: float, y: float, z: float) -> None:
+        self.__top_drawer_offset = [x, y, z]
+
+    def set_bottom_drawer_offset(self, x: float, y: float, z: float) -> None:
+        self.__bottom_drawer_offset = [x, y, z]
 
     def __check_for_room(self, entity, inventory) -> bool:
         if not isinstance(entity.get_attachment(), FridgeObject):

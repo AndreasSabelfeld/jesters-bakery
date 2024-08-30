@@ -1,3 +1,4 @@
+from src.audio.audio_master import AudioMaster
 from src.game_mechanics.coffee_container import CoffeeContainer
 from src.game_mechanics.cup_spawn import CupSpawn
 from src.game_mechanics.food import Food
@@ -5,7 +6,8 @@ from src.game_mechanics.food_spawn import FoodSpawn
 from src.game_mechanics.order import MasterOrder
 from src.game_mechanics.ingredient import Ingredient
 from src.game_mechanics.tea_bag_spawn import TeaBagSpawn
-from src.render_engine.input_controller import KeyboardInput, ControllerInput, UniversalInput
+from src.game_ui.key_hints import KeyHints
+from src.render_engine.input_controller import KeyboardInput, ControllerInput, UniversalInput, Binds
 from src.game_mechanics.game_object import GameObject
 from src.game_mechanics.coffee_machine_os import CoffeeMachineOS, CoffeeMachineOSLactoseFree
 from src.game_mechanics.fridge_object import FridgeObject
@@ -18,10 +20,11 @@ class Carry:
     LEFT = 0
     RIGHT = 1
 
-    def __init__(self, terrain_raycaster, object_raycaster, coffee_machine, coffee_machine_lf):
+    def __init__(self, terrain_raycaster, object_raycaster, coffee_machine, coffee_machine_lf, sfx_source):
         self.__camera = terrain_raycaster.get_camera()
         self.__terrain_picker = terrain_raycaster
         self.__object_picker = object_raycaster
+        self.__sfx_source = sfx_source
         self.__is_carrying_right = False
         self.__carrying_object_right = None
         self.__is_carrying_left = False
@@ -35,6 +38,9 @@ class Carry:
         self.__c_pressed = False
         self.__y_pressed = False
 
+        self.__pick_up_audio = AudioMaster.load_sound("res/audio/grab.wav")
+        self.__lay_down_audio = AudioMaster.load_sound("res/audio/put_down.wav")
+
     def update(self, can_pick_up: bool = True) -> None:
         relevant_entities = [_ for _ in self.movable_entities if
                              _ not in (self.__carrying_object_right, self.__carrying_object_left)]
@@ -43,6 +49,9 @@ class Carry:
             self.__move_right()
         if self.__is_carrying_left:
             self.__move_left()
+
+        if self.__is_carrying_right and self.__is_carrying_left:
+            KeyHints.set_text(f"Press {Binds.get_bind(Binds.L1)} + {Binds.get_bind(Binds.R1)} to interact with objects")
 
         if not can_pick_up:
             return
@@ -87,6 +96,7 @@ class Carry:
                     entity.get_parent().remove_child_1()
                 entity.set_offset([0, 0, 0])
         if entity is not None:
+            self.__sfx_source.play(self.__pick_up_audio)
             if side:
                 self.__is_carrying_right = True
                 self.__carrying_object_right = entity
@@ -100,6 +110,7 @@ class Carry:
             if not self.__pick_up_coffee(entity):
                 return 1
             else:
+                self.__sfx_source.play(self.__pick_up_audio)
                 return 0
         elif name == "TOP_DRAWER":
             entity.get_attachment().move_top_drawer()
@@ -110,6 +121,7 @@ class Carry:
         elif name == "MILK_FOAMER_LID":
             if entity.get_attachment().get_is_brewing():
                 return 1
+            self.__sfx_source.play(self.__pick_up_audio)
             entity.get_attachment().set_lid_closed(False)
             return 0
         elif name == "MILK_FOAMER_CUP":
@@ -117,25 +129,31 @@ class Carry:
                 return 1
             if not entity.get_attachment().get_lid_closed():
                 if entity.get_attachment().get_cup_placed():
+                    self.__sfx_source.play(self.__pick_up_audio)
                     entity.get_attachment().set_cup_placed(False)
                     return 0
         elif name == "MILK_FOAMER_VESSEL":
             if entity.get_attachment().get_is_brewing():
                 return 1
             if entity.get_attachment().get_lid_closed():
+                self.__sfx_source.play(self.__pick_up_audio)
                 entity.get_attachment().set_lid_closed(False)
                 self.set_carrying_object(side, entity.get_child_0())
             elif entity.get_attachment().get_cup_placed():
+                self.__sfx_source.play(self.__pick_up_audio)
                 entity.get_attachment().set_cup_placed(False)
                 self.set_carrying_object(side, entity.get_child_1())
             return 1
         elif isinstance(entity.get_attachment(), FoodSpawn):
+            self.__sfx_source.play(self.__pick_up_audio)
             self.set_carrying_object(side, entity.get_attachment().spawn())
             return 1
         elif isinstance(entity.get_attachment(), CupSpawn):
+            self.__sfx_source.play(self.__pick_up_audio)
             self.set_carrying_object(side, entity.get_attachment().spawn())
             return 1
         elif isinstance(entity.get_attachment(), TeaBagSpawn):
+            self.__sfx_source.play(self.__pick_up_audio)
             self.set_carrying_object(side, entity.get_attachment().spawn())
             return 1
         elif name == "DOOR":
@@ -149,8 +167,40 @@ class Carry:
                                                    entity.get_position()[2]])
             return 1
         elif name == "TICKET":
+            self.__sfx_source.play(self.__pick_up_audio)
             entity.get_attachment().remove_game_object_from_list(entity)
             return 0
+
+    def __lay_down(self, side: int, carrying_entity, relevant_entities: list) -> None:
+        relevant_entities = [_ for _ in relevant_entities if
+                             _ not in self.__coffee_machine.get_attachment().get_coffee_list()]
+        entity = self.__object_picker.update(relevant_entities)
+        if isinstance(entity, GameObject):
+            if self.__lay_down_special_cases(entity, side):
+                return
+            if isinstance(entity.get_attachment(), (CoffeeMachineOS, CoffeeMachineOSLactoseFree)):
+                self.__lay_down_coffee(side, entity)
+                self.remove_carrying_object(side)
+                return
+
+        # there isn't really ever a situation, where you want to put something below this height, mostly it's caused by
+        # a faulty collision detection, so this is kind of a way to fight that
+        min_height = 12.5
+        if entity is not None:
+            self.__sfx_source.play(self.__lay_down_audio)
+            pos = self.__object_picker.get_current_object_point()
+            pos[1] = max(min_height, pos[1])
+            carrying_entity.set_position([pos[0], pos[1], pos[2]])
+            self.remove_carrying_object(side)
+        else:
+            self.__terrain_picker.update()
+            terrain = self.__terrain_picker.get_current_terrain_point()
+            if terrain is not None:
+                self.__sfx_source.play(self.__lay_down_audio)
+                self.remove_carrying_object(side)
+                terrain[1] = max(min_height, terrain[1])
+                terrain = [terrain[0], terrain[1], terrain[2]]
+                carrying_entity.set_position(terrain)
 
     def __lay_down_special_cases(self, entity, side):
         name = entity.get_int_name()
@@ -272,35 +322,6 @@ class Carry:
                         self.get_carrying_object(side).get_child_0().set_pickup_able(False)
                         self.remove_carrying_object(side)
                         return 1
-
-    def __lay_down(self, side: int, carrying_entity, relevant_entities: list) -> None:
-        relevant_entities = [_ for _ in relevant_entities if
-                             _ not in self.__coffee_machine.get_attachment().get_coffee_list()]
-        entity = self.__object_picker.update(relevant_entities)
-        if isinstance(entity, GameObject):
-            if self.__lay_down_special_cases(entity, side):
-                return
-            if isinstance(entity.get_attachment(), (CoffeeMachineOS, CoffeeMachineOSLactoseFree)):
-                self.__lay_down_coffee(side, entity)
-                self.remove_carrying_object(side)
-                return
-
-        # there isn't really ever a situation, where you want to put something below this height, mostly it's caused by
-        # a faulty collision detection, so this is kind of a way to fight that
-        min_height = 12.75
-        if entity is not None:
-            pos = self.__object_picker.get_current_object_point()
-            pos[1] = max(min_height, pos[1])
-            carrying_entity.set_position([pos[0], pos[1], pos[2]])
-            self.remove_carrying_object(side)
-        else:
-            self.__terrain_picker.update()
-            terrain = self.__terrain_picker.get_current_terrain_point()
-            if terrain is not None:
-                self.remove_carrying_object(side)
-                terrain[1] = max(min_height, terrain[1])
-                terrain = [terrain[0], terrain[1], terrain[2]]
-                carrying_entity.set_position(terrain)
 
     def set_carrying_object(self, side: int, entity) -> None:
         if side:

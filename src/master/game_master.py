@@ -1,7 +1,8 @@
-import threading
-
 from OpenGL.GLUT import *
+from openal import alDistanceModel, AL_LINEAR_DISTANCE, AL_LINEAR_DISTANCE_CLAMPED, AL_INVERSE_DISTANCE,  \
+    AL_INVERSE_DISTANCE_CLAMPED, AL_EXPONENT_DISTANCE, AL_EXPONENT_DISTANCE_CLAMPED
 
+from src.audio.audio_master import AudioMaster
 from src.entities.camera import Camera
 from src.entities.light import Light
 from src.entities.player import FirstPersonPlayer
@@ -13,6 +14,7 @@ from src.game_mechanics.order import MasterOrder, Order
 from src.game_mechanics.pick_up import Carry
 from src.game_mechanics.scanner import Scanner
 from src.game_mechanics.tap import Tap
+from src.game_ui.key_hints import KeyHints
 from src.game_ui.ui import UI
 from src.master import prefabs
 from src.master.levels import Levels
@@ -20,7 +22,6 @@ from src.models.textured_model import TexturedModel
 from src.obj_converter.obj_loader import OBJLoader, NormalMappedOBJLoader
 from src.render_engine.display_manager import DisplayManager
 from src.render_engine.gui_renderer import GuiRenderer
-from src.render_engine.input_controller import KeyboardInput
 from src.render_engine.loader import Loader
 from src.game_mechanics.coffee_container import CoffeeContainer
 from src.render_engine.master_renderer import MasterRenderer
@@ -54,7 +55,10 @@ class GameMaster:
         player_model = self.__obj_loader.load_obj_model("objs/legacy/bunny", self.__loader)
         static_player_model = TexturedModel(player_model, ModelTexture(self.__loader.load_texture("pngs/machinery/white")))
 
-        self.__player = FirstPersonPlayer(static_player_model, [160.5, 5.18, 180], 0, 0, 0, 14)
+        self.__audio_master = AudioMaster()
+        self.__audio_master.set_listener_data([0, 0, 0], [0, 0, 0])
+        alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED)
+        self.__player = FirstPersonPlayer(static_player_model, [0, 0, 0], 0, 0, 0, 14)
         self.__player.set_player_size(14)
         self.__camera = Camera(self.__player)
 
@@ -95,12 +99,13 @@ class GameMaster:
 
         self.__finished_collider.set_attachment(self.__master_order)
 
-        self.__carry = Carry(self.__terrain_picker, self.__object_picker, self.__coffee_machine, self.__coffee_machine_lf)
+        self.__carry = Carry(self.__terrain_picker, self.__object_picker, self.__coffee_machine, self.__coffee_machine_lf, self.__player.get_sfx_source())
         self.__carry.movable_entities = self.__collider_entities
 
         self.__level_master = Levels(self.__master_order, self.__ticket_machine, self.__entities, self.__collider_entities, self.__shadow_map_entities)
-        self.__game_ui = UI(self.__loader, self.__gui_renderer, self.__level_master, self.__display)
+        self.__game_ui = UI(self.__loader, self.__gui_renderer, self.__level_master, self.__display, self.__player.get_sfx_source())
         self.__game_ui.loading_screen(Time.time_current_time())
+        self.__key_hints = KeyHints(self.__loader)
 
         self.__load_game()
 
@@ -116,6 +121,7 @@ class GameMaster:
         self.__game_ui.loading_screen(self.__load_eating_area())
         self.__game_ui.loading_screen(self.__load_chairs())
         self.__game_ui.loading_screen(self.__load_food())
+        self.__game_ui.loading_screen(self.__load_ingredients())
         self.__game_ui.loading_screen(self.__load_walls())
         self.__game_ui.loading_screen(self.__load_outside_area())
 
@@ -129,6 +135,7 @@ class GameMaster:
 
         self.__camera.set_position([160.5, 5.18, 180])
         self.__player.set_position([160.5, 5.18, 180])
+        self.__player.start_music()
         self.__level_master.set_countdown(10)
         self.__level_master.start_current_day()
 
@@ -141,8 +148,8 @@ class GameMaster:
             Time.set_delta_time()   # automatically calculates delta time
             Time.set_last_frame_time(Time.time_current_time())
 
-            self.__move_player(first_frame)
             self.__update_objects()
+            self.__move_player(first_frame)
             self.__render()
 
             glutSwapBuffers()       # needs to be called AFTER finished drawing
@@ -167,6 +174,7 @@ class GameMaster:
         first_frame[0] = False
 
     def __update_objects(self) -> None:
+        self.__key_hints.remove_text()
         self.__level_master.update()
         self.__game_ui.game_loop()
         self.__object_picker.update(self.__collider_entities)
@@ -192,6 +200,7 @@ class GameMaster:
         self.__work_drawer_os.render_selected_texture()
         self.__scanner.render_crosshair()
         self.__game_ui.render()
+        self.__key_hints.render()
         TextMaster.render_specified(specified)
 
     def __load_terrain(self) -> float:
@@ -447,6 +456,72 @@ class GameMaster:
         prefabs.citron_cake([135.0, 11.1, 255.0], [0, 0, 0], food_size, self.__loader, self.__obj_loader, self.__entities, self.__collider_entities)
         return Time.time_current_time()
 
+    def __load_ingredients(self) -> float:
+        coke_zero = prefabs.coke_zero([72, 10, 50], [0, 0, 0], 1, self.__loader, self.__obj_loader)
+        self.__fridge_os.place_in_bottom_drawer(coke_zero)
+        sprite = prefabs.sprite([74, 10, 50], [0, 0, 0], 1, self.__loader, self.__obj_loader)
+        self.__fridge_os.set_selected_pos(1, 0)
+        self.__fridge_os.place_in_bottom_drawer(sprite)
+        orange_juice = prefabs.orange_juice([76, 10, 50], [0, 0, 0], 1, self.__loader, self.__obj_loader)
+        self.__fridge_os.set_selected_pos(0, 2)
+        self.__fridge_os.place_in_top_drawer(orange_juice)
+        topfit_juice = prefabs.topfit_juice([78, 10, 50], [0, 0, 0], 1, self.__loader, self.__obj_loader)
+        self.__fridge_os.set_selected_pos(0, 3)
+        self.__fridge_os.place_in_top_drawer(topfit_juice)
+        prosecco_bottle = prefabs.prosecco_bottle([80, 10, 50], [0, 0, 0], 1, self.__loader, self.__obj_loader)
+        self.__fridge_os.set_selected_pos(2, 0)
+        self.__fridge_os.place_in_bottom_drawer(prosecco_bottle)
+        chai_bottle = prefabs.chai_bottle([82, 10, 50], [0, 0, 0], 1, self.__loader, self.__obj_loader)
+        self.__fridge_os.set_selected_pos(3, 0)
+        self.__fridge_os.place_in_bottom_drawer(chai_bottle)
+
+        milk_sac_game_object = prefabs.milk_sac([80, 10, 50], [0, 0, 0], 1, self.__loader, self.__obj_loader)
+        self.__fridge_os.set_selected_pos(0, 0)
+        self.__fridge_os.place_in_top_drawer(milk_sac_game_object)
+        lactose_free_milk = prefabs.lactose_free_milk([82, 10, 50], [0, 0, 0], 1, self.__loader, self.__obj_loader)
+        self.__fridge_os.set_selected_pos(3, 0)
+        self.__fridge_os.place_in_top_drawer(lactose_free_milk)
+        oat_milk = prefabs.oat_milk([84, 10, 50], [0, 0, 0], 1, self.__loader, self.__obj_loader)
+        self.__fridge_os.set_selected_pos(3, 1)
+        self.__fridge_os.place_in_top_drawer(oat_milk)
+
+        ovomaltine = prefabs.ovomaltine([84, 10, 50], [0, 0, 0], 1, self.__loader, self.__obj_loader)
+        self.__work_drawer_os.set_selected_pos(0, 0)
+        self.__work_drawer_os.place_in_bottom_drawer(ovomaltine)
+        caotina = prefabs.caotina([86, 10, 50], [0, 0, 0], 1, self.__loader, self.__obj_loader)
+        self.__work_drawer_os.set_selected_pos(1, 0)
+        self.__work_drawer_os.place_in_bottom_drawer(caotina)
+        chocolatl = prefabs.chocolatl([88, 10, 50], [0, 0, 0], 1, self.__loader, self.__obj_loader)
+        self.__work_drawer_os.set_selected_pos(2, 0)
+        self.__work_drawer_os.place_in_bottom_drawer(chocolatl)
+
+        tea_size = 0.5
+        english_breakfast = prefabs.english_breakfast([90, 10, 50], [0, 0, 0], tea_size, self.__loader, self.__obj_loader, self.__entities, self.__collider_entities)
+        self.__work_drawer_os.set_selected_pos(0, 0)
+        self.__work_drawer_os.place_in_top_drawer(english_breakfast)
+        earl_grey = prefabs.earl_grey([92, 10, 50], [0, 0, 0], tea_size, self.__loader, self.__obj_loader, self.__entities, self.__collider_entities)
+        self.__work_drawer_os.set_selected_pos(1, 0)
+        self.__work_drawer_os.place_in_top_drawer(earl_grey)
+        ginger = prefabs.ginger([94, 10, 50], [0, 0, 0], tea_size, self.__loader, self.__obj_loader, self.__entities, self.__collider_entities)
+        self.__work_drawer_os.set_selected_pos(2, 0)
+        self.__work_drawer_os.place_in_top_drawer(ginger)
+        verveine = prefabs.verveine([96, 10, 50], [0, 0, 0], tea_size, self.__loader, self.__obj_loader, self.__entities, self.__collider_entities)
+        self.__work_drawer_os.set_selected_pos(3, 0)
+        self.__work_drawer_os.place_in_top_drawer(verveine)
+        nana_mint = prefabs.nana_mint([98, 10, 50], [0, 0, 0], tea_size, self.__loader, self.__obj_loader, self.__entities, self.__collider_entities)
+        self.__work_drawer_os.set_selected_pos(0, 2)
+        self.__work_drawer_os.place_in_top_drawer(nana_mint)
+        rooibos = prefabs.rooibos([100, 10, 50], [0, 0, 0], tea_size, self.__loader, self.__obj_loader, self.__entities, self.__collider_entities)
+        self.__work_drawer_os.set_selected_pos(1, 2)
+        self.__work_drawer_os.place_in_top_drawer(rooibos)
+
+        ents = [coke_zero, sprite, orange_juice, topfit_juice, prosecco_bottle, chai_bottle, milk_sac_game_object,
+                lactose_free_milk, oat_milk, ovomaltine, caotina, chocolatl]
+        self.__entities.extend(ents)
+        self.__shadow_map_entities.extend(ents)
+
+        return Time.time_current_time()
+
     def __load_walls(self) -> float:
         size = 1.75
         south_wall_traiteur = prefabs.south_wall_traiteur([80, 5.18, 295], [0, -90, 0], size, self.__loader, self.__obj_loader)
@@ -484,7 +559,8 @@ class GameMaster:
                                                             self.__loader,
                                                             self.__obj_loader,
                                                             self.__gui_renderer,
-                                                            self.__object_picker)
+                                                            self.__object_picker,
+                                                            self.__player.get_sfx_source())
         self.__entities.append(coffee_machine_game_object)
         self.__collider_entities.append(coffee_machine_game_object)
         self.__shadow_map_entities.append(coffee_machine_game_object)
@@ -496,7 +572,8 @@ class GameMaster:
                                                                                       self.__loader,
                                                                                       self.__obj_loader,
                                                                                       self.__gui_renderer,
-                                                                                      self.__object_picker)
+                                                                                      self.__object_picker,
+                                                                                      self.__player.get_sfx_source())
         self.__entities.append(coffee_machine_lactose_free_game_object)
         self.__collider_entities.append(coffee_machine_lactose_free_game_object)
         self.__shadow_map_entities.append(coffee_machine_lactose_free_game_object)
@@ -513,6 +590,8 @@ class GameMaster:
     def __load_work_drawer(self, size: float) -> GameObject:
         workplate = prefabs.workplate1([150, 5.18, 173.5], [0, -90, 0], size, self.__loader, self.__obj_loader,
                                        self.__gui_renderer, self.__object_picker)
+        workplate.get_child_0().get_attachment().set_top_drawer_offset(-1.45 + 1.21 / 2, 3.66, 4 + 1.16 / 2)
+        workplate.get_child_0().get_attachment().set_bottom_drawer_offset(-1.45 + 1.21 / 2, 0.46, 4 + 1.16 / 2)
         self.__entities.append(workplate)
         self.__collider_entities.extend([workplate, workplate.get_child_0(), workplate.get_child_1()])
         self.__shadow_map_entities.append(workplate)
@@ -521,7 +600,8 @@ class GameMaster:
     def __load_milk_foamer(self) -> GameObject:
         milk_foamer_game_object = prefabs.milk_foamer([150, 12.5, 175], [0, 90, 0], 1, self.__loader, self.__obj_loader,
                                                       self.__gui_renderer, self.__object_picker)
-        self.__entities.extend([milk_foamer_game_object, milk_foamer_game_object.get_child_0(), milk_foamer_game_object.get_child_1()])
+        self.__entities.extend([milk_foamer_game_object, milk_foamer_game_object.get_child_0(), milk_foamer_game_object.get_child_1(),
+                                milk_foamer_game_object.get_attachment().get_render_target()])
         self.__collider_entities.extend([milk_foamer_game_object, milk_foamer_game_object.get_child_0(), milk_foamer_game_object.get_child_1()])
         self.__shadow_map_entities.extend([milk_foamer_game_object, milk_foamer_game_object.get_child_0(), milk_foamer_game_object.get_child_1()])
         return milk_foamer_game_object

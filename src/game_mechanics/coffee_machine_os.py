@@ -1,6 +1,9 @@
 import math
 from time import sleep
 from threading import Thread
+
+from src.audio.audio_master import AudioMaster
+from src.audio.source import Source
 from src.render_engine.input_controller import KeyboardInput, ControllerInput, KeyboardInputListener, UniversalInput, \
     UniversalInputListener
 from src.render_engine.time import Time
@@ -19,7 +22,7 @@ class CoffeeMachineOS:
     BACKGROUND_TEXTURE_SIZE = [1920, 1080]
     __NAME = "COFFEE_MACHINE"
 
-    def __init__(self, render_target, loader, obj_loader, fbo, gui_renderer, object_picker) -> None:
+    def __init__(self, render_target, loader, obj_loader, fbo, gui_renderer, object_picker, sfx_source: Source) -> None:
         """
         Creates new CoffeeMachineOS instance.
 
@@ -87,6 +90,18 @@ class CoffeeMachineOS:
         self.__max_queue_length = 7
 
         self.__listener = UniversalInputListener()
+
+        self.__ui_sfx_source = sfx_source
+        self.__sfx_source = Source()
+        self.__sfx_source.set_position(*render_target.get_position())
+        self.__sfx_source.set_volume(1.5)
+        self.__water_sfx_source = Source()
+        self.__water_sfx_source.set_position(*render_target.get_position())
+        self.__water_sfx_source.set_volume(0.5)
+        self.__menu_scroll_sound = AudioMaster.load_sound("res/audio/menu_scroll.wav")
+        self.__select_sound = AudioMaster.load_sound("res/audio/menu_selected.wav")
+        self.__print_sound = AudioMaster.load_sound("res/audio/coffee_machine.wav")
+        self.__tea_sound = AudioMaster.load_sound("res/audio/tea_pouring.wav")
 
     def render_screen(self) -> None:
         self.__update_time_remaining()
@@ -182,22 +197,27 @@ class CoffeeMachineOS:
         """Updates the cursor of the coffee machine. Method is being called from the render_screen method."""
         if self.__is_interacting:
             if UniversalInput.get_up():
+                self.__ui_sfx_source.play(self.__menu_scroll_sound)
                 if self.__selected_position[1] == 4:
                     self.__selected_position[0] = self.__current_page * 4
                 self.__selected_position[1] -= 1 if self.__selected_position[1] > 0 else 0
             if UniversalInput.get_down():
+                self.__ui_sfx_source.play(self.__menu_scroll_sound)
                 self.__selected_position[1] += 1 if self.__selected_position[1] < 5 else 0
                 if self.__selected_position[1] == 4:
                     self.__selected_position[0] = 0
             if UniversalInput.get_left():
+                self.__ui_sfx_source.play(self.__menu_scroll_sound)
                 if self.__selected_position[1] < 4:
                     self.__selected_position[0] -= 1 if self.__selected_position[0] > -1 else 0
             if UniversalInput.get_right():
+                self.__ui_sfx_source.play(self.__menu_scroll_sound)
                 if self.__selected_position[1] == 4:
                     self.__selected_position[0] += 1 if self.__selected_position[0] < self.__max_queue_length - 1 else 0
                 elif self.__selected_position[0] < 4 * len(CoffeePage.get_instances()) - 1:
                     self.__selected_position[0] += 1
             if UniversalInput.get_confirm():    # enter key
+                self.__ui_sfx_source.play(self.__select_sound)
                 if self.__selected_position[1] == 4:
                     self.__remove_beverage_from_queue(self.__selected_position[0])
                 elif self.__selected_position[1] == 5:
@@ -330,16 +350,19 @@ class CoffeeMachineOS:
         if self.__brewing_queue[0].get_container_type() == CoffeeProduct.TEA_POT:
             if not self.__brewing_tea:
                 if self.__positioned_coffees[0]:
+                    self.__water_sfx_source.play(self.__tea_sound)
                     self.__brewing_tea = True
                     self.__positioned_coffees[0].get_attachment().append_content(self.__brewing_queue[0].get_content())
                     process = Thread(target=self.__fill_timing, args=(self.__max_level, True,))
                     process.start()
-            return  # if tea is being made, no coffee should be let out
+            return
 
         if self.__brewing_coffee:
             return
         if not self.__positioned_coffees[1]:
             return
+
+        self.__sfx_source.play(self.__print_sound)
 
         if self.__brewing_queue[0].is_allow_double():
             # is allowed to make to 2 coffees and 2 coffees are placed:
@@ -398,10 +421,12 @@ class CoffeeMachineOS:
         if self.__positioned_coffees[1]:
             self.__positioned_coffees[1].get_attachment().fill(texture)
             if self.__positioned_coffees[1].get_attachment().get_level() == self.__max_level:
+                self.__sfx_source.stop()
                 self.__check_for_compatibility_of_container(self.__positioned_coffees[1].get_attachment(), texture)
         if self.__positioned_coffees[2]:
             self.__positioned_coffees[2].get_attachment().fill(texture)
             if self.__positioned_coffees[2].get_attachment().get_level() == self.__max_level:
+                self.__sfx_source.stop()
                 self.__check_for_compatibility_of_container(self.__positioned_coffees[2].get_attachment(), texture)
 
         if not self.__brewing_coffee:
@@ -639,7 +664,7 @@ class CoffeeMachineOSLactoseFree:
     BACKGROUND_TEXTURE_SIZE = [1920, 1080]
     __NAME = "COFFEE_MACHINE"
 
-    def __init__(self, render_target, loader, obj_loader, fbo, gui_renderer, object_picker) -> None:
+    def __init__(self, render_target, loader, obj_loader, fbo, gui_renderer, object_picker, sfx_source: Source) -> None:
         """
         Creates new CoffeeMachineOS instance.
 
@@ -701,6 +726,18 @@ class CoffeeMachineOSLactoseFree:
         self.__max_queue_length = 7
 
         self.__listener = UniversalInputListener()
+
+        self.__ui_sfx_source = sfx_source
+        self.__sfx_source = Source()
+        self.__sfx_source.set_position(*render_target.get_position())
+        self.__sfx_source.set_volume(1.5)
+        self.__water_sfx_source = Source()
+        self.__water_sfx_source.set_position(*render_target.get_position())
+        self.__water_sfx_source.set_volume(0.5)
+        self.__menu_scroll_sound = AudioMaster.load_sound("res/audio/menu_scroll.wav")
+        self.__select_sound = AudioMaster.load_sound("res/audio/menu_selected.wav")
+        self.__print_sound = AudioMaster.load_sound("res/audio/coffee_machine.wav")
+        self.__tea_sound = AudioMaster.load_sound("res/audio/tea_pouring.wav")
 
     def render_screen(self) -> None:
         self.__update_time_remaining()
@@ -787,21 +824,26 @@ class CoffeeMachineOSLactoseFree:
         """Updates the cursor of the coffee machine. Method is being called from the render_screen method."""
         if self.__is_interacting:
             if UniversalInput.get_up():
+                self.__ui_sfx_source.play(self.__menu_scroll_sound)
                 if self.__selected_position[1] == 4:
                     self.__selected_position[0] = self.__current_page * 4
                 self.__selected_position[1] -= 1 if self.__selected_position[1] > 0 else 0
             if UniversalInput.get_down():
+                self.__ui_sfx_source.play(self.__menu_scroll_sound)
                 self.__selected_position[1] += 1 if self.__selected_position[1] < 5 else 0
                 if self.__selected_position[1] == 4:
                     self.__selected_position[0] = 0
             if UniversalInput.get_left():
+                self.__ui_sfx_source.play(self.__menu_scroll_sound)
                 self.__selected_position[0] -= 1 if self.__selected_position[0] > 0 else 0
             if UniversalInput.get_right():
+                self.__ui_sfx_source.play(self.__menu_scroll_sound)
                 if self.__selected_position[1] == 4:
                     self.__selected_position[0] += 1 if self.__selected_position[0] < self.__max_queue_length - 1 else 0
                 elif self.__selected_position[0] < 4 * len(CoffeePage.get_instances()) - 1:
                     self.__selected_position[0] += 1
             if UniversalInput.get_confirm():    # enter key
+                self.__ui_sfx_source.play(self.__select_sound)
                 if self.__selected_position[1] == 4:
                     self.__remove_beverage_from_queue(self.__selected_position[0])
                 elif self.__selected_position[1] == 5:
@@ -927,6 +969,7 @@ class CoffeeMachineOSLactoseFree:
         if self.__brewing_queue[0].get_container_type() == CoffeeProduct.TEA_POT:
             if not self.__brewing_tea:
                 if self.__positioned_coffees[0]:
+                    self.__water_sfx_source.play(self.__tea_sound)
                     process = Thread(target=self.__fill_timing, args=(self.__max_level, True,))
                     process.start()
                     self.__brewing_tea = True
@@ -937,6 +980,8 @@ class CoffeeMachineOSLactoseFree:
             return
         if not self.__positioned_coffees[1]:
             return
+
+        self.__sfx_source.play(self.__print_sound)
 
         if self.__brewing_queue[0].is_allow_double():
             # is allowed to make to 2 coffees and 2 coffees are placed:

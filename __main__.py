@@ -4,7 +4,6 @@ from src.master.game_master import GameMaster
 
 
 def main():
-    # test_bakery_modelled.main()
     game = GameMaster()
 
     """lvl = 8

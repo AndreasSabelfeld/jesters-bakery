@@ -1,5 +1,6 @@
 from OpenGL.GLUT import *
 
+from src.audio.audio_master import AudioMaster
 from src.game_mechanics.coffee_container import CoffeeContainer
 from src.game_mechanics.order import MasterOrder, Order
 from src.game_mechanics.tap import Tap
@@ -42,6 +43,7 @@ def main():
     display = DisplayManager(1920, 1080)
     display.create_display("An-gine")  # creates display
     display.set_backdrop_color(173, 216, 230)
+    audio_master = AudioMaster()
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~~~LOADERS~~~~~~~~~~~~~~
@@ -119,10 +121,10 @@ def main():
     food_size = 0.5
     mixer_size = 0.5
     coffee_machine_game_object = prefabs.coffee_machine([50, 10, 50], [0, 0, 0], machine_size, loader, obj_loader,
-                                                        gui_renderer, object_picker)
+                                                        gui_renderer, object_picker, player.get_sfx_source())
     coffee_machine_lactose_free_game_object = prefabs.lactose_free_coffee_machine([46, 10, 50], [0, 0, 0], machine_size,
                                                                                   loader, obj_loader,
-                                                                                  gui_renderer, object_picker)
+                                                                                  gui_renderer, object_picker, player.get_sfx_source())
     fridge_game_object = prefabs.fridge([40, 10, 50], [0, 0, 0], machine_size, loader, obj_loader,
                                         gui_renderer, object_picker)
     milk_foamer_game_object = prefabs.milk_foamer([56, 10, 50], [0, 0, 0], 1, loader, obj_loader,
@@ -219,10 +221,10 @@ def main():
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # ~~~~~~~~~~~~~GAME~~~~~~~~~~~~~~~~~
-    carry = Carry(terrain_picker, object_picker, coffee_machine_game_object, coffee_machine_lactose_free_game_object)
+    carry = Carry(terrain_picker, object_picker, coffee_machine_game_object, coffee_machine_lactose_free_game_object, player.get_sfx_source())
     carry.movable_entities = collider_entities
 
-    scanner = Scanner(object_picker, loader)
+    scanner = Scanner(object_picker, loader, gui_renderer)
     coffee_os = coffee_machine_game_object.get_attachment()
     coffee_os_lactose_free = coffee_machine_lactose_free_game_object.get_attachment()
     fridge = fridge_game_object.get_child_0().get_attachment()

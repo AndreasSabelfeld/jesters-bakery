@@ -1,3 +1,5 @@
+from src.audio.audio_master import AudioMaster
+from src.audio.source import Source
 from src.entities.entity import Entity
 from src.game_mechanics.game_object import GameObject
 from src.models.textured_model import TexturedModel
@@ -23,7 +25,9 @@ class CoffeeContainer:
         self.__level = 0
         self.__overflown = False
         self.__content = list()
-        self.__parent_entity.set_info(self.__content)
+        self.__parent_entity.set_info(str(self.__content))
+        self.__pour_sound = AudioMaster.load_sound("res/audio/pour.wav")
+        self.__parent_entity.get_sfx_source().set_volume(3)
 
     @classmethod
     def add_loaders(cls, loader, obj_loader):
@@ -55,11 +59,13 @@ class CoffeeContainer:
                 return TexturedModel(self.__obj_loader.load_obj_model(f"objs/cups/prosecco_glass_lvl_{level}", self.__loader), texture)
 
     def fill(self, texture: ModelTexture) -> None:
+        self.__parent_entity.get_sfx_source().play(self.__pour_sound)
         self.__level += 1
         self.__parent_entity.set_child_0(Entity(self.get_model(self.__container_type, self.__level, texture),
                                                 self.__parent_entity.get_position(), 0, 0, 0, 1))
 
     def set_level(self, level: int, texture) -> None:
+        self.__parent_entity.get_sfx_source().play(self.__pour_sound)
         self.__level = level
         self.__parent_entity.set_child_0(Entity(self.get_model(self.__container_type, self.__level, texture),
                                                 self.__parent_entity.get_position(), 0, 0, 0, 1))
