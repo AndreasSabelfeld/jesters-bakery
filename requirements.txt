@@ -1,6 +1,17 @@
-Pillow~=9.4.0
-numpy~=1.24.1
-pyopengl~=3.1.6
+setuptools
+Pillow
+numpy==1.26.4
+pyopenal
+pyopengl==3.1.7
 PyWave~=0.5.0
 glfw~=2.6.2
 inputs~=0.5
+
+# install all using:
+# pip install -r requirements.txt
+
+# it is recommended to run using python 3.10.2
+# the version can be downlaoded from here:
+# https://www.python.org/downloads/release/python-3102/
+
+# you may need to install the OpenGL wheel from the "/whls" folder

@@ -8,9 +8,9 @@ class GuiShader(ShaderProgram):
     __FRAGMENT_FILE = f"{path[0]}/src/guis/guiFragmentShader.glsl"
 
     def __init__(self):
-        super().__init__(self.__VERTEX_FILE, self.__FRAGMENT_FILE)
-
         self.__location_transformation_matrix = 0
+
+        super().__init__(self.__VERTEX_FILE, self.__FRAGMENT_FILE)
 
     def get_all_uniform_locations(self):
         self.__location_transformation_matrix = super().get_uniform_location("transformation_matrix")

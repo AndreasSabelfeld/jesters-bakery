@@ -106,7 +106,7 @@ class Carry:
 
     def __pick_up_special_cases(self, entity, side) -> int:
         name = entity.get_int_name()
-        if name == "COFFEE" or name == "TEA" or name == "GLASS":
+        if name == "COFFEE" or name == "TEA" or name == "GLASS" or name == "MIXER_VESSEL":
             if not self.__pick_up_coffee(entity):
                 return 1
             else:

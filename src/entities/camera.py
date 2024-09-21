@@ -105,8 +105,9 @@ class Camera:
 
     def calculate_zoom(self) -> None:
         """Calculates the zoom from the input controller"""
-        zoom_level = KeyboardInput.get_scroll() * 2
-        self.__distance_from_player -= zoom_level
+        # zoom_level = KeyboardInput.get_scroll() * 2
+        # self.__distance_from_player -= zoom_level
+        pass
 
     def calculate_pitch(self) -> None:
         """Calculates the pitch from the input controller"""

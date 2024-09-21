@@ -3,6 +3,7 @@ from OpenGL.GLUT import *
 from src.audio.audio_master import AudioMaster
 from src.audio.source import Source
 from src.entities.camera import Camera
+from src.entities.player import ThirdPersonPlayer, FirstPersonPlayer
 from src.font_mesh_creator.font_type import FontType
 from src.font_mesh_creator.gui_text import GUIText
 from src.font_rendering.text_master import TextMaster
@@ -22,13 +23,16 @@ class UI:
     MAIN_MENU = 1
     GAME_LOOP = 2
 
-    def __init__(self, loader: Loader, gui_renderer: GuiRenderer, level_master: Levels, display: DisplayManager, sfx_source: Source):
+    def __init__(self, loader: Loader, gui_renderer: GuiRenderer, level_master: Levels, display: DisplayManager, sfx_source: Source,
+                 player: FirstPersonPlayer, camera: Camera):
         self.__time_zero = Time.time_current_time()
         self.__loader = loader
         self.__gui_renderer = gui_renderer
         self.__level_master = level_master
         self.__display = display
         self.__sfx_source = sfx_source
+        self.__player = player
+        self.__camera = camera
         self.__clear_tex = GuiTexture(self.__loader.load_texture("pngs/machinery/black"), [0, 0], [1920, 1080])
         self.__current_screen = self.NO_SCREEN
         self.__current_texts = list()
@@ -65,7 +69,7 @@ class UI:
         self.render()
 
     def main_menu(self, master_renderer: MasterRenderer, entities: list, nm_entities: list, terrains: list, lights: list,
-                  camera: Camera, sm_entities: list, sun) -> None:
+                  sm_entities: list, sun) -> None:
         self.__current_texts.clear()
         self.__current_textures.clear()
 
@@ -107,8 +111,8 @@ class UI:
         Time.set_delta_time()  # automatically calculates delta time
         Time.set_last_frame_time(Time.time_current_time())
 
-        camera.set_position([200, 19.18, 260])
-        camera.set_yaw(-90)
+        self.__camera.set_position([200, 19.18, 260])
+        self.__camera.set_yaw(-90)
         direction = 1
 
         while True:
@@ -116,12 +120,12 @@ class UI:
             Time.set_delta_time()  # automatically calculates delta time
             Time.set_last_frame_time(Time.time_current_time())
 
-            if camera.get_position()[2] >= 260:
+            if self.__camera.get_position()[2] >= 260:
                 direction = -2 * Time.get_delta_time()
-            elif camera.get_position()[2] <= 75:
+            elif self.__camera.get_position()[2] <= 75:
                 direction = 2 * Time.get_delta_time()
 
-            camera.get_position()[2] += direction
+            self.__camera.get_position()[2] += direction
 
             # because of some reason the camera doesn't move except when something is printed, so I'm printing an
             # empty string
@@ -151,11 +155,79 @@ class UI:
 
             items[selected_item].set_color(250 / 255, 218 / 255, 94 / 255)
             master_renderer.render_shadow_map(sm_entities, sun)
-            master_renderer.render_scene(entities, nm_entities, terrains, lights, camera, self.__display)
+            master_renderer.render_scene(entities, nm_entities, terrains, lights, self.__camera, self.__display)
             self.render()
 
-    def options_menu(self):
-        ...
+    def options_menu(self) -> bool:
+        old_texts = self.__current_texts.copy()
+        old_textures = self.__current_textures.copy()
+        self.__current_texts.clear()
+        self.__current_textures.clear()
+
+        selected_item = 0
+
+        font = FontType(self.__loader.load_texture("fnts/lonely_coffee"), "res/fnts/lonely_coffee.fnt")
+
+        item_bg = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Item3"), [0, -0.25], [0.33, 0.5])
+        item_1 = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Item5"), [0, 0], [0.25, 0.10])
+        item_1_text = GUIText(f"Reset Character", 20, font, [0, 0.47], 1, True)
+        item_1_text.set_color(1, 1, 1)
+        item_1_text.set_border_width(0.7)
+        item_1_text.set_offset([0.003, 0.003])
+
+        item_2 = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Item5"), [0, -0.25], [0.25, 0.10])
+        item_2_text = GUIText(f"Reset Progress", 20, font, [0, 0.6], 1, True)
+        item_2_text.set_color(1, 1, 1)
+        item_2_text.set_border_width(0.7)
+        item_2_text.set_offset([0.003, 0.003])
+
+        item_3 = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Item5"), [0, -0.5], [0.25, 0.10])
+        item_3_text = GUIText(f"Return", 20, font, [0, 0.72], 1, True)
+        item_3_text.set_color(1, 1, 1)
+        item_3_text.set_border_width(0.7)
+        item_3_text.set_offset([0.003, 0.003])
+
+        icon_right = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Icon_Right"), [-0.3, 0], [0.04, 0.1])
+
+        items = [item_1_text, item_2_text, item_3_text]
+        self.__current_textures = [item_bg, item_1, item_2, item_3, icon_right]
+        self.__current_texts = [*items]
+
+        while True:
+            Time.set_current_time(Time.time_current_time())
+            Time.set_delta_time()  # automatically calculates delta time
+            Time.set_last_frame_time(Time.time_current_time())
+
+            if UniversalInput.get_up():
+                if selected_item > 0:
+                    self.__sfx_source.play(self.__menu_scroll)
+                    items[selected_item].set_color(1, 1, 1)
+                    selected_item -= 1
+                    icon_right.set_position([icon_right.get_position()[0], icon_right.get_position()[1] + 0.25])
+            if UniversalInput.get_down():
+                if selected_item < 2:
+                    self.__sfx_source.play(self.__menu_scroll)
+                    items[selected_item].set_color(1, 1, 1)
+                    selected_item += 1
+                    icon_right.set_position([icon_right.get_position()[0], icon_right.get_position()[1] - 0.25])
+            if UniversalInput.get_confirm():  # enter key
+                self.__sfx_source.play(self.__select)
+                if selected_item == 0:
+                    self.__camera.set_position([160.5, 5.18, 180])
+                    self.__player.set_position([160.5, 5.18, 180])
+                    self.__current_texts = old_texts
+                    self.__current_textures = old_textures
+                    return True
+                if selected_item == 1:
+                    self.__level_master._write_save(1)
+                    self.__level_master._load_save()
+                if selected_item == 2:
+                    self.__current_texts = old_texts
+                    self.__current_textures = old_textures
+                    return False
+
+            items[selected_item].set_color(250 / 255, 218 / 255, 94 / 255)
+            self.render()
 
     def game_loop(self) -> None:
         self.__current_texts.clear()
@@ -240,6 +312,10 @@ class UI:
         self.__current_texts = [title_text, *items]
 
         while True:
+            Time.set_current_time(Time.time_current_time())
+            Time.set_delta_time()  # automatically calculates delta time
+            Time.set_last_frame_time(Time.time_current_time())
+
             if UniversalInput.get_up():
                 if selected_item > 0:
                     self.__sfx_source.play(self.__menu_scroll)
@@ -257,7 +333,8 @@ class UI:
                 if selected_item == 0:
                     return
                 if selected_item == 1:
-                    self.options_menu()
+                     if self.options_menu():
+                         return
                 if selected_item == 2:
                     self.__display.destroy_window()
                     return
@@ -308,6 +385,10 @@ class UI:
             self.__current_texts = [title_text, item_2_text, points_text]
 
         while True:
+            Time.set_current_time(Time.time_current_time())
+            Time.set_delta_time()  # automatically calculates delta time
+            Time.set_last_frame_time(Time.time_current_time())
+
             if UniversalInput.get_confirm():  # enter key
                 return
             self.render()

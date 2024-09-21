@@ -2,6 +2,7 @@ from OpenGL.GLUT import *
 from openal import alDistanceModel, AL_LINEAR_DISTANCE, AL_LINEAR_DISTANCE_CLAMPED, AL_INVERSE_DISTANCE,  \
     AL_INVERSE_DISTANCE_CLAMPED, AL_EXPONENT_DISTANCE, AL_EXPONENT_DISTANCE_CLAMPED
 import ast
+import ctypes
 
 from src.audio.audio_master import AudioMaster
 from src.entities.camera import Camera
@@ -43,7 +44,9 @@ class GameMaster:
         self.__terrains = []
         self.__lights = []
 
-        self.__display = DisplayManager(1920, 1080)
+        user32 = ctypes.windll.user32
+        screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
+        self.__display = DisplayManager(*screensize)
         self.__display.create_display("An-gine")  # creates display
         self.__display.set_backdrop_color(173, 216, 230)
 
@@ -104,7 +107,7 @@ class GameMaster:
         self.__carry.movable_entities = self.__collider_entities
 
         self.__level_master = Levels(self.__master_order, self.__ticket_machine, self.__entities, self.__collider_entities, self.__shadow_map_entities)
-        self.__game_ui = UI(self.__loader, self.__gui_renderer, self.__level_master, self.__display, self.__player.get_sfx_source())
+        self.__game_ui = UI(self.__loader, self.__gui_renderer, self.__level_master, self.__display, self.__player.get_sfx_source(), self.__player, self.__camera)
         self.__game_ui.loading_screen(Time.time_current_time())
         self.__key_hints = KeyHints(self.__loader)
 
@@ -130,11 +133,17 @@ class GameMaster:
         self.start_game()
 
     def start_game(self):
-        args = (self.__master_renderer, self.__entities, self.__nm_entities, self.__terrains, self.__lights,
-                self.__camera, self.__shadow_map_entities, self.__sun)
+        self.__game_ui.main_menu(self.__master_renderer, self.__entities, self.__nm_entities, self.__terrains, self.__lights, self.__shadow_map_entities, self.__sun)
 
-        self.__game_ui.main_menu(*args)
+        self.__camera.set_position([160.5, 5.18, 180])
+        self.__player.set_position([160.5, 5.18, 180])
+        self.__player.start_music()
+        self.__level_master.set_countdown(10)
+        self.__level_master.start_current_day()
 
+        self.game_loop()
+
+    def restart_game(self):
         self.__camera.set_position([160.5, 5.18, 180])
         self.__player.set_position([160.5, 5.18, 180])
         self.__player.start_music()
@@ -184,7 +193,7 @@ class GameMaster:
                 self.__level_master.progress_next_day()
             self.__move_out_of_bounds()
             self.__reload_cached_positions()
-            self.__level_master.start_current_day()
+            self.restart_game()
 
     def __update_objects(self) -> None:
         self.__key_hints.remove_text()

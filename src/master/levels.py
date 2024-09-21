@@ -14,13 +14,12 @@ class Levels:
         self.__sm_entities = sm_ents
 
         self.__current_lvl = -1
-        self.__load_save()
+        self._load_save()
 
         self.__current_order = 0
         self.__order_time = 0
 
         self.__amount_of_orders = 0
-        self.__length_of_day = 0
         self.__goal_points = 0
         self.__total_points = 0
 
@@ -61,25 +60,32 @@ class Levels:
 
     def progress_next_day(self) -> None:
         self.__current_lvl += 1
-        self.__write_save(self.__current_lvl)
+        self._write_save(self.__current_lvl)
 
     def start_current_day(self) -> None:
+        self.__orders = list()
 
         match self.__current_lvl:
             case 1:
                 self.day_1()
+            case 2:
+                self.day_2()
             case _:
                 # game finished
                 pass
 
     def day_1(self):
-        self.__amount_of_orders = 2
+        self.__amount_of_orders = 1
         for _ in range(self.__amount_of_orders):
             length_of_order = 1
             self.__orders.append(Order(self.__master_order, length_of_order))
-        self.__length_of_day = 0
-        for order in self.__orders:
-            self.__length_of_day += order.get_time()
+        self.__goal_points = -100
+
+    def day_2(self):
+        self.__amount_of_orders = 1
+        for _ in range(self.__amount_of_orders):
+            length_of_order = 1
+            self.__orders.append(Order(self.__master_order, length_of_order))
         self.__goal_points = -100
 
     def __start_order(self, order: Order) -> None:
@@ -92,7 +98,7 @@ class Levels:
         for i in range(self.__current_order + 1):
             self.__orders[i].check_if_fulfilled()
 
-    def __load_save(self) -> None:
+    def _load_save(self) -> None:
         save_file = "sav/save.txt"
         with open(save_file, "a+") as f:
             f.seek(0)
@@ -105,7 +111,7 @@ class Levels:
             f.close()
 
     @staticmethod
-    def __write_save(data: int) -> None:
+    def _write_save(data: int) -> None:
         save_file = "sav/save.txt"
         with open(save_file, "w") as f:
             f.write(f"{data}")
@@ -120,9 +126,6 @@ class Levels:
 
     def get_current_lvl(self) -> int:
         return self.__current_lvl
-
-    def get_length_of_day(self) -> int:
-        return self.__length_of_day
 
     def get_goal_points(self) -> int:
         return self.__goal_points
