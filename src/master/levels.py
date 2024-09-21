@@ -13,7 +13,9 @@ class Levels:
         self.__collider_entities = col_ents
         self.__sm_entities = sm_ents
 
-        self.__current_lvl = 1
+        self.__current_lvl = -1
+        self.__load_save()
+
         self.__current_order = 0
         self.__order_time = 0
 
@@ -21,7 +23,6 @@ class Levels:
         self.__length_of_day = 0
         self.__goal_points = 0
         self.__total_points = 0
-        self.__start_offset_factor = 1
 
         self.__countdown = 0
         self.__initial_spawn = False
@@ -35,25 +36,51 @@ class Levels:
         if not self.__initial_spawn:
             self.__start_order(self.__orders[self.__current_order])
             self.__initial_spawn = True
-        if self.__order_time > self.__orders[self.__current_order].get_initial_time() * self.__start_offset_factor:
+        if self.__order_time > self.__orders[self.__current_order].get_initial_time():
             if self.__current_order < len(self.__orders) - 1:
                 self.__current_order += 1
                 self.__order_time = 0
                 self.__start_order(self.__orders[self.__current_order])
+        if self.check_if_all_orders_fulfilled():
+            self.calculate_points()
 
         self.__order_time += Time.get_delta_time()
         self.__update_orders()
 
+    def check_if_all_orders_fulfilled(self) -> bool:
+        for i in range(self.__current_order + 1):
+            if not self.__orders[i].is_fulfilled():
+                return False
+        return True
+
+    def calculate_points(self) -> int:
+        self.__total_points = 0
+        for i in range(self.__current_order + 1):
+            self.__total_points += self.__orders[i].calculate_points()
+        return self.__total_points
+
     def progress_next_day(self) -> None:
         self.__current_lvl += 1
+        self.__write_save(self.__current_lvl)
 
     def start_current_day(self) -> None:
+
         match self.__current_lvl:
             case 1:
                 self.day_1()
             case _:
                 # game finished
                 pass
+
+    def day_1(self):
+        self.__amount_of_orders = 2
+        for _ in range(self.__amount_of_orders):
+            length_of_order = 1
+            self.__orders.append(Order(self.__master_order, length_of_order))
+        self.__length_of_day = 0
+        for order in self.__orders:
+            self.__length_of_day += order.get_time()
+        self.__goal_points = -100
 
     def __start_order(self, order: Order) -> None:
         game_object = order.spawn_ticket(self.__ticket_machine)
@@ -65,15 +92,24 @@ class Levels:
         for i in range(self.__current_order + 1):
             self.__orders[i].check_if_fulfilled()
 
-    def day_1(self):
-        self.__amount_of_orders = 3
-        for _ in range(self.__amount_of_orders):
-            length_of_order = random.randint(3, 5)
-            self.__orders.append(Order(self.__master_order, length_of_order))
-        self.__length_of_day = 0
-        for order in self.__orders:
-            self.__length_of_day += order.get_time()
-        self.__goal_points = 0
+    def __load_save(self) -> None:
+        save_file = "sav/save.txt"
+        with open(save_file, "a+") as f:
+            f.seek(0)
+            data = f.read()
+            if not data:
+                f.write(f"{1}")
+                f.seek(0)
+                data = f.read()
+            self.__current_lvl = int(data)
+            f.close()
+
+    @staticmethod
+    def __write_save(data: int) -> None:
+        save_file = "sav/save.txt"
+        with open(save_file, "w") as f:
+            f.write(f"{data}")
+            f.close()
 
     def count_down(self) -> None:
         if self.__countdown > 0:

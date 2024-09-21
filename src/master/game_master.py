@@ -1,6 +1,7 @@
 from OpenGL.GLUT import *
 from openal import alDistanceModel, AL_LINEAR_DISTANCE, AL_LINEAR_DISTANCE_CLAMPED, AL_INVERSE_DISTANCE,  \
     AL_INVERSE_DISTANCE_CLAMPED, AL_EXPONENT_DISTANCE, AL_EXPONENT_DISTANCE_CLAMPED
+import ast
 
 from src.audio.audio_master import AudioMaster
 from src.entities.camera import Camera
@@ -124,6 +125,7 @@ class GameMaster:
         self.__game_ui.loading_screen(self.__load_ingredients())
         self.__game_ui.loading_screen(self.__load_walls())
         self.__game_ui.loading_screen(self.__load_outside_area())
+        self.__cache_positions()
 
         self.start_game()
 
@@ -148,6 +150,7 @@ class GameMaster:
             Time.set_delta_time()   # automatically calculates delta time
             Time.set_last_frame_time(Time.time_current_time())
 
+            self.__level_logic()
             self.__update_objects()
             self.__move_player(first_frame)
             self.__render()
@@ -163,7 +166,7 @@ class GameMaster:
             # in the first frame delta_time is zero
             self.__player.move(self.__collider_entities)
 
-        # if player is interacting with any of these:
+        # if player is not interacting with any of these:
         if not (self.__coffee_os.get_is_interacting() or self.__coffee_os_lactose_free.get_is_interacting() or
                 self.__fridge_os.get_is_interacting() or self.__work_drawer_os.get_is_interacting()):
             self.__camera.move()
@@ -173,9 +176,18 @@ class GameMaster:
 
         first_frame[0] = False
 
+    def __level_logic(self):
+        self.__level_master.update()
+        if self.__level_master.check_if_all_orders_fulfilled():
+            self.__game_ui.level_complete()
+            if self.__level_master.get_total_points() >= self.__level_master.get_goal_points():
+                self.__level_master.progress_next_day()
+            self.__move_out_of_bounds()
+            self.__reload_cached_positions()
+            self.__level_master.start_current_day()
+
     def __update_objects(self) -> None:
         self.__key_hints.remove_text()
-        self.__level_master.update()
         self.__game_ui.game_loop()
         self.__object_picker.update(self.__collider_entities)
         self.__scanner.update(self.__collider_entities)
@@ -202,6 +214,35 @@ class GameMaster:
         self.__game_ui.render()
         self.__key_hints.render()
         TextMaster.render_specified(specified)
+
+    def __move_out_of_bounds(self) -> None:
+        """
+        Entities created midst level should not be taken over to the next level, hence they (and every other object)
+        are moved out of bounds. (The used objects are being moved back to their original position with the
+        __reload_cached_positions method)
+        """
+        for entity in self.__entities:
+            entity.set_position([-999, -999, -999])
+
+    def __cache_positions(self) -> None:
+        dictionary = dict()
+        for entity in self.__entities:
+            dictionary.update({id(entity): entity.get_position()})
+        cache_file = "sav/cache.txt"
+        with open(cache_file, 'w') as f:
+            f.write(str(dictionary))
+            f.close()
+
+    @staticmethod
+    def __reload_cached_positions() -> None:
+        cache_file = "sav/cache.txt"
+        with open(cache_file, 'r') as f:
+            data = f.read()
+            f.close()
+        data_as_dict = ast.literal_eval(data)
+        for key in data_as_dict.keys():
+            obj = ctypes.cast(key, ctypes.py_object).value
+            obj.set_position(data_as_dict[key])
 
     def __load_terrain(self) -> float:
         background_texture = TerrainTexture(self.__loader.load_texture("pngs/shop/asphalt"))

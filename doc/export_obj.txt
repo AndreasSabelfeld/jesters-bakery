@@ -1,3 +1,5 @@
+Author: Andreas Sabelfeld
+
 HOW TO EXPORT A BLENDER MODEL TO USE IT IN THIS ENGINE:
 
 Step 1:

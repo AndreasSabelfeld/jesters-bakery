@@ -1,6 +1,5 @@
 from openal import *
 import PyWave
-from os import path
 
 
 class AudioMaster:

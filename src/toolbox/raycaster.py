@@ -155,7 +155,7 @@ class ObjectRaycaster(Raycaster):
 
     def __filter_list(self, collider_entities: list) -> list:
         """
-        Takes in the sorted collider entity list and creates a new one where the entities have a max distance
+        Takes in the sorted collider entity list and creates a new one where the entities have a maximal distance
         from the player
         """
         new_list = list()

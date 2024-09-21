@@ -20,7 +20,7 @@ class Plane:
             normal = normal.normalize()
         except ZeroDivisionError:
             # I don't know what exactly in a 3D model causes the normal to be non-existent...
-            # probably a faulty 3D modell with vertices at the exact same position.
+            # probably a faulty 3D model with vertices at the exact same position.
             pass
         return cls(p1, normal)
 

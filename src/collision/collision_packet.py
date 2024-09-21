@@ -60,7 +60,7 @@ class CollisionPacket:
             t = 1.0
 
             # check for collision inside the triangle
-            # most of the models are so dense, that detecting a collision inside the plane is obsolete.s
+            # doesn't work
             """if not embedded_in_plane:
                 plane_intersection_point = (self.base_point - triangle_plane.normal) + t0*self.velocity
 

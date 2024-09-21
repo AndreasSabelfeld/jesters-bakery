@@ -110,7 +110,7 @@ class Order:
         file_name = "ticket"
         obj = open(f"{sys.path[0]}/res/objs/machinery/{file_name}.obj", 'w')
         x = 0.075
-        y = (0.5 / 16) * (self.__text.get_number_of_lines() - 2)
+        y = (0.5 / 16) * (self.__text.get_number_of_lines() - 1)
         self.__ticket_height = 0.7 * y
         obj.write(f"v -{x} {self.__ticket_height} -0.000000\n" +
                   f"v {x} {self.__ticket_height} -0.000000\n" +
@@ -302,7 +302,7 @@ class MasterOrder:
     @staticmethod
     def calculate_time(order: list):
         time = 0
-        grace_factor = 2
+        grace_factor = 3
         for element in order:
             time += element[2]
         time *= grace_factor

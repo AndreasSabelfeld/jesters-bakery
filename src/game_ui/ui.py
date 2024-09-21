@@ -270,6 +270,7 @@ class UI:
     def level_complete(self) -> None:
         self.__current_texts.clear()
         self.__current_textures.clear()
+        points = self.__level_master.get_total_points()
 
         font = FontType(self.__loader.load_texture("fnts/lonely_coffee"), "res/fnts/lonely_coffee.fnt")
 
@@ -279,25 +280,32 @@ class UI:
         title_text.set_border_width(0.7)
         title_text.set_offset([0.003, 0.003])
 
-        item_2 = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Item5"), [0, -0.25], [0.25, 0.10])
-        item_2_text = GUIText(f"Next Day", 20, font, [0, 0.6], 1, True)
+        points_text = GUIText(f"Your Points: {points}", 16, font, [0, 0.6], 1, True)
+        points_text.set_color(1, 1, 1)
+        points_text.set_border_width(0.7)
+        points_text.set_offset([0.003, 0.003])
+
+        item_2 = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Item5"), [0, -0.65], [0.25, 0.10])
+        item_2_text = GUIText(f"Next Day", 20, font, [0, 0.8], 1, True)
         item_2_text.set_color(1, 1, 1)
         item_2_text.set_border_width(0.7)
         item_2_text.set_offset([0.003, 0.003])
 
-        if self.__level_master.get_total_points() >= self.__level_master.get_goal_points():
+        if -1 >= self.__level_master.get_goal_points():
             star_1 = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Icon_Star"), [-0.25, 0.6], [0.12, 0.2])
             star_2 = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Icon_Star"), [0, 0.7], [0.12, 0.2])
             star_3 = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Icon_Star"), [0.25, 0.6], [0.12, 0.2])
 
             self.__current_textures = [title_bg, star_1, star_2, star_3, item_2]
-            self.__current_texts = [title_text, item_2_text]
+            self.__current_texts = [title_text, item_2_text, points_text]
         else:
             title_text.set_text_string("Level Failed!")
+            title_text.set_position([0, 0.15])
+            points_text.set_text_string(f"Your Points: {points} \nPoints needed: {self.__level_master.get_goal_points()}")
             item_2_text.set_text_string("Restart Day")
 
             self.__current_textures = [title_bg, item_2]
-            self.__current_texts = [title_text, item_2_text]
+            self.__current_texts = [title_text, item_2_text, points_text]
 
         while True:
             if UniversalInput.get_confirm():  # enter key
