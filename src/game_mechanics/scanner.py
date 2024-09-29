@@ -4,6 +4,7 @@ from src.guis.gui_texture import GuiTexture
 from src.render_engine.gui_renderer import GuiRenderer
 from src.toolbox.raycaster import ObjectRaycaster
 from src.game_mechanics.game_object import GameObject
+from src.toolbox.path import PATH
 
 
 class Scanner:
@@ -14,7 +15,7 @@ class Scanner:
         self.__prompt = str()
         self.__info = str()
 
-        font = FontType(loader.load_texture("fnts/prompt_font"), "res/fnts/prompt_font.fnt")
+        font = FontType(loader.load_texture("fnts/prompt_font"), f"{PATH}/res/fnts/prompt_font.fnt")
         self.__text = GUIText("", 15, font, [0.05, 0.8], 0.5, False)
         self.__text.set_color(1, 1, 1)
         self.__text.set_outline_color(0, 0, 0)

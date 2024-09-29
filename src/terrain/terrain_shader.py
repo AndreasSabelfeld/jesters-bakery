@@ -1,5 +1,5 @@
 from src.shaders.shader_program import ShaderProgram
-from sys import path
+from src.toolbox.path import PATH
 from src.toolbox.maths import Maths
 
 
@@ -7,13 +7,13 @@ class TerrainShader(ShaderProgram):
 
     __MAX_LIGHTS = 5
 
-    __VERTEX_FILE = f"{path[0]}/src/terrain/terrainVertexShader.glsl"
-    __FRAGMENT_FILE = f"{path[0]}/src/terrain/terrainFragmentShader.glsl"
+    __VERTEX_FILE = f"{PATH}/src/terrain/terrainVertexShader.glsl"
+    __FRAGMENT_FILE = f"{PATH}/src/terrain/terrainFragmentShader.glsl"
 
     def __init__(self):
         if ShaderProgram.get_is_cel():
             # if cel shading is activated use another shader
-            TerrainShader.__FRAGMENT_FILE = f"{path[0]}/src/shaders/cel_terrainFragmentShader.glsl"
+            TerrainShader.__FRAGMENT_FILE = f"{PATH}/src/shaders/cel_terrainFragmentShader.glsl"
         self.__location_transformation_matrix: int = 0  # no location
         self.__location_projection_matrix: int = 0
         self.__location_view_matrix: int = 0

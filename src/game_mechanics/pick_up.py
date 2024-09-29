@@ -12,6 +12,7 @@ from src.game_mechanics.game_object import GameObject
 from src.game_mechanics.coffee_machine_os import CoffeeMachineOS, CoffeeMachineOSLactoseFree
 from src.game_mechanics.fridge_object import FridgeObject
 from src.pycgtypes import vec3
+from src.toolbox.path import PATH
 
 
 class Carry:
@@ -38,8 +39,8 @@ class Carry:
         self.__c_pressed = False
         self.__y_pressed = False
 
-        self.__pick_up_audio = AudioMaster.load_sound("res/audio/grab.wav")
-        self.__lay_down_audio = AudioMaster.load_sound("res/audio/put_down.wav")
+        self.__pick_up_audio = AudioMaster.load_sound(f"{PATH}/res/audio/grab.wav")
+        self.__lay_down_audio = AudioMaster.load_sound(f"{PATH}/res/audio/put_down.wav")
 
     def update(self, can_pick_up: bool = True) -> None:
         relevant_entities = [_ for _ in self.movable_entities if
@@ -300,7 +301,7 @@ class Carry:
                         return 1
             elif entity.get_attachment().get_container_type() == CoffeeContainer.TEA_POT:
                 if isinstance(self.get_carrying_object(side), GameObject) and self.get_carrying_object(side).get_int_name() == "TEA_BAG":
-                    entity.get_attachment().append_content(self.get_carrying_object(side).get_info())
+                    entity.get_attachment().append_content(self.get_carrying_object(side).get_ext_name())
                     self.get_carrying_object(side).set_position([entity.get_position()[0] + 0.4,
                                                                  entity.get_position()[1] + 1.1,
                                                                  entity.get_position()[2]])

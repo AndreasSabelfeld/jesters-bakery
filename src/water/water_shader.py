@@ -1,16 +1,16 @@
-from sys import path
+from src.toolbox.path import PATH
 from src.shaders.shader_program import ShaderProgram
 from src.toolbox.maths import Maths
 
 
 class WaterShader(ShaderProgram):
-    __VERTEX_FILE = f"{path[0]}/src/water/waterVertexShader.glsl"
-    __FRAGMENT_FILE = f"{path[0]}/src/water/waterFragmentShader.glsl"
+    __VERTEX_FILE = f"{PATH}/src/water/waterVertexShader.glsl"
+    __FRAGMENT_FILE = f"{PATH}/src/water/waterFragmentShader.glsl"
 
     def __init__(self):
         if ShaderProgram.get_is_cel():
             # if cel shading is activated use another shader
-            WaterShader.__FRAGMENT_FILE = f"{path[0]}/src/water/cel_waterFragmentShader.glsl"
+            WaterShader.__FRAGMENT_FILE = f"{PATH}/src/water/cel_waterFragmentShader.glsl"
 
         self.__location_model_matrix: int = 0
         self.__location_projection_matrix: int = 0

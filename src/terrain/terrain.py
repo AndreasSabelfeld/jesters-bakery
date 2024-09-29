@@ -1,5 +1,6 @@
 from PIL import Image
-import sys
+
+from src.toolbox.path import PATH
 from src.render_engine.loader import Loader
 from src.textures.terrain_texture import TerrainTexture
 from src.textures.terrain_texture_pack import TerrainTexturePack
@@ -26,7 +27,7 @@ class Terrain:
             self.__texture_pack = TerrainTexturePack(TerrainTexture(texture_pack), TerrainTexture(texture_pack),
                                                      TerrainTexture(texture_pack), TerrainTexture(texture_pack))
             black = Image.new(mode="RGB", size=(2, 2), color=(0, 0, 0))
-            black.save(f"{sys.path[0]}/res/pngs/black.png", 'PNG')
+            black.save(f"{PATH}/res/pngs/black.png", 'PNG')
             self.__blend_map = TerrainTexture(Loader.load_texture("pngs/black"))
         else:
             self.__texture_pack = texture_pack
@@ -34,13 +35,13 @@ class Terrain:
 
     def generate_terrain(self, loader, height_map: str):
         try:
-            img = Image.open(f"{sys.path[0]}/res/{height_map}.png").convert('L')  # greyscale
+            img = Image.open(f"{PATH}/res/{height_map}.png").convert('L')  # greyscale
             img = img.transpose(Image.FLIP_TOP_BOTTOM)  # flip image upside down
         except Exception as e:
             print(e)
             white = Image.new(mode="L", size=(256, 256), color=255)
-            white.save(f"{sys.path[0]}/res/pngs/white.png", 'PNG')
-            img = Image.open(f"{sys.path[0]}/res/pngs/white.png").convert('L')
+            white.save(f"{PATH}/res/pngs/white.png", 'PNG')
+            img = Image.open(f"{PATH}/res/pngs/white.png").convert('L')
             self.__max_height = 0
         self.__vertex_count = img.height
         self.__heights = [[0.0 for _ in range(self.__vertex_count)] for _ in range(self.__vertex_count)]

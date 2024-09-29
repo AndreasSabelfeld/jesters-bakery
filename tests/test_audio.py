@@ -3,6 +3,7 @@ from src.audio.source import Source
 from time import sleep
 from openal import alDistanceModel, AL_LINEAR_DISTANCE, AL_LINEAR_DISTANCE_CLAMPED, AL_INVERSE_DISTANCE,  \
     AL_INVERSE_DISTANCE_CLAMPED, AL_EXPONENT_DISTANCE, AL_EXPONENT_DISTANCE_CLAMPED
+from src.toolbox.path import PATH
 
 
 def main():
@@ -10,7 +11,7 @@ def main():
     AudioMaster.set_listener_data([0, 0, 0], [0, 0, 0])
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED)
 
-    buffer = AudioMaster.load_sound("res/bounce.wav")
+    buffer = AudioMaster.load_sound(f"{PATH}/res/bounce.wav")
     source = Source()
     source.set_looping(True)
     source.play(buffer)
@@ -22,7 +23,6 @@ def main():
     while c != 'q':
         x_pos -= 0.3
         source.set_position(x_pos, 0, 2)
-        print(x_pos)
         sleep(0.1)
 
     source.delete()

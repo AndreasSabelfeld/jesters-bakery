@@ -33,10 +33,13 @@ from src.textures.model_texture import ModelTexture
 from src.textures.terrain_texture import TerrainTexture
 from src.textures.terrain_texture_pack import TerrainTexturePack
 from src.toolbox.raycaster import TerrainRaycaster, ObjectRaycaster
+from src.toolbox.path import PATH
 
 
 class GameMaster:
+
     def __init__(self):
+        self.__running = True
         self.__entities = []
         self.__nm_entities = []
         self.__collider_entities = []
@@ -107,7 +110,7 @@ class GameMaster:
         self.__carry.movable_entities = self.__collider_entities
 
         self.__level_master = Levels(self.__master_order, self.__ticket_machine, self.__entities, self.__collider_entities, self.__shadow_map_entities)
-        self.__game_ui = UI(self.__loader, self.__gui_renderer, self.__level_master, self.__display, self.__player.get_sfx_source(), self.__player, self.__camera)
+        self.__game_ui = UI(self.__loader, self.__gui_renderer, self.__level_master, self.__display, self.__player.get_sfx_source(), self.__player, self.__camera, self)
         self.__game_ui.loading_screen(Time.time_current_time())
         self.__key_hints = KeyHints(self.__loader)
 
@@ -135,26 +138,21 @@ class GameMaster:
     def start_game(self):
         self.__game_ui.main_menu(self.__master_renderer, self.__entities, self.__nm_entities, self.__terrains, self.__lights, self.__shadow_map_entities, self.__sun)
 
-        self.__camera.set_position([160.5, 5.18, 180])
-        self.__player.set_position([160.5, 5.18, 180])
-        self.__player.start_music()
-        self.__level_master.set_countdown(10)
-        self.__level_master.start_current_day()
-
-        self.game_loop()
+        self.restart_game()
 
     def restart_game(self):
         self.__camera.set_position([160.5, 5.18, 180])
         self.__player.set_position([160.5, 5.18, 180])
         self.__player.start_music()
         self.__level_master.set_countdown(10)
-        self.__level_master.start_current_day()
+        if not self.__level_master.start_current_day():
+            self.game_completed()
 
         self.game_loop()
 
     def game_loop(self):
         first_frame = [True]        # to use it like a pointer
-        while glutGetWindow() != 0:
+        while self.is_running():
             Time.set_current_time(Time.time_current_time())
             Time.set_delta_time()   # automatically calculates delta time
             Time.set_last_frame_time(Time.time_current_time())
@@ -167,8 +165,21 @@ class GameMaster:
             glutSwapBuffers()       # needs to be called AFTER finished drawing
             glutMainLoopEvent()     # used to run openGL manually in a loop instead of glutMainLoop()
 
-    def stop_game(self):
-        ...
+    def stop_game(self) -> None:
+        self.set_running(False)
+
+    def game_completed(self) -> None:
+        self.__game_ui.thx_4_playing()
+        self.stop_game()
+
+    def is_running(self) -> bool:
+        return self.__running
+
+    def set_running(self, val: bool) -> None:
+        self.__running = val
+
+    def get_display(self) -> DisplayManager:
+        return self.__display
 
     def __move_player(self, first_frame: list[bool]) -> None:
         if not first_frame[0]:
@@ -188,8 +199,9 @@ class GameMaster:
     def __level_logic(self):
         self.__level_master.update()
         if self.__level_master.check_if_all_orders_fulfilled():
+            points = self.__level_master.calculate_points()
             self.__game_ui.level_complete()
-            if self.__level_master.get_total_points() >= self.__level_master.get_goal_points():
+            if points >= self.__level_master.get_goal_points():
                 self.__level_master.progress_next_day()
             self.__move_out_of_bounds()
             self.__reload_cached_positions()
@@ -237,14 +249,14 @@ class GameMaster:
         dictionary = dict()
         for entity in self.__entities:
             dictionary.update({id(entity): entity.get_position()})
-        cache_file = "sav/cache.txt"
+        cache_file = f"{PATH}/sav/cache.txt"
         with open(cache_file, 'w') as f:
             f.write(str(dictionary))
             f.close()
 
     @staticmethod
     def __reload_cached_positions() -> None:
-        cache_file = "sav/cache.txt"
+        cache_file = f"{PATH}/sav/cache.txt"
         with open(cache_file, 'r') as f:
             data = f.read()
             f.close()
@@ -268,7 +280,7 @@ class GameMaster:
         return Time.time_current_time()
 
     def __load_ui(self) -> float:
-        font = FontType(self.__loader.load_texture("fnts/candara"), "res/fnts/candara.fnt")
+        font = FontType(self.__loader.load_texture("fnts/candara"), f"{PATH}/res/fnts/candara.fnt")
         text1 = GUIText("a sample text!", 15, font, [0, 0.02], 1, False)
         text1.set_color(1, 0, 0)
         text1.set_border_width(0.7)

@@ -1,5 +1,5 @@
 from .shader_program import ShaderProgram
-from sys import path
+from src.toolbox.path import PATH
 from src.toolbox.maths import Maths
 
 
@@ -7,9 +7,9 @@ class StaticShader(ShaderProgram):
 
     __MAX_LIGHTS = 5
 
-    __VERTEX_FILE = f"{path[0]}/src/shaders/vertexShader.glsl"
-    __GEOMETRY_FILE = f"{path[0]}/src/shaders/geometryShader.glsl"
-    __FRAGMENT_FILE = f"{path[0]}/src/shaders/fragmentShader.glsl"
+    __VERTEX_FILE = f"{PATH}/src/shaders/vertexShader.glsl"
+    __GEOMETRY_FILE = f"{PATH}/src/shaders/geometryShader.glsl"
+    __FRAGMENT_FILE = f"{PATH}/src/shaders/fragmentShader.glsl"
 
     def __init__(self):
         self.__location_transformation_matrix: int = 0  # no location

@@ -1,4 +1,5 @@
 from .entity import Entity
+from src.toolbox.path import PATH
 from src.render_engine.input_controller import KeyboardInput, ControllerInput, UniversalInput
 from src.render_engine.time import Time
 from src.terrain.terrain import Terrain
@@ -202,19 +203,19 @@ class ThirdPersonPlayer(Player):
     def __load_audio(self) -> None:
         self.__steps_sfx = Source()
         self.__steps_sfx.set_looping(True)
-        self.__steps_sfx.play(AudioMaster.load_sound("res/audio/footsteps.wav"))
+        self.__steps_sfx.play(AudioMaster.load_sound(f"{PATH}/res/audio/footsteps.wav"))
         self.__steps_sfx.set_volume(0.5)
         self.__steps_sfx.pause()
         self.__sfx_source = Source()
         self.__bg_sfx_source = Source()
         self.__bg_sfx_source.set_position(186, 5.18, 89)
         self.__bg_sfx_source.set_looping(True)
-        self.__bg_sfx_source.play(AudioMaster.load_sound("res/audio/dinner_atmo.wav"))
+        self.__bg_sfx_source.play(AudioMaster.load_sound(f"{PATH}/res/audio/dinner_atmo.wav"))
         self.__bg_sfx_source.set_volume(0.2)
         self.__bg_sfx_source.pause()
         self.__music_source = Source()
         self.__music_source.set_looping(True)
-        self.__music_source.play(AudioMaster.load_sound("res/audio/music_loop.wav"))
+        self.__music_source.play(AudioMaster.load_sound(f"{PATH}/res/audio/music_loop.wav"))
         self.__music_source.set_volume(0.1)
         self.__music_source.pause()
 

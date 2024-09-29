@@ -1,19 +1,19 @@
-from sys import path
+from src.toolbox.path import PATH
 from src.shaders.shader_program import ShaderProgram
 from src.toolbox.maths import Maths
 from src.render_engine.time import Time
 
 
 class SkyboxShader(ShaderProgram):
-    __VERTEX_FILE = f"{path[0]}/src/skybox/skyboxVertexShader.glsl"
-    __FRAGMENT_FILE = f"{path[0]}/src/skybox/skyboxFragmentShader.glsl"
+    __VERTEX_FILE = f"{PATH}/src/skybox/skyboxVertexShader.glsl"
+    __FRAGMENT_FILE = f"{PATH}/src/skybox/skyboxFragmentShader.glsl"
 
     __ROTATE_SPEED = 1
 
     def __init__(self):
         if ShaderProgram.get_is_cel():
             # if cel shading is activated use another shader
-            SkyboxShader.__FRAGMENT_FILE = f"{path[0]}/src/skybox/cel_skyboxFragmentShader.glsl"
+            SkyboxShader.__FRAGMENT_FILE = f"{PATH}/src/skybox/cel_skyboxFragmentShader.glsl"
 
         self.__location_projection_matrix = 0
         self.__location_view_matrix = 0

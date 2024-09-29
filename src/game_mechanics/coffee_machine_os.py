@@ -2,6 +2,7 @@ import math
 from time import sleep
 from threading import Thread
 
+from src.toolbox.path import PATH
 from src.audio.audio_master import AudioMaster
 from src.audio.source import Source
 from src.render_engine.input_controller import KeyboardInput, ControllerInput, KeyboardInputListener, UniversalInput, \
@@ -63,7 +64,7 @@ class CoffeeMachineOS:
         self.__product_entries = None
         self.__create_products()
         self.__time_remaining = GUIText("", 18,
-                                        FontType(self.__loader.load_texture("fnts/arial"), "res/fnts/arial.fnt"),
+                                        FontType(self.__loader.load_texture("fnts/arial"), f"{PATH}/res/fnts/arial.fnt"),
                                         [0.07, 0.75], 1, False)
         self.__time_remaining.set_color(250 / 255, 218 / 255, 94 / 255)
         self.__time_remaining.set_border_width(0.7)
@@ -98,10 +99,10 @@ class CoffeeMachineOS:
         self.__water_sfx_source = Source()
         self.__water_sfx_source.set_position(*render_target.get_position())
         self.__water_sfx_source.set_volume(0.5)
-        self.__menu_scroll_sound = AudioMaster.load_sound("res/audio/menu_scroll.wav")
-        self.__select_sound = AudioMaster.load_sound("res/audio/menu_selected.wav")
-        self.__print_sound = AudioMaster.load_sound("res/audio/coffee_machine.wav")
-        self.__tea_sound = AudioMaster.load_sound("res/audio/tea_pouring.wav")
+        self.__menu_scroll_sound = AudioMaster.load_sound(f"{PATH}/res/audio/menu_scroll.wav")
+        self.__select_sound = AudioMaster.load_sound(f"{PATH}/res/audio/menu_selected.wav")
+        self.__print_sound = AudioMaster.load_sound(f"{PATH}/res/audio/coffee_machine.wav")
+        self.__tea_sound = AudioMaster.load_sound(f"{PATH}/res/audio/tea_pouring.wav")
 
     def render_screen(self) -> None:
         self.__update_time_remaining()
@@ -700,7 +701,7 @@ class CoffeeMachineOSLactoseFree:
         self.__product_entries = None
         self.__create_products()
         self.__time_remaining = GUIText("", 18,
-                                        FontType(self.__loader.load_texture("fnts/arial"), "res/fnts/arial.fnt"),
+                                        FontType(self.__loader.load_texture("fnts/arial"), f"{PATH}/res/fnts/arial.fnt"),
                                         [0.07, 0.75], 1, False)
         self.__time_remaining.set_color(1, 0, 0)
         self.__time_remaining.set_border_width(0.7)
@@ -734,10 +735,10 @@ class CoffeeMachineOSLactoseFree:
         self.__water_sfx_source = Source()
         self.__water_sfx_source.set_position(*render_target.get_position())
         self.__water_sfx_source.set_volume(0.5)
-        self.__menu_scroll_sound = AudioMaster.load_sound("res/audio/menu_scroll.wav")
-        self.__select_sound = AudioMaster.load_sound("res/audio/menu_selected.wav")
-        self.__print_sound = AudioMaster.load_sound("res/audio/coffee_machine.wav")
-        self.__tea_sound = AudioMaster.load_sound("res/audio/tea_pouring.wav")
+        self.__menu_scroll_sound = AudioMaster.load_sound(f"{PATH}/res/audio/menu_scroll.wav")
+        self.__select_sound = AudioMaster.load_sound(f"{PATH}/res/audio/menu_selected.wav")
+        self.__print_sound = AudioMaster.load_sound(f"{PATH}/res/audio/coffee_machine.wav")
+        self.__tea_sound = AudioMaster.load_sound(f"{PATH}/res/audio/tea_pouring.wav")
 
     def render_screen(self) -> None:
         self.__update_time_remaining()

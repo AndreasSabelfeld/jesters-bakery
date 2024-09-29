@@ -1,11 +1,11 @@
 from src.shaders.shader_program import ShaderProgram
 
-from sys import path
+from src.toolbox.path import PATH
 
 
 class ShadowShader(ShaderProgram):
-    __VERTEX_FILE = f"{path[0]}/src/shadows/shadowVertexShader.glsl"
-    __FRAGMENT_FILE = f"{path[0]}/src/shadows/shadowFragmentShader.glsl"
+    __VERTEX_FILE = f"{PATH}/src/shadows/shadowVertexShader.glsl"
+    __FRAGMENT_FILE = f"{PATH}/src/shadows/shadowFragmentShader.glsl"
 
     def __init__(self):
         # self.__location_mvp_matrix: int = -1

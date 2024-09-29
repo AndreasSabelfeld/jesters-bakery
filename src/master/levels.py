@@ -1,5 +1,6 @@
 import random
 
+from src.toolbox.path import PATH
 from src.game_mechanics.game_object import GameObject
 from src.game_mechanics.order import MasterOrder, Order
 from src.render_engine.time import Time
@@ -47,7 +48,7 @@ class Levels:
         self.__update_orders()
 
     def check_if_all_orders_fulfilled(self) -> bool:
-        for i in range(self.__current_order + 1):
+        for i in range(len(self.__orders)):
             if not self.__orders[i].is_fulfilled():
                 return False
         return True
@@ -62,31 +63,70 @@ class Levels:
         self.__current_lvl += 1
         self._write_save(self.__current_lvl)
 
-    def start_current_day(self) -> None:
+    def start_current_day(self) -> bool:
         self.__orders = list()
 
         match self.__current_lvl:
-            case 1:
-                self.day_1()
-            case 2:
-                self.day_2()
+            case 1: self.day_1()
+            case 2: self.day_2()
+            case 3: self.day_3()
+            case 4: self.day_4()
+            case 5: self.day_5()
+            case 6: self.day_6()
+            case 7: self.day_7()
             case _:
-                # game finished
-                pass
+                return False
+
+        return True
 
     def day_1(self):
-        self.__amount_of_orders = 1
+        self.__amount_of_orders = 2
         for _ in range(self.__amount_of_orders):
-            length_of_order = 1
+            length_of_order = 2
             self.__orders.append(Order(self.__master_order, length_of_order))
-        self.__goal_points = -100
+        self.__goal_points = 0
 
     def day_2(self):
-        self.__amount_of_orders = 1
+        self.__amount_of_orders = 2
         for _ in range(self.__amount_of_orders):
-            length_of_order = 1
+            length_of_order = 4
             self.__orders.append(Order(self.__master_order, length_of_order))
-        self.__goal_points = -100
+        self.__goal_points = 0
+
+    def day_3(self):
+        self.__amount_of_orders = 4
+        for _ in range(self.__amount_of_orders):
+            length_of_order = 2
+            self.__orders.append(Order(self.__master_order, length_of_order))
+        self.__goal_points = 10
+
+    def day_4(self):
+        self.__amount_of_orders = 4
+        for _ in range(self.__amount_of_orders):
+            length_of_order = 4
+            self.__orders.append(Order(self.__master_order, length_of_order))
+        self.__goal_points = 15
+
+    def day_5(self):
+        self.__amount_of_orders = 4
+        for _ in range(self.__amount_of_orders):
+            length_of_order = 6
+            self.__orders.append(Order(self.__master_order, length_of_order))
+        self.__goal_points = 15
+
+    def day_6(self):
+        self.__amount_of_orders = 4
+        for _ in range(self.__amount_of_orders):
+            length_of_order = 8
+            self.__orders.append(Order(self.__master_order, length_of_order))
+        self.__goal_points = 15
+
+    def day_7(self):
+        self.__amount_of_orders = 8
+        for _ in range(self.__amount_of_orders):
+            length_of_order = 8
+            self.__orders.append(Order(self.__master_order, length_of_order))
+        self.__goal_points = 15
 
     def __start_order(self, order: Order) -> None:
         game_object = order.spawn_ticket(self.__ticket_machine)
@@ -99,7 +139,7 @@ class Levels:
             self.__orders[i].check_if_fulfilled()
 
     def _load_save(self) -> None:
-        save_file = "sav/save.txt"
+        save_file = f"{PATH}/sav/save.txt"
         with open(save_file, "a+") as f:
             f.seek(0)
             data = f.read()
@@ -112,7 +152,7 @@ class Levels:
 
     @staticmethod
     def _write_save(data: int) -> None:
-        save_file = "sav/save.txt"
+        save_file = f"{PATH}/sav/save.txt"
         with open(save_file, "w") as f:
             f.write(f"{data}")
             f.close()

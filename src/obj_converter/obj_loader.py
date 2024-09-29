@@ -1,4 +1,4 @@
-import sys
+from src.toolbox.path import PATH
 from src.render_engine.loader import Loader
 from src.models.cube import cube_vertices, cube_texture_coords, cube_normals, cube_indices
 from src.obj_converter.vertex import Vertex, VertexNM
@@ -19,7 +19,7 @@ class OBJLoader:
 
     def load_obj_model(self, file_name: str, loader: Loader):
         try:
-            obj = open(f"{sys.path[0]}/res/{file_name}.obj", 'r')
+            obj = open(f"{PATH}/res/{file_name}.obj", 'r')
         except Exception as e:
             print(e)
             return loader.load_to_vao(cube_vertices, cube_texture_coords, cube_normals, cube_indices)
@@ -123,7 +123,7 @@ class NormalMappedOBJLoader(OBJLoader):
 
     def load_obj_model(self, file_name: str, loader: Loader):
         try:
-            obj = open(f"{sys.path[0]}/res/{file_name}.obj", 'r')
+            obj = open(f"{PATH}/res/{file_name}.obj", 'r')
         except Exception as e:
             print(e)
             return loader.load_to_vao(cube_vertices, cube_texture_coords, cube_normals, cube_indices)

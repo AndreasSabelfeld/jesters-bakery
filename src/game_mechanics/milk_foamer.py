@@ -8,6 +8,7 @@ from src.models.textured_model import TexturedModel
 from src.render_engine.input_controller import KeyboardInputListener, UniversalInputListener
 from src.render_engine.time import Time
 from src.textures.model_texture import ModelTexture
+from src.toolbox.path import PATH
 
 
 class MilkFoamer:
@@ -23,7 +24,7 @@ class MilkFoamer:
         self.__gui_renderer = gui_renderer
         self.__object_picker = object_picker
 
-        self.__text = GUIText("", 132, FontType(self.__loader.load_texture("fnts/clock"), "res/fnts/clock.fnt"), [0, 0.2], 1, True)
+        self.__text = GUIText("", 132, FontType(self.__loader.load_texture("fnts/clock"), f"{PATH}/res/fnts/clock.fnt"), [0, 0.2], 1, True)
         self.__black_texture = GuiTexture(self.__loader.load_texture("pngs/machinery/black"), [0, 0], [1920, 1080])
         self.__text.set_color(1, 1, 1)
         self.__text.set_border_width(0.7)

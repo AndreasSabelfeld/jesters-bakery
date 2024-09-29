@@ -8,6 +8,7 @@ from src.pycgtypes import vec3, mat3
 from src.game_mechanics.game_object import GameObject
 from src.render_engine.display_manager import DisplayManager
 from src.render_engine.input_controller import KeyboardInput, KeyboardInputListener, UniversalInputListener
+from src.toolbox.path import PATH
 
 
 class Fridge:
@@ -44,8 +45,8 @@ class Fridge:
         self.__camera_offset = camera_offset
 
         self.__listener = UniversalInputListener()
-        self.__open_sound = AudioMaster.load_sound("res/audio/drawer_open.wav")
-        self.__close_sound = AudioMaster.load_sound("res/audio/drawer_close.wav")
+        self.__open_sound = AudioMaster.load_sound(f"{PATH}/res/audio/drawer_open.wav")
+        self.__close_sound = AudioMaster.load_sound(f"{PATH}/res/audio/drawer_close.wav")
 
     def update(self, pick_up: Carry):
         if self.__is_interacting:

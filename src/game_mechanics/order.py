@@ -1,7 +1,7 @@
 import math
 import random
-import sys
 
+from src.toolbox.path import PATH
 from src.entities.entity import Entity
 from src.font_mesh_creator.font_type import FontType
 from src.font_mesh_creator.gui_text import GUIText
@@ -108,7 +108,7 @@ class Order:
 
     def __get_model(self) -> RawModel:
         file_name = "ticket"
-        obj = open(f"{sys.path[0]}/res/objs/machinery/{file_name}.obj", 'w')
+        obj = open(f"{PATH}/res/objs/machinery/{file_name}.obj", 'w')
         x = 0.075
         y = (0.5 / 16) * (self.__text.get_number_of_lines() - 1)
         self.__ticket_height = 0.7 * y
@@ -168,6 +168,7 @@ class Order:
             self.__time -= Time.get_delta_time()
         else:
             self.__fulfilled = True
+            return
 
         if self.__master.get_placed_products():
             for product in self.__master.get_placed_products():
@@ -213,7 +214,7 @@ class MasterOrder:
 
         self.__loader = loader
         self.__obj_loader = obj_loader
-        self.__font = FontType(self.__loader.load_texture("fnts/receipt"), "res/fnts/receipt.fnt")
+        self.__font = FontType(self.__loader.load_texture("fnts/receipt"), f"{PATH}/res/fnts/receipt.fnt")
         self.__gui_renderer = gui_renderer
         self.__parent_object = parent_object
 
@@ -230,17 +231,21 @@ class MasterOrder:
                     wish = prod.get_wishes()[random.randint(0, len(prod.get_wishes())-1)]
                     if wish == "Oat Milk":
                         wish_time = 30
-            self.load_content(prod, wish)
+            # if the product was tea, there needs to be a flavour for the wish, so it's returned from this function
+            tea_wish = self.load_content(prod, wish)
+            if tea_wish:
+                wish = tea_wish
             order.append([prod, wish, prod.get_time() + wish_time])
         return order
 
-    def load_content(self, prod: Possibility, wish: str) -> None:
+    def load_content(self, prod: Possibility, wish: str) -> str | None:
         if not wish:
             if not prod.get_content():
                 prod.set_content([prod.get_name()])
             if prod.get_name() == "Tea":
                 wish = prod.get_wishes()[random.randint(0, len(prod.get_wishes()) - 1)]
                 prod.get_content().append(wish)
+                return wish
         elif wish == "Oat Milk":
             if prod.get_name() == "Milk Coffee":
                 prod.set_content(["Oat Milk", "Foam", "Oat Milk Coffee"])
@@ -302,7 +307,7 @@ class MasterOrder:
     @staticmethod
     def calculate_time(order: list):
         time = 0
-        grace_factor = 3
+        grace_factor = 4
         for element in order:
             time += element[2]
         time *= grace_factor
@@ -351,6 +356,57 @@ class MasterOrder:
         poss.append(Possibility("Cafe Latte", ["Decaffeinated", "Lactose Free", "Oat Milk"],
                                 self.__coffee_dict["Cafe Latte"].get_brew_length(),
                                 self.__coffee_dict["Cafe Latte"].get_container_type()))
+        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
+                                self.__coffee_dict["Tea"].get_brew_length(),
+                                self.__coffee_dict["Tea"].get_container_type()))
+        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
+                                self.__coffee_dict["Tea"].get_brew_length(),
+                                self.__coffee_dict["Tea"].get_container_type()))
+        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
+                                self.__coffee_dict["Tea"].get_brew_length(),
+                                self.__coffee_dict["Tea"].get_container_type()))
+        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
+                                self.__coffee_dict["Tea"].get_brew_length(),
+                                self.__coffee_dict["Tea"].get_container_type()))
+        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
+                                self.__coffee_dict["Tea"].get_brew_length(),
+                                self.__coffee_dict["Tea"].get_container_type()))
+        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
+                                self.__coffee_dict["Tea"].get_brew_length(),
+                                self.__coffee_dict["Tea"].get_container_type()))
+        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
+                                self.__coffee_dict["Tea"].get_brew_length(),
+                                self.__coffee_dict["Tea"].get_container_type()))
+        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
+                                self.__coffee_dict["Tea"].get_brew_length(),
+                                self.__coffee_dict["Tea"].get_container_type()))
+        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
+                                self.__coffee_dict["Tea"].get_brew_length(),
+                                self.__coffee_dict["Tea"].get_container_type()))
+        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
+                                self.__coffee_dict["Tea"].get_brew_length(),
+                                self.__coffee_dict["Tea"].get_container_type()))
+        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
+                                self.__coffee_dict["Tea"].get_brew_length(),
+                                self.__coffee_dict["Tea"].get_container_type()))
+        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
+                                self.__coffee_dict["Tea"].get_brew_length(),
+                                self.__coffee_dict["Tea"].get_container_type()))
+        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
+                                self.__coffee_dict["Tea"].get_brew_length(),
+                                self.__coffee_dict["Tea"].get_container_type()))
+        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
+                                self.__coffee_dict["Tea"].get_brew_length(),
+                                self.__coffee_dict["Tea"].get_container_type()))
+        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
+                                self.__coffee_dict["Tea"].get_brew_length(),
+                                self.__coffee_dict["Tea"].get_container_type()))
+        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
+                                self.__coffee_dict["Tea"].get_brew_length(),
+                                self.__coffee_dict["Tea"].get_container_type()))
+        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
+                                self.__coffee_dict["Tea"].get_brew_length(),
+                                self.__coffee_dict["Tea"].get_container_type()))
         poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
                                 self.__coffee_dict["Tea"].get_brew_length(),
                                 self.__coffee_dict["Tea"].get_container_type()))

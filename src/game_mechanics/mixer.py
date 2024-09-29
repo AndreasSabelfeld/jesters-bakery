@@ -3,6 +3,7 @@ from time import sleep
 
 from src.audio.audio_master import AudioMaster
 from src.game_mechanics.game_object import GameObject
+from src.toolbox.path import PATH
 
 
 class Mixer:
@@ -10,7 +11,7 @@ class Mixer:
         self.__mixer = mixer_game_object
         self.__mixing_time = 3
         self.__mixing = False
-        self.__blend_sound = AudioMaster.load_sound("res/audio/short_blend.wav")
+        self.__blend_sound = AudioMaster.load_sound(f"{PATH}/res/audio/short_blend.wav")
 
     def place_vessel(self, vessel: GameObject) -> None:
         vessel.set_position(self.__mixer.get_position())

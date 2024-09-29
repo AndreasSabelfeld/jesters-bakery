@@ -1,5 +1,6 @@
 from src.audio.audio_master import AudioMaster
 from src.audio.source import Source
+from src.toolbox.path import PATH
 from src.entities.entity import Entity
 from src.game_mechanics.game_object import GameObject
 from src.models.textured_model import TexturedModel
@@ -26,7 +27,7 @@ class CoffeeContainer:
         self.__overflown = False
         self.__content = list()
         self.__parent_entity.set_info(str(self.__content))
-        self.__pour_sound = AudioMaster.load_sound("res/audio/pour.wav")
+        self.__pour_sound = AudioMaster.load_sound(f"{PATH}/res/audio/pour.wav")
         self.__parent_entity.get_sfx_source().set_volume(3)
 
     @classmethod

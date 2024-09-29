@@ -1,5 +1,5 @@
 from src.shaders.shader_program import ShaderProgram
-from sys import path
+from src.toolbox.path import PATH
 from src.toolbox.maths import Maths
 
 
@@ -7,8 +7,8 @@ class NormalMappingShader(ShaderProgram):
 
     __MAX_LIGHTS = 5
 
-    __VERTEX_FILE = f"{path[0]}/src/normal_mapping/normalMapVertexShader.glsl"
-    __FRAGMENT_FILE = f"{path[0]}/src/normal_mapping/normalMapFragmentShader.glsl"
+    __VERTEX_FILE = f"{PATH}/src/normal_mapping/normalMapVertexShader.glsl"
+    __FRAGMENT_FILE = f"{PATH}/src/normal_mapping/normalMapFragmentShader.glsl"
 
     def __init__(self):
         self.__location_transformation_matrix: int = 0  # no location

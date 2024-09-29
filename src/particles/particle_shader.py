@@ -1,11 +1,11 @@
 from src.shaders.shader_program import ShaderProgram
 
-from sys import path
+from src.toolbox.path import PATH
 
 
 class ParticleShader(ShaderProgram):
-    __VERTEX_FILE = f"{path[0]}/src/particles/particleVertex.glsl"
-    __FRAGMENT_FILE = f"{path[0]}/src/particles/particleFragment.glsl"
+    __VERTEX_FILE = f"{PATH}/src/particles/particleVertex.glsl"
+    __FRAGMENT_FILE = f"{PATH}/src/particles/particleFragment.glsl"
 
     def __init__(self):
         self.__location_number_of_rows: int = -1

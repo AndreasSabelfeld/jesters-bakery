@@ -6,6 +6,7 @@ pyopengl==3.1.7
 PyWave~=0.5.0
 glfw~=2.6.2
 inputs~=0.5
+nuitka
 
 # install all using:
 # pip install -r requirements.txt
@@ -15,3 +16,7 @@ inputs~=0.5
 # https://www.python.org/downloads/release/python-3102/
 
 # you may need to install the OpenGL wheel from the "/whls" folder
+# note: if version 3.1.7 gives you graphical errors, use version 3.1.6
+
+# more wheels:
+# https://web.archive.org/web/20230702115900/https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyopengl

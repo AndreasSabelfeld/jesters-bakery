@@ -1,11 +1,11 @@
 from src.shaders.shader_program import ShaderProgram
-from sys import path
+from src.toolbox.path import PATH
 
 
 class ContrastShader(ShaderProgram):
 
-    __VERTEX_FILE = f"{path[0]}/src/post_processing/contrast_vertex.glsl"
-    __FRAGMENT_FILE = f"{path[0]}/src/post_processing/contrast_fragment.glsl"
+    __VERTEX_FILE = f"{PATH}/src/post_processing/contrast_vertex.glsl"
+    __FRAGMENT_FILE = f"{PATH}/src/post_processing/contrast_fragment.glsl"
 
     def __init__(self):
         super().__init__(self.get_vertex_file(), self.get_fragment_file())

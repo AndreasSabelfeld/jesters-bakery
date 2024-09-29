@@ -1,10 +1,10 @@
 from src.shaders.shader_program import ShaderProgram
-from sys import path
+from src.toolbox.path import PATH
 
 
 class FontShader(ShaderProgram):
-    __VERTEX_FILE = f"{path[0]}/src/font_rendering/fontVertex.glsl"
-    __FRAGMENT_FILE = f"{path[0]}/src/font_rendering/fontFragment.glsl"
+    __VERTEX_FILE = f"{PATH}/src/font_rendering/fontVertex.glsl"
+    __FRAGMENT_FILE = f"{PATH}/src/font_rendering/fontFragment.glsl"
 
     def __init__(self):
         self.__location_color: int = -1

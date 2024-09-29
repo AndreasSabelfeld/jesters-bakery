@@ -1,11 +1,11 @@
 from src.shaders.shader_program import ShaderProgram
-from sys import path
+from src.toolbox.path import PATH
 
 
 class VerticalBlurShader(ShaderProgram):
 
-    __VERTEX_FILE = f"{path[0]}/src/gaussian_blur/vertical_blur_vertex.glsl"
-    __FRAGMENT_FILE = f"{path[0]}/src/gaussian_blur/blur_fragment.glsl"
+    __VERTEX_FILE = f"{PATH}/src/gaussian_blur/vertical_blur_vertex.glsl"
+    __FRAGMENT_FILE = f"{PATH}/src/gaussian_blur/blur_fragment.glsl"
 
     def __init__(self):
         self.__location_target_height: int = -1

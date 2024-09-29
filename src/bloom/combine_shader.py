@@ -1,11 +1,11 @@
 from src.shaders.shader_program import ShaderProgram
-from sys import path
+from src.toolbox.path import PATH
 
 
 class CombineShader(ShaderProgram):
 
-    __VERTEX_FILE = f"{path[0]}/src/bloom/simple_vertex.glsl"
-    __FRAGMENT_FILE = f"{path[0]}/src/bloom/combine_fragment.glsl"
+    __VERTEX_FILE = f"{PATH}/src/bloom/simple_vertex.glsl"
+    __FRAGMENT_FILE = f"{PATH}/src/bloom/combine_fragment.glsl"
 
     def __init__(self):
         self.__location_color_texture: int = 0

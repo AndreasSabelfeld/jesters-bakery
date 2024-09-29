@@ -15,6 +15,7 @@ from src.render_engine.input_controller import KeyboardInput, Binds, UniversalIn
 from src.render_engine.loader import Loader
 from src.render_engine.master_renderer import MasterRenderer
 from src.render_engine.time import Time
+from src.toolbox.path import PATH
 
 
 class UI:
@@ -24,7 +25,7 @@ class UI:
     GAME_LOOP = 2
 
     def __init__(self, loader: Loader, gui_renderer: GuiRenderer, level_master: Levels, display: DisplayManager, sfx_source: Source,
-                 player: FirstPersonPlayer, camera: Camera):
+                 player: FirstPersonPlayer, camera: Camera, game_master):
         self.__time_zero = Time.time_current_time()
         self.__loader = loader
         self.__gui_renderer = gui_renderer
@@ -33,12 +34,13 @@ class UI:
         self.__sfx_source = sfx_source
         self.__player = player
         self.__camera = camera
+        self.__game_master = game_master
         self.__clear_tex = GuiTexture(self.__loader.load_texture("pngs/machinery/black"), [0, 0], [1920, 1080])
         self.__current_screen = self.NO_SCREEN
         self.__current_texts = list()
         self.__current_textures = list()
-        self.__menu_scroll = AudioMaster.load_sound("res/audio/menu_scroll.wav")
-        self.__select = AudioMaster.load_sound("res/audio/menu_selected.wav")
+        self.__menu_scroll = AudioMaster.load_sound(f"{PATH}/res/audio/menu_scroll.wav")
+        self.__select = AudioMaster.load_sound(f"{PATH}/res/audio/menu_selected.wav")
 
     def render(self) -> None:
         self.__gui_renderer.render(self.__current_textures)
@@ -59,7 +61,7 @@ class UI:
         if percentage > 100:
             percentage = 100
 
-        font = FontType(self.__loader.load_texture("fnts/joystix"), "res/fnts/joystix.fnt")
+        font = FontType(self.__loader.load_texture("fnts/joystix"), f"{PATH}/res/fnts/joystix.fnt")
         text = GUIText(f"LOADING... \n{percentage:.2f}% DONE", 15, font, [0, 0.5], 1, True)
         text.set_color(1, 1, 1)
         text.set_border_width(0.7)
@@ -75,7 +77,7 @@ class UI:
 
         selected_item = 0
 
-        font = FontType(self.__loader.load_texture("fnts/lonely_coffee"), "res/fnts/lonely_coffee.fnt")
+        font = FontType(self.__loader.load_texture("fnts/lonely_coffee"), f"{PATH}/res/fnts/lonely_coffee.fnt")
         title_bg = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Item4"), [0, 0.6], [0.6, 0.4])
         title_text = GUIText(f"Jester's Bakery", 35, font, [0, 0.08], 1, True)
         title_text.set_color(1, 1, 1)
@@ -150,7 +152,7 @@ class UI:
                 if selected_item == 1:
                     self.options_menu()
                 if selected_item == 2:
-                    self.__display.destroy_window()
+                    self.__game_master.stop_game()
                     return
 
             items[selected_item].set_color(250 / 255, 218 / 255, 94 / 255)
@@ -166,7 +168,7 @@ class UI:
 
         selected_item = 0
 
-        font = FontType(self.__loader.load_texture("fnts/lonely_coffee"), "res/fnts/lonely_coffee.fnt")
+        font = FontType(self.__loader.load_texture("fnts/lonely_coffee"), f"{PATH}/res/fnts/lonely_coffee.fnt")
 
         item_bg = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Item3"), [0, -0.25], [0.33, 0.5])
         item_1 = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Item5"), [0, 0], [0.25, 0.10])
@@ -233,14 +235,14 @@ class UI:
         self.__current_texts.clear()
         self.__current_textures.clear()
 
-        font = FontType(self.__loader.load_texture("fnts/lonely_coffee"), "res/fnts/lonely_coffee.fnt")
+        font = FontType(self.__loader.load_texture("fnts/lonely_coffee"), f"{PATH}/res/fnts/lonely_coffee.fnt")
         title_bg = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Item4"), [0, 0.74], [0.3, 0.2])
         day = GUIText(f"Day: {self.__level_master.get_current_lvl()}", 32, font, [0, 0.05], 1, True)
         day.set_color(1, 1, 1)
         day.set_border_width(0.7)
         day.set_offset([0.003, 0.003])
 
-        prompt_font = FontType(self.__loader.load_texture("fnts/prompt_font"), "res/fnts/prompt_font.fnt")
+        prompt_font = FontType(self.__loader.load_texture("fnts/prompt_font"), f"{PATH}/res/fnts/prompt_font.fnt")
         menu_icon = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Icon_Menu"), [-0.9, 0.8], [0.05, 0.075])
         hint = GUIText(f"{Binds.get_bind(Binds.OPTIONS)}", 24, prompt_font, [0.08, 0.05], 1, False)
         hint.set_color(1, 1, 1)
@@ -280,7 +282,7 @@ class UI:
 
         selected_item = 0
 
-        font = FontType(self.__loader.load_texture("fnts/lonely_coffee"), "res/fnts/lonely_coffee.fnt")
+        font = FontType(self.__loader.load_texture("fnts/lonely_coffee"), f"{PATH}/res/fnts/lonely_coffee.fnt")
         title_text = GUIText(f"Paused", 35, font, [0, 0.25], 1, True)
         title_text.set_color(1, 1, 1)
         title_text.set_border_width(0.7)
@@ -336,7 +338,7 @@ class UI:
                      if self.options_menu():
                          return
                 if selected_item == 2:
-                    self.__display.destroy_window()
+                    self.__game_master.stop_game()
                     return
             elif UniversalInput.get_options():
                 return
@@ -349,7 +351,7 @@ class UI:
         self.__current_textures.clear()
         points = self.__level_master.get_total_points()
 
-        font = FontType(self.__loader.load_texture("fnts/lonely_coffee"), "res/fnts/lonely_coffee.fnt")
+        font = FontType(self.__loader.load_texture("fnts/lonely_coffee"), f"{PATH}/res/fnts/lonely_coffee.fnt")
 
         title_bg = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Item4"), [0, 0.5], [0.45, 0.3])
         title_text = GUIText(f"Level Complete!", 35, font, [0, 0.4], 1, True)
@@ -364,11 +366,11 @@ class UI:
 
         item_2 = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Item5"), [0, -0.65], [0.25, 0.10])
         item_2_text = GUIText(f"Next Day", 20, font, [0, 0.8], 1, True)
-        item_2_text.set_color(1, 1, 1)
+        item_2_text.set_color(250 / 255, 218 / 255, 94 / 255)
         item_2_text.set_border_width(0.7)
         item_2_text.set_offset([0.003, 0.003])
 
-        if -1 >= self.__level_master.get_goal_points():
+        if points >= self.__level_master.get_goal_points():
             star_1 = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Icon_Star"), [-0.25, 0.6], [0.12, 0.2])
             star_2 = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Icon_Star"), [0, 0.7], [0.12, 0.2])
             star_3 = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Icon_Star"), [0.25, 0.6], [0.12, 0.2])
@@ -391,4 +393,37 @@ class UI:
 
             if UniversalInput.get_confirm():  # enter key
                 return
+            self.render()
+
+    def thx_4_playing(self) -> None:
+        self.__current_texts.clear()
+        self.__current_textures.clear()
+
+        msg = """Thank you for taking the time to play my game! \n \n This project was developed as part of my Matura-Work. I sincerely hope you enjoyed the experience and found it engaging. Completing this project has been a rewarding journey, and I’m grateful to have had the opportunity to share it with you. \n \n Thank you again! \n \n - Andreas Sabelfeld"""
+        font = FontType(self.__loader.load_texture("fnts/lonely_coffee"), f"{PATH}/res/fnts/lonely_coffee.fnt")
+
+        item_bg = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Item3"), [0, 0.05], [0.33, 0.5])
+        text = GUIText(f"{msg}", 10, font, [0.35, 0.25], 0.3, False)
+        text.set_color(1, 1, 1)
+        text.set_border_width(0.7)
+        text.set_offset([0.003, 0.003])
+
+        item_2 = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Item5"), [0, -0.65], [0.25, 0.10])
+        item_2_text = GUIText(f"Close Game", 20, font, [0, 0.8], 1, True)
+        item_2_text.set_color(250 / 255, 218 / 255, 94 / 255)
+        item_2_text.set_border_width(0.7)
+        item_2_text.set_offset([0.003, 0.003])
+
+        self.__current_textures = [item_bg, item_2]
+        self.__current_texts = [text, item_2_text]
+
+        while True:
+            Time.set_current_time(Time.time_current_time())
+            Time.set_delta_time()  # automatically calculates delta time
+            Time.set_last_frame_time(Time.time_current_time())
+
+            if UniversalInput.get_confirm():
+                self.__sfx_source.play(self.__select)
+                return
+
             self.render()

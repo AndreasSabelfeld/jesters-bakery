@@ -28,6 +28,7 @@ from src.water.water_frame_buffers import WaterFrameBuffers
 from src.terrain.terrain import Terrain
 
 from src.toolbox.raycaster import TerrainRaycaster
+from src.toolbox.path import PATH
 
 from src.obj_converter.obj_loader import OBJLoader, NormalMappedOBJLoader
 
@@ -63,7 +64,7 @@ def main():
 
     # ~~~~~~~~~~~~~TEXT~~~~~~~~~~~~~~~~
     TextMaster(loader)
-    font = FontType(loader.load_texture("candara"), "res/candara.fnt")
+    font = FontType(loader.load_texture("candara"), f"{PATH}/res/candara.fnt")
     text1 = GUIText("a sample text!", 15, font, [0, 0.02], 1, False)
     text1.set_color(1, 0, 0)
     text1.set_border_width(0.7)

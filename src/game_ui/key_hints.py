@@ -2,6 +2,7 @@ from src.font_mesh_creator.font_type import FontType
 from src.font_mesh_creator.gui_text import GUIText
 from src.font_rendering.text_master import TextMaster
 from src.render_engine.loader import Loader
+from src.toolbox.path import PATH
 
 
 class KeyHints:
@@ -10,7 +11,7 @@ class KeyHints:
     def __init__(self, loader: Loader):
         self.__loader = loader
 
-        self.__prompt_font = FontType(self.__loader.load_texture("fnts/prompt_font"), "res/fnts/prompt_font.fnt")
+        self.__prompt_font = FontType(self.__loader.load_texture("fnts/prompt_font"), f"{PATH}/res/fnts/prompt_font.fnt")
         KeyHints.__load_text(self.__prompt_font)
 
     @classmethod

@@ -5,6 +5,7 @@ from src.game_mechanics.game_object import GameObject
 from src.models.textured_model import TexturedModel
 from src.render_engine.time import Time
 from src.textures.model_texture import ModelTexture
+from src.toolbox.path import PATH
 
 
 class MixerVessel:
@@ -18,7 +19,7 @@ class MixerVessel:
         self.__fill_cooldown = 0
         self.__content = []
         self.__texture = None
-        self.__pour_sound = AudioMaster.load_sound("res/audio/pour.wav")
+        self.__pour_sound = AudioMaster.load_sound(f"{PATH}/res/audio/pour.wav")
 
     def update(self):
         if self.__fill_cooldown > 0:

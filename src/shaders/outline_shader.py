@@ -1,12 +1,12 @@
 from .shader_program import ShaderProgram
-from sys import path
+from src.toolbox.path import PATH
 from src.toolbox.maths import Maths
 
 
 class OutlineShader(ShaderProgram):
 
-    __VERTEX_FILE = f"{path[0]}/src/shaders/outline_vertex_shader.glsl"
-    __FRAGMENT_FILE = f"{path[0]}/src/shaders/outline_fragment_shader.glsl"
+    __VERTEX_FILE = f"{PATH}/src/shaders/outline_vertex_shader.glsl"
+    __FRAGMENT_FILE = f"{PATH}/src/shaders/outline_fragment_shader.glsl"
 
     def __init__(self):
         self.__location_projection_matrix: int = 0

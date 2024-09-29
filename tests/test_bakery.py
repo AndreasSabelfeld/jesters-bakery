@@ -25,6 +25,7 @@ from src.entities.player import FirstPersonPlayer
 from src.terrain.terrain import Terrain
 
 from src.toolbox.raycaster import TerrainRaycaster, ObjectRaycaster
+from src.toolbox.path import PATH
 
 from src.obj_converter.obj_loader import OBJLoader, NormalMappedOBJLoader
 
@@ -55,7 +56,7 @@ def main():
 
     # ~~~~~~~~~~~~~TEXT~~~~~~~~~~~~~~~~
     TextMaster(loader)
-    font = FontType(loader.load_texture("fnts/candara"), "res/fnts/candara.fnt")
+    font = FontType(loader.load_texture("fnts/candara"), f"{PATH}/res/fnts/candara.fnt")
     text1 = GUIText("a sample text!", 15, font, [0, 0.02], 1, False)
     text1.set_color(1, 0, 0)
     text1.set_border_width(0.7)

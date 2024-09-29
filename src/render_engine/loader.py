@@ -4,7 +4,7 @@ from OpenGL.GL.EXT.texture_filter_anisotropic import *
 from OpenGL.GLUT import *
 from PIL import Image
 import numpy
-from sys import path
+from src.toolbox.path import PATH
 
 from src.models.raw_model import RawModel
 from src.textures.texture_data import TextureData
@@ -86,7 +86,7 @@ class Loader:
     @classmethod
     def load_texture(cls, file_name: str, bias: float = -0.6):
         try:
-            img = Image.open(f"{path[0]}/res/{file_name}.png").convert('RGBA')
+            img = Image.open(f"{PATH}/res/{file_name}.png").convert('RGBA')
         except Exception as e:
             print(e)
             # missing texture
@@ -138,13 +138,13 @@ class Loader:
     @staticmethod
     def decode_texture_file(file_name: str):
         try:
-            img = Image.open(f"{path[0]}/res/{file_name}.png").convert('RGBA')
+            img = Image.open(f"{PATH}/res/{file_name}.png").convert('RGBA')
             img = img.transpose(Image.FLIP_TOP_BOTTOM)  # flip image upside down
         except Exception as e:
             print(e)
             missing_texture = Image.new(mode="RGB", size=(2, 2), color=(210, 0, 160))
-            missing_texture.save(f"{path[0]}/res/pngs/missing_texture.png")
-            img = Image.open(f"{path[0]}/res/pngs/missing_texture.png").convert('RGBA')
+            missing_texture.save(f"{PATH}/res/pngs/missing_texture.png")
+            img = Image.open(f"{PATH}/res/pngs/missing_texture.png").convert('RGBA')
             img = img.transpose(Image.FLIP_TOP_BOTTOM)  # flip image upside down
         width, height, data = img.size[0], img.size[1], img.tobytes("raw", "RGBA", 0, -1)
         return TextureData(data, width, height)

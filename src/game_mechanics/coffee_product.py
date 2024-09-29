@@ -3,6 +3,7 @@ from src.font_mesh_creator.gui_text import GUIText
 from src.guis.gui_texture import GuiTexture
 from src.game_mechanics.coffee_page import CoffeePage, CoffeePageLactoseFree
 from src.textures.model_texture import ModelTexture
+from src.toolbox.path import PATH
 
 
 class CoffeeProduct:
@@ -42,7 +43,7 @@ class CoffeeProduct:
         self.__texture = texture
         self.__content = content
         self.__lactose_free = lactose_free
-        self.__font = FontType(self.__loader.load_texture("fnts/arial"), "res/fnts/arial.fnt")
+        self.__font = FontType(self.__loader.load_texture("fnts/arial"), f"{PATH}/res/fnts/arial.fnt")
         self.__icon_size = 0.125    # same as in CoffeeMachineOS class
         self.__text_offset = 0.04   # same as in CoffeeMachineOS class
         self.__text = GUIText(self.__name,
