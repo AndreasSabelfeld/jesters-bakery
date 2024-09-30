@@ -3,6 +3,7 @@ from src.game_mechanics.coffee_container import CoffeeContainer
 from src.game_mechanics.cup_spawn import CupSpawn
 from src.game_mechanics.food import Food
 from src.game_mechanics.food_spawn import FoodSpawn
+from src.game_mechanics.instructions import Instructions
 from src.game_mechanics.order import MasterOrder
 from src.game_mechanics.ingredient import Ingredient
 from src.game_mechanics.tea_bag_spawn import TeaBagSpawn
@@ -171,6 +172,12 @@ class Carry:
             self.__sfx_source.play(self.__pick_up_audio)
             entity.get_attachment().remove_game_object_from_list(entity)
             return 0
+        elif isinstance(entity, GameObject) and isinstance(entity.get_attachment(), Instructions):
+            if side == self.RIGHT:
+                entity.get_attachment().scroll_next()
+            else:
+                entity.get_attachment().scroll_previous()
+            return 1
 
     def __lay_down(self, side: int, carrying_entity, relevant_entities: list) -> None:
         relevant_entities = [_ for _ in relevant_entities if

@@ -10,7 +10,7 @@ from src.textures.model_texture import ModelTexture
 
 
 class TapFaucet:
-    def __init__(self, obj_loader, loader, pos: list[float], rotation: list[float], size: int, fill_texture, content: str,
+    def __init__(self, obj_loader, loader, pos: list[float], rotation: list[float], size: float, fill_texture, content: str,
                  sign_texture: str):
         self.__obj_loader = obj_loader
         self.__loader = loader

@@ -1,9 +1,15 @@
 from OpenGL.GLUT import *
 
+from src.audio.audio_master import AudioMaster
 from src.font_rendering.text_master import TextMaster
 from src.game_mechanics.coffee_container import CoffeeContainer
+from src.game_mechanics.coffee_machine_os import CoffeeMachineOS
 from src.game_mechanics.coffee_product import CoffeeProduct
+from src.game_mechanics.game_object import GameObject
+from src.game_mechanics.tap import Tap
+from src.game_mechanics.tea_bag_spawn import TeaBagSpawn
 from src.guis.gui_texture import GuiTexture
+from src.master.prefabs import plate
 from src.render_engine.display_manager import DisplayManager
 from src.render_engine.gui_renderer import GuiRenderer
 from src.render_engine.master_renderer import MasterRenderer
@@ -33,6 +39,10 @@ def main():
     display.set_backdrop_color(173, 216, 230)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+
+    audio_master = AudioMaster()
+    audio_master.set_listener_data([0, 0, 0], [0, 0, 0])
+
     # ~~~~~~~~~~~~LOADERS~~~~~~~~~~~~~~
     loader = Loader()
     obj_loader = OBJLoader()
@@ -44,8 +54,8 @@ def main():
     bunny_model = obj_loader.load_obj_model("bunny", loader)
     static_bunny_model = TexturedModel(bunny_model, ModelTexture(loader.load_texture("white")))
 
-    player = FirstPersonPlayer(static_bunny_model, [50, 0, 62], 0, 0, 0, 3)
-    player.set_player_size(12)
+    player = FirstPersonPlayer(static_bunny_model, [50, 0, 66], 0, 0, 0, 3)
+    player.set_player_size(14)
     camera = Camera(player)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -275,32 +285,120 @@ def main():
     # entities.extend([small_coffee_game_object, big_coffee_game_object, tea_pot_game_object, small_glass_game_object,
     #                 big_glass_game_object, espresso_cup_game_object])
 
+    coffee_machine_model = obj_loader.load_obj_model("objs/machinery/coffee_machine", loader)
+    coffee_machine_texture = ModelTexture(loader.load_texture("pngs/machinery/coffee_machine_tex"))
+    coffee_machine_texture.set_shine_damper(10)
+    coffee_machine_texture.set_reflectivity(0.1)
+    static_coffee_machine_model = TexturedModel(coffee_machine_model, coffee_machine_texture)
+    static_coffee_machine_collider = TexturedModel(
+        obj_loader.load_obj_model("objs/machinery/coffee_machine_collider", loader),
+        ModelTexture(loader.load_texture("")))
+
+    coffee_machine_screen_model = obj_loader.load_obj_model("objs/machinery/coffee_machine_screen", loader)
+    coffee_machine_screen_texture = ModelTexture(loader.load_texture("pngs/machinery/white"))
+    coffee_machine_screen_texture.set_shine_damper(10)
+    coffee_machine_screen_texture.set_reflectivity(0.5)
+    static_coffee_machine_screen_model = TexturedModel(coffee_machine_screen_model, coffee_machine_screen_texture)
+
+    machine = Entity(static_coffee_machine_model,[50, 10.5, 60], 0, 10, 0, 0.7)
+    coffee_machine_collider = Entity(static_coffee_machine_collider, [50, 10.5, 60], 0, 10, 0, 1)
+    coffee_machine_screen = Entity(static_coffee_machine_screen_model, [50, 10.5, 60], 0, 10, 0, 0.7)
+    coffee_machine_game_object = GameObject(machine, coffee_machine_screen, int_name=CoffeeMachineOS.get_name(),
+                                            collider=coffee_machine_collider)
+
+    entities.append(coffee_machine_game_object)
+    entities.append(prefabs.mixer([50, 10.5, 60], [0, 10, 0], 0.5, loader, obj_loader))
+    entities.append(prefabs.mixer_vessel([50, 10.5, 60], [0, 10, 0], 0.5, loader, obj_loader))
+    milk_foamer_vessel_model = obj_loader.load_obj_model("objs/machinery/milk_foamer_vessel", loader)
+    milk_foamer_vessel_texture = ModelTexture(loader.load_texture("pngs/machinery/milk_foamer_vessel_tex"))
+    milk_foamer_vessel_texture.set_reflectivity(0.75)
+    static_milk_foamer_vessel_model = TexturedModel(milk_foamer_vessel_model, milk_foamer_vessel_texture)
+    static_milk_foamer_vessel_collider = TexturedModel(
+        obj_loader.load_obj_model("objs/machinery/milk_foamer_vessel_collider", loader),
+        ModelTexture(loader.load_texture("")))
+
+    milk_foamer_screen_model = obj_loader.load_obj_model("objs/machinery/milk_foamer_screen", loader)
+    milk_foamer_screen_texture = ModelTexture(loader.load_texture("pngs/machinery/black"))
+    static_milk_foamer_screen_model = TexturedModel(milk_foamer_screen_model, milk_foamer_screen_texture)
+
+    milk_foamer_cup_model = obj_loader.load_obj_model("objs/machinery/milk_foamer_cup", loader)
+    milk_foamer_cup_texture = ModelTexture(loader.load_texture("pngs/machinery/milk_foamer_cup_tex"))
+    milk_foamer_cup_texture.set_reflectivity(0.75)
+    static_milk_foamer_cup_model = TexturedModel(milk_foamer_cup_model, milk_foamer_cup_texture)
+    static_milk_foamer_cup_collider = TexturedModel(
+        obj_loader.load_obj_model("objs/machinery/milk_foamer_cup_collider", loader),
+        ModelTexture(loader.load_texture("")))
+
+    milk_foamer_rotator_model = obj_loader.load_obj_model("objs/machinery/milk_foamer_rotator", loader)
+    milk_foamer_rotator_texture = ModelTexture(loader.load_texture("pngs/machinery/milk_foamer_rotator_tex"))
+    static_milk_foamer_rotator_model = TexturedModel(milk_foamer_rotator_model, milk_foamer_rotator_texture)
+
+    milk_foamer_lid_model = obj_loader.load_obj_model("objs/machinery/milk_foamer_lid", loader)
+    milk_foamer_lid_texture = ModelTexture(loader.load_texture("pngs/machinery/milk_foamer_lid_tex"))
+    milk_foamer_lid_texture.set_reflectivity(0.75)
+    static_milk_foamer_lid_model = TexturedModel(milk_foamer_lid_model, milk_foamer_lid_texture)
+    static_milk_foamer_lid_collider = TexturedModel(
+        obj_loader.load_obj_model("objs/machinery/milk_foamer_lid_collider", loader),
+        ModelTexture(loader.load_texture("")))
+
+    milk_foamer_vessel = Entity(static_milk_foamer_vessel_model, [50, 10.5, 60], *[0, 10, 0], 1)
+    milk_foamer_vessel_collider = Entity(static_milk_foamer_vessel_collider, [50, 10.5, 60], *[0, 10, 0], 1)
+    milk_foamer_screen = Entity(static_milk_foamer_screen_model, [50, 10.5, 60], *[0, 10, 0], 1)
+    milk_foamer_cup = Entity(static_milk_foamer_cup_model, [50, 10.5, 60], *[0, 10, 0], 1)
+    milk_foamer_cup_collider = Entity(static_milk_foamer_cup_collider, [50, 10.5, 60], *[0, 10, 0], 1)
+    milk_foamer_rotator = Entity(static_milk_foamer_rotator_model, [50, 10.5, 60], *[0, 10, 0], 1)
+    milk_foamer_lid = Entity(static_milk_foamer_lid_model, [50, 10.5, 60], *[0, 10, 0], 1)
+    milk_foamer_lid_collider = Entity(static_milk_foamer_lid_collider, [50, 10.5, 60], *[0, 10, 0], 1)
+
+    milk_foamer_game_object = GameObject(milk_foamer_vessel, child_0=milk_foamer_lid, child_1=milk_foamer_cup,
+                                         collider=milk_foamer_vessel_collider,
+                                         int_name="MILK_FOAMER_VESSEL")
+    entities.append(milk_foamer_game_object)
+    entities.append(prefabs.plate([50, 10.5, 60], [0, 10, 0], 0.5, loader, obj_loader))
+    entities.append(prefabs.oat_milk([50, 10.5, 60], [0, 10, 0], 1, loader, obj_loader))
+    entities.append(prefabs.lactose_free_milk([50, 10.5, 60], [0, 10, 0], 1, loader, obj_loader))
+    entities.append(prefabs.chai_bottle([50, 10.5, 60], [0, 10, 0], 1, loader, obj_loader))
+    entities.append(prefabs.orange_juice([50, 10.5, 60], [0, 10, 0], 1, loader, obj_loader))
+    entities.append(prefabs.topfit_juice([50, 10.5, 60], [0, 10, 0], 1, loader, obj_loader))
+    entities.append(prefabs.prosecco_bottle([50, 10.5, 60], [0, 10, 0], 1, loader, obj_loader))
+    entities.append(prefabs.prosecco_glass([50, 10.5, 60], [0, 10, 0], 1, loader, obj_loader))
+    entities.append(prefabs.sprite([50, 10.5, 60], [0, 10, 0], 1, loader, obj_loader))
+    entities.append(prefabs.beer([50, 10.5, 60], [0, 10, 0], 1, loader, obj_loader))
+    textures = [ModelTexture(loader.load_texture("pngs/cups/coke_filling_tex")),
+                ModelTexture(loader.load_texture("pngs/cups/schorle_filling_tex")),
+                ModelTexture(loader.load_texture("pngs/cups/water_filling_tex")),
+                ModelTexture(loader.load_texture("pngs/cups/water_filling_tex")),
+                ModelTexture(loader.load_texture("pngs/cups/beer_filling_tex"))]
+    tap = Tap(obj_loader, loader, [50, 10.5, 60], [0, 10, 0], 0.7, textures).get_game_objects()
+    entities.append(prefabs.caotina([50, 10.5, 60], [0, 10, 0], 1, loader, obj_loader))
+    entities.append(prefabs.ovomaltine([50, 10.5, 60], [0, 10, 0], 1, loader, obj_loader))
+    entities.append(prefabs.chocolatl([50, 10.5, 60], [0, 10, 0], 1, loader, obj_loader))
+
+
     for product in products:
         container = product.get_container_type()
         if container == CoffeeProduct.ESPRESSO_CUP:
-            e1 = prefabs.espresso_cup([50, 10.5, 60], [0, 10, 0], 1, loader, obj_loader)
-            for i in range(3): e1.get_attachment().fill(product.get_texture())
+            e1 = prefabs.espresso_cup([50, 10.5, 60], [0, 10, 0], 2, loader, obj_loader)
             entities.append(e1)
         if container == CoffeeProduct.COFFEE_CUP:
-            e1 = prefabs.coffee_cup([50, 10.5, 60], [0, 10, 0], 1, loader, obj_loader)
-            for i in range(3): e1.get_attachment().fill(product.get_texture())
+            e1 = prefabs.coffee_cup([50, 10.5, 60], [0, 10, 0], 2, loader, obj_loader)
             entities.append(e1)
         if container == CoffeeProduct.CAPPUCCINO_CUP:
-            e1 = prefabs.cappuccino_cup([50, 10.5, 60], [0, 10, 0], 1, loader, obj_loader)
-            for i in range(3): e1.get_attachment().fill(product.get_texture())
+            e1 = prefabs.cappuccino_cup([50, 10.5, 60], [0, 10, 0], 2, loader, obj_loader)
             entities.append(e1)
         if container == CoffeeProduct.SMALL_GLASS:
-            e1 = prefabs.small_glass([50, 10.5, 60], [0, 10, 0], 1, loader, obj_loader)
-            for i in range(3): e1.get_attachment().fill(product.get_texture())
+            e1 = prefabs.small_glass([50, 10.5, 60], [0, 10, 0], 2, loader, obj_loader)
             entities.append(e1)
         if container == CoffeeProduct.BIG_GLASS:
-            e1 = prefabs.big_glass([50, 10.5, 60], [0, 10, 0], 1, loader, obj_loader)
+            e1 = prefabs.big_glass([50, 10.5, 60], [0, 10, 0], 2, loader, obj_loader)
             for i in range(3): e1.get_attachment().fill(product.get_texture())
             entities.append(e1)
         if container == CoffeeProduct.TEA_POT:
-            e1 = prefabs.tea([50, 10.5, 60], [0, 10, 0], 1, loader, obj_loader)
-            for i in range(3): e1.get_attachment().fill(product.get_texture())
+            e1 = prefabs.tea([50, 10.5, 60], [0, 10, 0], 2, loader, obj_loader)
             entities.append(e1)
+
+    prefabs.egg_sandwich([50, 10.5, 60], [0, 10, 0], 0.5, loader, obj_loader, entities, collider_entities)
+    prefabs.earl_grey([50, 10.5, 60], [0, 190, 0], 1, loader, obj_loader, entities, collider_entities)
 
     collider_entities.extend(entities.copy())
     print("finished loading assets")

@@ -8,7 +8,7 @@ from src.game_mechanics.tap_faucet import TapFaucet
 
 
 class Tap:
-    def __init__(self, obj_loader, loader, pos: list[float], rotation: list[float], size: int, textures: list):
+    def __init__(self, obj_loader, loader, pos: list[float], rotation: list[float], size: float, textures: list):
         self.__obj_loader = obj_loader
         self.__loader = loader
         self.__pos = pos
@@ -43,8 +43,8 @@ class Tap:
         self.__base = GameObject(tap_base)
         self.__base.set_pickup_able(False)
 
-        x_offset = 1 * math.cos(math.radians(self.__rot[1]))
-        z_offset = -1 * math.sin(math.radians(self.__rot[1]))
+        x_offset = self.__size * math.cos(math.radians(self.__rot[1]))
+        z_offset = -self.__size * math.sin(math.radians(self.__rot[1]))
         pos_0 = [self.__pos[0] - 2 * x_offset, self.__pos[1], self.__pos[2] - 2 * z_offset]
         pos_1 = [self.__pos[0] - 1 * x_offset, self.__pos[1], self.__pos[2] - 1 * z_offset]
         pos_2 = [self.__pos[0] - 0 * x_offset, self.__pos[1], self.__pos[2] - 0 * z_offset]

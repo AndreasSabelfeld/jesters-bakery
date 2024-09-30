@@ -8,6 +8,7 @@ from src.game_mechanics.fridge import Fridge
 from src.game_mechanics.fridge_object import FridgeObject
 from src.game_mechanics.game_object import GameObject
 from src.game_mechanics.ingredient import Ingredient
+from src.game_mechanics.instructions import Instructions
 from src.game_mechanics.milk_foamer import MilkFoamer
 from src.game_mechanics.mixer import Mixer
 from src.game_mechanics.mixer_vessel import MixerVessel
@@ -2051,5 +2052,35 @@ def ticket_machine(pos: list[float], rot: list[float], size: float, loader: Load
     collider = Entity(static_collider, pos, *rot, size)
     game_object = GameObject(ent, collider=collider)
     game_object.set_pickup_able(False)
+
+    return game_object
+
+def instructions(pos: list[float], rot: list[float], size: float, loader: Loader, obj_loader: OBJLoader) -> GameObject:
+    texture = ModelTexture(loader.load_texture("pngs/machinery/instructions_board_tex"))
+    texture.set_shine_damper(10)
+    texture.set_reflectivity(0.5)
+
+    paper_texture = ModelTexture(loader.load_texture(""))
+    paper_texture.set_shine_damper(10)
+    paper_texture.set_reflectivity(0.5)
+
+    model = obj_loader.load_obj_model("objs/machinery/instructions_board", loader)
+    static_model = TexturedModel(model, texture)
+    paper_model = obj_loader.load_obj_model("objs/machinery/instructions_paper", loader)
+    paper_static_model = TexturedModel(paper_model, paper_texture)
+
+    static_collider = TexturedModel(obj_loader.load_obj_model("objs/machinery/instructions_collider", loader),
+                                    ModelTexture(loader.load_texture("")))
+
+    ent = Entity(static_model, pos, *rot, size)
+    paper_ent = Entity(paper_static_model, pos, *rot, size)
+    collider = Entity(static_collider, pos, *rot, size)
+
+    game_object = GameObject(ent, collider=collider, child_0=paper_ent)
+    game_object.set_ext_name("Instructions")
+    game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to browse the pages.")
+
+    instruction = Instructions(paper_ent, loader)
+    game_object.set_attachment(instruction)
 
     return game_object

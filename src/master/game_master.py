@@ -20,6 +20,7 @@ from src.game_ui.key_hints import KeyHints
 from src.game_ui.ui import UI
 from src.master import prefabs
 from src.master.levels import Levels
+from src.master.prefabs import instructions
 from src.models.textured_model import TexturedModel
 from src.obj_converter.obj_loader import OBJLoader, NormalMappedOBJLoader
 from src.render_engine.display_manager import DisplayManager
@@ -302,8 +303,9 @@ class GameMaster:
         mixer_game_object = prefabs.mixer([150, 12.5, 185], [0, 90, 0], 0.5, self.__loader, self.__obj_loader)
         heater = prefabs.cup_heater([150, 12.5, 194], [0, 90, 0], size, self.__loader, self.__obj_loader,
                                     self.__entities, self.__collider_entities)
+        instruction = prefabs.instructions([167, 15.5, 176.5], [0, -90, 0], size, self.__loader, self.__obj_loader)
 
-        machines = [ice_machine_door, mixer_game_object, heater]
+        machines = [ice_machine_door, mixer_game_object, heater, instruction]
         self.__entities.extend(machines)
         self.__collider_entities.extend(machines)
         self.__collider_entities.extend([heater.get_child_0(), heater.get_child_1()])

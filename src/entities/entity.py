@@ -1,3 +1,4 @@
+from src.models.textured_model import TexturedModel
 from src.toolbox.maths import Maths
 
 
@@ -36,7 +37,7 @@ class Entity:
         return Maths.create_transformation_matrix(self.get_position(), self.get_rot_x(), self.get_rot_y(),
                                                   self.get_rot_z(), self.get_scale())
 
-    def get_model(self):
+    def get_model(self) -> TexturedModel:
         return self.__model
 
     def set_model(self, model):

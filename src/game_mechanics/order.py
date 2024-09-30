@@ -359,57 +359,6 @@ class MasterOrder:
         poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
                                 self.__coffee_dict["Tea"].get_brew_length(),
                                 self.__coffee_dict["Tea"].get_container_type()))
-        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
-                                self.__coffee_dict["Tea"].get_brew_length(),
-                                self.__coffee_dict["Tea"].get_container_type()))
-        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
-                                self.__coffee_dict["Tea"].get_brew_length(),
-                                self.__coffee_dict["Tea"].get_container_type()))
-        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
-                                self.__coffee_dict["Tea"].get_brew_length(),
-                                self.__coffee_dict["Tea"].get_container_type()))
-        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
-                                self.__coffee_dict["Tea"].get_brew_length(),
-                                self.__coffee_dict["Tea"].get_container_type()))
-        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
-                                self.__coffee_dict["Tea"].get_brew_length(),
-                                self.__coffee_dict["Tea"].get_container_type()))
-        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
-                                self.__coffee_dict["Tea"].get_brew_length(),
-                                self.__coffee_dict["Tea"].get_container_type()))
-        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
-                                self.__coffee_dict["Tea"].get_brew_length(),
-                                self.__coffee_dict["Tea"].get_container_type()))
-        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
-                                self.__coffee_dict["Tea"].get_brew_length(),
-                                self.__coffee_dict["Tea"].get_container_type()))
-        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
-                                self.__coffee_dict["Tea"].get_brew_length(),
-                                self.__coffee_dict["Tea"].get_container_type()))
-        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
-                                self.__coffee_dict["Tea"].get_brew_length(),
-                                self.__coffee_dict["Tea"].get_container_type()))
-        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
-                                self.__coffee_dict["Tea"].get_brew_length(),
-                                self.__coffee_dict["Tea"].get_container_type()))
-        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
-                                self.__coffee_dict["Tea"].get_brew_length(),
-                                self.__coffee_dict["Tea"].get_container_type()))
-        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
-                                self.__coffee_dict["Tea"].get_brew_length(),
-                                self.__coffee_dict["Tea"].get_container_type()))
-        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
-                                self.__coffee_dict["Tea"].get_brew_length(),
-                                self.__coffee_dict["Tea"].get_container_type()))
-        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
-                                self.__coffee_dict["Tea"].get_brew_length(),
-                                self.__coffee_dict["Tea"].get_container_type()))
-        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
-                                self.__coffee_dict["Tea"].get_brew_length(),
-                                self.__coffee_dict["Tea"].get_container_type()))
-        poss.append(Possibility("Tea", ["English Breakfast", "Earl Grey", "Rooibos", "Nana-Mint", "Verveine", "Ginger"],
-                                self.__coffee_dict["Tea"].get_brew_length(),
-                                self.__coffee_dict["Tea"].get_container_type()))
         poss.append(Possibility("Hot Chocolate", ["Lactose Free", "Oat Milk"],
                                 self.__coffee_dict["Hot Chocolate"].get_brew_length(),
                                 self.__coffee_dict["Hot Chocolate"].get_container_type()))
