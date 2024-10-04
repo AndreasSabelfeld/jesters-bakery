@@ -22,8 +22,8 @@ class AudioMaster:
         """
         Sets the listener's position and velocity in the 3D space.
 
-        :param position: A list of three floats representing the listener's position (x, y, z).
-        :param velocity: A list of three floats representing the listener's velocity (x, y, z).
+        :param position: A list of three floats of the listener's position (x, y, z).
+        :param velocity: A list of three floats of the listener's velocity (x, y, z).
         """
         alListener3f(AL_POSITION, *position)
         alListener3f(AL_VELOCITY, *velocity)

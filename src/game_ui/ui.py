@@ -19,6 +19,12 @@ from src.toolbox.path import PATH
 
 
 class UI:
+    """
+    Handles the user interface for the game.
+
+    This class is very simple and manually displays the ui screens with hardcoded gui elements.
+    """
+
     NO_SCREEN = -1
     LOADING_SCREEN = 0
     MAIN_MENU = 1
@@ -26,6 +32,17 @@ class UI:
 
     def __init__(self, loader: Loader, gui_renderer: GuiRenderer, level_master: Levels, display: DisplayManager, sfx_source: Source,
                  player: FirstPersonPlayer, camera: Camera, game_master):
+        """Initializes the UI instance.
+
+        :param loader: The loader instance
+        :param gui_renderer: The renderer for drawing GUI elements.
+        :param level_master: The LevelMaster instance
+        :param display: The display manager
+        :param sfx_source: The audio source for sound effects.
+        :param player: The player character
+        :param camera: The camera used to view the game.
+        :param game_master: The GameMaster instance
+        """
         self.__time_zero = Time.time_current_time()
         self.__loader = loader
         self.__gui_renderer = gui_renderer
@@ -43,6 +60,8 @@ class UI:
         self.__select = AudioMaster.load_sound(f"{PATH}/res/audio/menu_selected.wav")
 
     def render(self) -> None:
+        """Renders the current GUI elements and swaps buffers.
+        """
         self.__gui_renderer.render(self.__current_textures)
         TextMaster.render_specified(self.__current_texts)
 
@@ -50,9 +69,15 @@ class UI:
         glutMainLoopEvent()     # used to run openGL manually in a loop instead of glutMainLoop()
 
     def clear(self) -> None:
+        """Clears the current screen by rendering a black texture.
+        """
         self.__gui_renderer.render([self.__clear_tex])
 
     def loading_screen(self, elapsed_time: float) -> None:
+        """Displays the loading screen with the loading percentage.
+
+        :param elapsed_time: The total time that has elapsed since the loading started.
+        """
         self.__current_texts.clear()
         self.__current_textures.clear()
         self.clear()
@@ -72,14 +97,27 @@ class UI:
 
     def main_menu(self, master_renderer: MasterRenderer, entities: list, nm_entities: list, terrains: list, lights: list,
                   sm_entities: list, sun) -> None:
+        """Sets up and displays the main menu screen.
+
+        :param master_renderer: The renderer used for drawing the game elements.
+        :param entities: A list of game entities to be rendered.
+        :param nm_entities: A list of normal mapped entities to be rendered
+        :param terrains: A list of terrain objects to be rendered
+        :param lights: A list of light sources for the scene.
+        :param sm_entities: A list of shadow map entities
+        :param sun: The sun entity used for lighting.
+        """
+
         self.__current_texts.clear()
         self.__current_textures.clear()
 
         selected_item = 0
 
+        splash_image = GuiTexture(self.__loader.load_texture("pngs/ui/jester"), [0, 0.7], [0.15, 0.3])
+
         font = FontType(self.__loader.load_texture("fnts/lonely_coffee"), f"{PATH}/res/fnts/lonely_coffee.fnt")
-        title_bg = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Item4"), [0, 0.6], [0.6, 0.4])
-        title_text = GUIText(f"Jester's Bakery", 35, font, [0, 0.08], 1, True)
+        title_bg = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Item4"), [0, 0.55], [0.6, 0.4])
+        title_text = GUIText(f"Jester's            Bakery", 35, font, [0.18, 0.12], 1, False)
         title_text.set_color(1, 1, 1)
         title_text.set_border_width(0.7)
         title_text.set_offset([0.003, 0.003])
@@ -106,7 +144,7 @@ class UI:
         icon_right = GuiTexture(self.__loader.load_texture("pngs/ui/PenzillaUI/Icon_Right"), [-0.3, 0], [0.04, 0.1])
 
         items = [item_1_text, item_2_text, item_3_text]
-        self.__current_textures = [title_bg, item_bg, item_1, item_2, item_3, icon_right]
+        self.__current_textures = [title_bg, item_bg, item_1, item_2, item_3, icon_right, splash_image]
         self.__current_texts = [title_text, *items]
 
         Time.set_current_time(Time.time_current_time())
@@ -161,6 +199,10 @@ class UI:
             self.render()
 
     def options_menu(self) -> bool:
+        """Displays the options menu and handles user input.
+
+        :return: True if the user respawns the character otherwise false
+        """
         old_texts = self.__current_texts.copy()
         old_textures = self.__current_textures.copy()
         self.__current_texts.clear()
@@ -232,6 +274,9 @@ class UI:
             self.render()
 
     def game_loop(self) -> None:
+        """
+        Handles the UI of the game loop.
+        """
         self.__current_texts.clear()
         self.__current_textures.clear()
 
@@ -277,6 +322,7 @@ class UI:
             self.pause_menu()
 
     def pause_menu(self) -> None:
+        """Handles the UI when the player pauses the game"""
         self.__current_texts.clear()
         self.__current_textures.clear()
 
@@ -347,6 +393,7 @@ class UI:
             self.render()
 
     def level_complete(self) -> None:
+        """Shows the level complete UI when the player finishes a level"""
         self.__current_texts.clear()
         self.__current_textures.clear()
         points = self.__level_master.get_total_points()
@@ -396,6 +443,7 @@ class UI:
             self.render()
 
     def thx_4_playing(self) -> None:
+        """Shows the UI screen when the player finishes the entire game"""
         self.__current_texts.clear()
         self.__current_textures.clear()
 

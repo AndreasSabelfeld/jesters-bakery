@@ -8,6 +8,9 @@ from src.textures.model_texture import ModelTexture
 
 
 class CoffeeContainer:
+    """Represents a container for various types of coffee or drinks."""
+
+    # Container type constants
     ESPRESSO_CUP = 0
     SMALL_GLASS = 1
     COFFEE_CUP = 2
@@ -21,6 +24,11 @@ class CoffeeContainer:
     __obj_loader = None
 
     def __init__(self, container_type: int, parent_entity: GameObject):
+        """Initializes a CoffeeContainer instance.
+
+        :param container_type: The type of the container, represented by a constant.
+        :param parent_entity: The GameObject that this container is connected with.
+        """
         self.__container_type = container_type
         self.__parent_entity = parent_entity
         self.__level = 0
@@ -32,10 +40,22 @@ class CoffeeContainer:
 
     @classmethod
     def add_loaders(cls, loader, obj_loader):
+        """Sets the loaders for the container.
+
+        :param loader: The texture loader.
+        :param obj_loader: The object loader for 3D models.
+        """
         cls.__loader = loader
         cls.__obj_loader = obj_loader
 
     def get_model(self, container_type: int, level: int, texture) -> TexturedModel:
+        """Gets the 3D model for the container based on type and level.
+
+        :param container_type: The type of the container.
+        :param level: The fill level of the container.
+        :param texture: The texture to be applied to the model.
+        :return: A TexturedModel instance of the container model.
+        """
         if level > 3:
             level = 3
             # if content is not a sublist of:
@@ -60,35 +80,68 @@ class CoffeeContainer:
                 return TexturedModel(self.__obj_loader.load_obj_model(f"objs/cups/prosecco_glass_lvl_{level}", self.__loader), texture)
 
     def fill(self, texture: ModelTexture) -> None:
+        """Fills the container, increasing the level and updating the visual model.
+
+        :param texture: The texture to apply to the model.
+        """
         self.__parent_entity.get_sfx_source().play(self.__pour_sound)
         self.__level += 1
         self.__parent_entity.set_child_0(Entity(self.get_model(self.__container_type, self.__level, texture),
                                                 self.__parent_entity.get_position(), 0, 0, 0, 1))
 
     def set_level(self, level: int, texture) -> None:
+        """Sets the fill level of the container.
+
+        :param level: The new fill level for the container.
+        :param texture: The texture to apply to the model.
+        """
         self.__parent_entity.get_sfx_source().play(self.__pour_sound)
         self.__level = level
         self.__parent_entity.set_child_0(Entity(self.get_model(self.__container_type, self.__level, texture),
                                                 self.__parent_entity.get_position(), 0, 0, 0, 1))
 
     def get_level(self) -> int:
+        """Gets the current fill level of the container.
+
+        :return: The fill level of the container.
+        """
         return self.__level
 
     def set_texture(self, texture: ModelTexture) -> None:
+        """Sets the texture of the container and updates the model based on the current level.
+
+        :param texture: The new texture to apply to the model.
+        """
         self.set_level(self.get_level(), texture)
 
     def get_container_type(self) -> int:
+        """Gets the type of the container.
+
+        :return: The type of the container.
+        """
         return self.__container_type
 
     def toggle_overflown(self, texture) -> None:
+        """Handles the overflow state of the container.
+
+        :param texture: The texture to apply to the overflowed model.
+        """
         if not self.__overflown:
             self.__overflown = True
             self.__parent_entity.get_entity().get_model().set_texture(texture)
 
     def get_content(self) -> list:
+        """Gets the current content of the container.
+
+        :return: A list of the content of the container.
+        """
         return self.__content
 
     def append_content(self, content: str | list) -> None:
+        """Appends content to the container, handling merging of half portions.
+
+        :param content: A string or list of contents to append to the container.
+        """
         if isinstance(content, str):
             # if we have two halves, this makes one full
             if "half" in content and content in self.__content:
@@ -102,6 +155,10 @@ class CoffeeContainer:
             self.__content.extend(content)
 
     def remove_content(self) -> list:
+        """Removes all content from the container and returns it.
+
+        :return: A list of the content that was in the container.
+        """
         c = self.__content.copy()
         self.__content = []
         return c

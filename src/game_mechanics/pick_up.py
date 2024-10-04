@@ -23,6 +23,15 @@ class Carry:
     RIGHT = 1
 
     def __init__(self, terrain_raycaster, object_raycaster, coffee_machine, coffee_machine_lf, sfx_source):
+        """
+        Initializes the Carry object.
+
+        :param terrain_raycaster: Used for detecting terrain.
+        :param object_raycaster: Used for detecting objects.
+        :param coffee_machine: A coffee machine object.
+        :param coffee_machine_lf: A lactose free coffee machine object
+        :param sfx_source: The source for sound effects.
+        """
         self.__camera = terrain_raycaster.get_camera()
         self.__terrain_picker = terrain_raycaster
         self.__object_picker = object_raycaster
@@ -44,6 +53,11 @@ class Carry:
         self.__lay_down_audio = AudioMaster.load_sound(f"{PATH}/res/audio/put_down.wav")
 
     def update(self, can_pick_up: bool = True) -> None:
+        """
+        Updates the carry state, checking for pick-up or put-down actions.
+
+        :param can_pick_up: Whether picking up is allowed.
+        """
         relevant_entities = [_ for _ in self.movable_entities if
                              _ not in (self.__carrying_object_right, self.__carrying_object_left)]
 
@@ -85,6 +99,12 @@ class Carry:
                 self.__c_pressed = False
 
     def __pick_up(self, side, relevant_entities) -> None:
+        """
+        Handles picking up an object from the environment.
+
+        :param side: The side to pick up the object with (LEFT or RIGHT).
+        :param relevant_entities: List of entities that can be interacted with.
+        """
         entity = self.__object_picker.update(relevant_entities)
         if isinstance(entity, GameObject):
             if not entity.is_pickup_able():
@@ -107,6 +127,13 @@ class Carry:
                 self.__carrying_object_left = entity
 
     def __pick_up_special_cases(self, entity, side) -> int:
+        """
+        Handles specific cases when picking up certain objects.
+
+        :param entity: The object being picked up.
+        :param side: The side to pick up the object with (LEFT or RIGHT).
+        :return: A special case flag to indicate if the object should be put in the hands
+        """
         name = entity.get_int_name()
         if name == "COFFEE" or name == "TEA" or name == "GLASS" or name == "MIXER_VESSEL":
             if not self.__pick_up_coffee(entity):
@@ -180,6 +207,14 @@ class Carry:
             return 1
 
     def __lay_down(self, side: int, carrying_entity, relevant_entities: list) -> None:
+        """
+        Puts down the carried object and checks for interaction with other objects.
+
+        :param side: The side of the player where the object is carried.
+        :param carrying_entity: The object currently being carried.
+        :param relevant_entities: List of entities to consider for interaction.
+        """
+
         relevant_entities = [_ for _ in relevant_entities if
                              _ not in self.__coffee_machine.get_attachment().get_coffee_list()]
         entity = self.__object_picker.update(relevant_entities)
@@ -211,6 +246,15 @@ class Carry:
                 carrying_entity.set_position(terrain)
 
     def __lay_down_special_cases(self, entity, side):
+        """
+        Handles special cases for certain objects when being laid down.
+
+        :param entity: The object being interacted with.
+        :param side: The side of the player where the other object is carried.
+
+        :return: 1 if a special case is handled, otherwise 0.
+        """
+
         name = entity.get_int_name()
         if name == "MILK_FOAMER_VESSEL":
             if isinstance(self.get_carrying_object(side), GameObject):
@@ -332,6 +376,12 @@ class Carry:
                         return 1
 
     def set_carrying_object(self, side: int, entity) -> None:
+        """
+        Sets the object in the specified hand.
+
+        :param side: The side of the player where the object should be carried (0 for left, 1 for right).
+        :param entity: The object to be carried.
+        """
         if side:
             if not self.__is_carrying_right:
                 self.__is_carrying_right = True
@@ -342,6 +392,13 @@ class Carry:
                 self.__carrying_object_left = entity
 
     def remove_carrying_object(self, side: int) -> any:
+        """
+        Removes and returns the object being carried in the specified hand.
+
+        :param side: The side of the player (0 for left, 1 for right).
+
+        :return: The object that was being carried.
+        """
         if side:
             self.__is_carrying_right = False
             obj = self.__carrying_object_right
@@ -353,12 +410,22 @@ class Carry:
         return obj
 
     def get_carrying_object(self, side: int) -> any:
+        """
+        Returns the object being carried in the specified hand.
+
+        :param side: The side of the player (0 for left, 1 for right).
+
+        :return: The object being carried.
+        """
         if side:
             return self.__carrying_object_right
         else:
             return self.__carrying_object_left
 
     def __move_right(self):
+        """
+        Updates the position and rotation of the object being carried in the right hand.
+        """
         self.__terrain_picker.update()
         object_pos_right = vec3(self.__camera.get_position()) + vec3(self.__terrain_picker.get_current_ray()) * self.__forward_distance
         object_pos_right += vec3(self.__terrain_picker.get_current_ray()).normalize().cross(vec3(0, 1, 0)) * self.__sideways_distance
@@ -368,6 +435,9 @@ class Carry:
         self.__carrying_object_right.set_rot_z(self.__camera.get_player().get_rot_z())
 
     def __move_left(self):
+        """
+        Updates the position and rotation of the object being carried in the left hand.
+        """
         self.__terrain_picker.update()
         object_pos_left = vec3(self.__camera.get_position()) + vec3(self.__terrain_picker.get_current_ray()) * self.__forward_distance
         object_pos_left += vec3(self.__terrain_picker.get_current_ray()).normalize().cross(vec3(0, 1, 0)) * (-self.__sideways_distance)
@@ -377,6 +447,13 @@ class Carry:
         self.__carrying_object_left.set_rot_z(self.__camera.get_player().get_rot_z())
 
     def __pick_up_coffee(self, entity) -> bool:
+        """
+        Handles picking up coffee or tea objects from a coffee machine.
+
+        :param entity: The coffee or tea object to be picked up.
+
+        :return: True if the object was picked up, otherwise False.
+        """
         if entity in self.__coffee_machine.get_attachment().get_coffee_list():
             if self.__coffee_machine.get_attachment().is_brewing_coffee() and (entity.get_int_name() == "COFFEE" or entity.get_int_name() == "GLASS"):
                 return False
@@ -392,6 +469,12 @@ class Carry:
         return True
 
     def __lay_down_coffee(self, side, coffee_machine):
+        """
+        Places the carried coffee or tea object onto the coffee machine if possible.
+
+        :param side: The side of the player where the object is being carried (0 for left, 1 for right).
+        :param coffee_machine: The coffee machine where the object will be placed.
+        """
         if side:
             if not isinstance(self.__carrying_object_right, GameObject):
                 return
@@ -418,11 +501,15 @@ class Carry:
                     coffee_machine.get_attachment().set_coffee(0, self.__carrying_object_left)
 
     def __put_left_in_right(self):
-        """Object in the left hand 'collides' with the object in the right hand."""
+        """
+        Object in the left hand 'collides' with the object in the right hand.
+        """
         if self.get_carrying_object(self.LEFT) and self.get_carrying_object(self.RIGHT):
             self.__lay_down_special_cases(self.get_carrying_object(self.RIGHT), self.LEFT)
 
     def __put_right_in_left(self):
-        """Object in the right hand 'collides' with the object in the left hand."""
+        """
+        Object in the right hand 'collides' with the object in the left hand.
+        """
         if self.get_carrying_object(self.LEFT) and self.get_carrying_object(self.RIGHT):
             self.__lay_down_special_cases(self.get_carrying_object(self.LEFT), self.RIGHT)

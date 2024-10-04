@@ -8,7 +8,20 @@ from src.game_mechanics.tap_faucet import TapFaucet
 
 
 class Tap:
+    """
+    Represents a tap with multiple faucets.
+    """
+
     def __init__(self, obj_loader, loader, pos: list[float], rotation: list[float], size: float, textures: list):
+        """Initializes the Tap instance.
+
+        :param obj_loader: The object loader for loading 3D models.
+        :param loader: The texture loader for loading textures.
+        :param pos: The position of the tap
+        :param rotation: The rotation of the tap in degrees.
+        :param size: The size of the tap.
+        :param textures: A list of textures for the faucets.
+        """
         self.__obj_loader = obj_loader
         self.__loader = loader
         self.__pos = pos
@@ -26,7 +39,8 @@ class Tap:
 
         self.__load_assets()
 
-    def update(self):
+    def update(self) -> None:
+        """Updates the state of all the faucets."""
         self.__faucet_0.update()
         self.__faucet_1.update()
         self.__faucet_2.update()
@@ -34,6 +48,7 @@ class Tap:
         self.__faucet_4.update()
 
     def __load_assets(self) -> None:
+        """Loads the tap model and its connected textures."""
         tap_base_model = self.__obj_loader.load_obj_model("objs/machinery/tap_base", self.__loader)
         tap_base_texture = ModelTexture(self.__loader.load_texture("pngs/machinery/tap_base_texture"))
         tap_base_texture.set_reflectivity(0.5)
@@ -62,9 +77,18 @@ class Tap:
                                     "pngs/machinery/tap_faucet_beer_tex")
 
     def get_base(self) -> GameObject:
+        """Returns the base of the tap.
+
+        :return: The GameObject of the tap base.
+        """
         return self.__base
 
     def get_faucet(self, num: int) -> GameObject:
+        """Returns the specified faucet.
+
+        :param num: The index of the faucet to return (0-4).
+        :return: The GameObject of the specified faucet.
+        """
         match num:
             case 0:
                 return self.__faucet_0
@@ -80,6 +104,10 @@ class Tap:
                 print("Faucet number out of range!")
 
     def get_game_objects(self) -> list[GameObject]:
+        """Returns a list of all GameObjects related with the tap.
+
+        :return: A list of GameObjects including the tap base and all faucets.
+        """
         return [self.__base,
                 self.__faucet_0.get_faucet_game_object(),
                 self.__faucet_1.get_faucet_game_object(),

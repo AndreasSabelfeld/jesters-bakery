@@ -39,6 +39,11 @@ class Binds:
 
     @classmethod
     def get_bind(cls, bind: int) -> str:
+        """Gets the bind representation based on the input method.
+
+        :params bind: The bind index.
+        :return: The corresponding bind representation.
+        """
         if ControllerInput.is_using_controller:
             return cls.dict.get(bind)[1]
         else:
@@ -63,6 +68,11 @@ class KeyboardInput:
 
     @classmethod
     def on_key_down(cls, key_to_check) -> bool:
+        """Checks if a key is pressed down for the first frame
+
+        :params key_to_check: The key to check.
+        :return: True if the key is pressed down, otherwise False.
+        """
         if key_to_check not in cls.__cooldowns.keys():
             cls.__cooldowns.update({key_to_check: False})
         # if key is held down for the first frame
@@ -75,14 +85,17 @@ class KeyboardInput:
 
     @classmethod
     def key_down(cls, player_input, *args):
+        """Handles the key down event."""
         cls.__keys_held.update({player_input: True})
 
     @classmethod
     def key_up(cls, player_input, *args):
+        """Handles the key up event."""
         cls.__keys_held.update({player_input: False})
 
     @classmethod
     def special_keys(cls, player_input, *args):
+        """Handles special key inputs, like F1 for polygon mode."""
         if player_input == GLUT_KEY_F1:
             if not cls.get_polygon_mode():
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
@@ -93,6 +106,7 @@ class KeyboardInput:
 
     @classmethod
     def mouse_buttons(cls, button: int, state: int, x: int, y: int):
+        """Handles mouse button inputs."""
         if not (button == 3 or button == 4):
             # if not the mouse wheel was used update pressed key
             cls.__mouse_keys_held.update({button: True})
@@ -103,6 +117,7 @@ class KeyboardInput:
 
     @classmethod
     def mouse_movement(cls, x: int, y: int):
+        """Updates mouse position and calculates movement deltas."""
         middle_x = cls.get_window_size()[0]
         middle_y = cls.get_window_size()[1]
         cls.__mouse_pos = [x, y]
@@ -111,50 +126,92 @@ class KeyboardInput:
 
     @classmethod
     def mouse_wheel(cls, button: int, direction: int, x: int, y: int):
+        """Handles mouse wheel input."""
         cls.__scroll = direction
 
     @classmethod
     def set_polygon_mode(cls, b: bool):
+        """Sets the polygon mode."""
         cls.__polygon_mode = b
 
     @classmethod
     def get_polygon_mode(cls) -> bool:
+        """Gets the current polygon mode status.
+
+        :return: True if polygon mode is enabled, otherwise False.
+        """
         return cls.__polygon_mode
 
     @classmethod
     def get_keys_held(cls) -> dict:
+        """Gets the currently held keys.
+
+        :return: A dictionary of keys held.
+        """
         return cls.__keys_held
 
     @classmethod
     def get_mouse_keys_held(cls) -> dict:
+        """Gets the currently held mouse keys.
+
+        :return: A dictionary of mouse keys held.
+        """
         return cls.__mouse_keys_held
 
     @classmethod
     def get_mouse_pos(cls) -> list[float]:
+        """Gets the current mouse position.
+
+        :return: The mouse position as a list of floats.
+        """
         return cls.__mouse_pos
 
     @classmethod
     def get_scroll(cls) -> int:
+        """Gets the current scroll value.
+
+        :return: The scroll value.
+        """
         return cls.__scroll
 
     @classmethod
     def get_dx(cls) -> float:
+        """Gets the change in mouse x position.
+
+        :return: The change in x position.
+        """
         return cls.__dx
 
     @classmethod
     def get_dy(cls) -> float:
+        """Gets the change in mouse y position.
+
+        :return: The change in y position.
+        """
         return cls.__dy
 
     @classmethod
     def set_window_size(cls, size: list[int]) -> None:
+        """Sets the window size.
+
+        :params size: The window size as a list of two integers.
+        """
         cls.__window_size = size
 
     @classmethod
-    def get_window_size(cls) -> list[int, int]:
+    def get_window_size(cls) -> list[int]:
+        """Gets the current window size.
+
+        :return: The window size as a list of two integers.
+        """
         return cls.__window_size
 
     @classmethod
     def get_cooldowns(cls) -> dict:
+        """Gets the cooldowns for the keys.
+
+        :return: A dictionary of cooldowns.
+        """
         return cls.__cooldowns
 
 
@@ -162,9 +219,15 @@ class KeyboardInputListener(KeyboardInput):
     """Individual Keyboard Listener working with instances"""
 
     def __init__(self):
+        """Initializes the KeyboardInputListener instance."""
         self.__cooldowns = dict()
 
     def on_key_down(self, key_to_check) -> bool:
+        """Checks if a key is pressed down for the first frame.
+
+        :params key_to_check: The key to check.
+        :return: True if the key is pressed down, otherwise False.
+        """
         if key_to_check not in self.__cooldowns.keys():
             self.__cooldowns.update({key_to_check: False})
         # if key is held down for the first frame
@@ -176,24 +239,52 @@ class KeyboardInputListener(KeyboardInput):
         return False
 
     def get_keys_held(self) -> dict:
+        """Gets the currently held keys.
+
+        :return: A dictionary of keys held.
+        """
         return super().get_keys_held()
 
     def get_mouse_keys_held(self) -> dict:
+        """Gets the currently held mouse keys.
+
+        :return: A dictionary of mouse keys held.
+        """
         return super().get_mouse_keys_held()
 
     def get_mouse_pos(self) -> list[float]:
+        """Gets the current mouse position.
+
+        :return: The mouse position as a list of floats.
+        """
         return super().get_mouse_pos()
 
     def get_scroll(self) -> int:
+        """Gets the current scroll value.
+
+        :return: The scroll value.
+        """
         return super().get_scroll()
 
     def get_dx(self) -> float:
+        """Gets the change in mouse x position.
+
+        :return: The change in x position.
+        """
         return super().get_dx()
 
     def get_dy(self) -> float:
-        return super().get_dx()
+        """Gets the change in mouse y position.
+
+        :return: The change in y position.
+        """
+        return super().get_dy()
 
     def get_cooldowns(self) -> dict:
+        """Gets the cooldowns for the keys.
+
+        :return: A dictionary of cooldowns.
+        """
         return self.__cooldowns
 
 
@@ -337,11 +428,21 @@ class UniversalInput:
 
     @classmethod
     def set_using_controller(cls, using: bool) -> None:
+        """
+        Sets if the controller is being used.
+
+        :params using: Whether to use the controller.
+        """
         cls.__controller.is_using_controller = using
         cls.__controller.restart_monitor_thread()
 
     @classmethod
     def get_x_axis_movement(cls) -> float:
+        """
+        Returns x-axis movement value.
+
+        :return: x-axis movement.
+        """
         if cls.__controller.is_using_controller:
             if abs(cls.__controller.LeftJoystickX) > ControllerInput.get_dead_zone():
                 return cls.__controller.LeftJoystickX
@@ -356,6 +457,11 @@ class UniversalInput:
 
     @classmethod
     def get_y_axis_movement(cls) -> float:
+        """
+        Returns y-axis movement value.
+
+        :return: y-axis movement.
+        """
         if cls.__controller.is_using_controller:
             if abs(cls.__controller.LeftJoystickY) > ControllerInput.get_dead_zone():
                 return -cls.__controller.LeftJoystickY
@@ -370,6 +476,11 @@ class UniversalInput:
 
     @classmethod
     def get_x_axis_rotation(cls) -> float:
+        """
+        Returns x-axis rotation value.
+
+        :return: x-axis rotation.
+        """
         if cls.__controller.is_using_controller:
             if abs(cls.__controller.RightJoystickX) > ControllerInput.get_dead_zone():
                 return -cls.__controller.RightJoystickX * ControllerInput.get_sensitivity() * 10
@@ -380,6 +491,11 @@ class UniversalInput:
 
     @classmethod
     def get_y_axis_rotation(cls) -> float:
+        """
+        Returns y-axis rotation value.
+
+        :return: y-axis rotation.
+        """
         if cls.__controller.is_using_controller:
             if abs(cls.__controller.RightJoystickY) > ControllerInput.get_dead_zone():
                 return cls.__controller.RightJoystickY * ControllerInput.get_sensitivity() * 10
@@ -390,6 +506,11 @@ class UniversalInput:
 
     @classmethod
     def get_left(cls) -> bool:
+        """
+        Returns true if left action is triggered.
+
+        :return: True if left action is triggered.
+        """
         if cls.__controller.is_using_controller:
             if cls.__controller.LeftJoystickX < -0.8 and not cls.__left_cooldown:
                 cls.__left_cooldown = True
@@ -406,6 +527,11 @@ class UniversalInput:
 
     @classmethod
     def get_right(cls) -> bool:
+        """
+        Returns true if right action is triggered.
+
+        :return: True if right action is triggered.
+        """
         if cls.__controller.is_using_controller:
             if cls.__controller.LeftJoystickX > 0.8 and not cls.__right_cooldown:
                 cls.__right_cooldown = True
@@ -422,6 +548,11 @@ class UniversalInput:
 
     @classmethod
     def get_up(cls) -> bool:
+        """
+        Returns true if up action is triggered.
+
+        :return: True if up action is triggered.
+        """
         if cls.__controller.is_using_controller:
             if cls.__controller.LeftJoystickY > 0.8 and not cls.__up_cooldown:
                 cls.__up_cooldown = True
@@ -438,6 +569,11 @@ class UniversalInput:
 
     @classmethod
     def get_down(cls) -> bool:
+        """
+        Returns true if down action is triggered.
+
+        :return: True if down action is triggered.
+        """
         if cls.__controller.is_using_controller:
             if cls.__controller.LeftJoystickY < -0.8 and not cls.__down_cooldown:
                 cls.__down_cooldown = True
@@ -454,6 +590,11 @@ class UniversalInput:
 
     @classmethod
     def get_confirm(cls) -> bool:
+        """
+        Returns true if confirm action is triggered.
+
+        :return: True if confirm action is triggered.
+        """
         if cls.__controller.is_using_controller:
             if cls.__controller.A_cross and not cls.__confirm_cooldown:
                 cls.__confirm_cooldown = True
@@ -470,6 +611,11 @@ class UniversalInput:
 
     @classmethod
     def get_deny(cls) -> bool:
+        """
+        Returns true if deny action is triggered.
+
+        :return: True if deny action is triggered.
+        """
         if cls.__controller.is_using_controller:
             if cls.__controller.B_circle and not cls.__deny_cooldown:
                 cls.__deny_cooldown = True
@@ -486,6 +632,11 @@ class UniversalInput:
 
     @classmethod
     def get_interact(cls) -> bool:
+        """
+        Returns true if interact action is triggered.
+
+        :return: True if interact action is triggered.
+        """
         if cls.__controller.is_using_controller:
             if cls.__controller.X_square and not cls.__interact_cooldown:
                 cls.__interact_cooldown = True
@@ -502,6 +653,11 @@ class UniversalInput:
 
     @classmethod
     def get_r2(cls) -> bool:
+        """
+        Returns true if R2 action is triggered.
+
+        :return: True if R2 action is triggered.
+        """
         if cls.__controller.is_using_controller:
             if cls.__controller.RightTrigger and not cls.__r2_cooldown:
                 cls.__r2_cooldown = True
@@ -518,6 +674,11 @@ class UniversalInput:
 
     @classmethod
     def get_l2(cls) -> bool:
+        """
+        Returns true if L2 action is triggered.
+
+        :return: True if L2 action is triggered.
+        """
         if cls.__controller.is_using_controller:
             if cls.__controller.LeftTrigger and not cls.__l2_cooldown:
                 cls.__l2_cooldown = True
@@ -534,6 +695,11 @@ class UniversalInput:
 
     @classmethod
     def get_r1(cls) -> bool:
+        """
+        Returns true if R1 action is triggered.
+
+        :return: True if R1 action is triggered.
+        """
         if cls.__controller.is_using_controller:
             if cls.__controller.RightBumper and not cls.__r1_cooldown:
                 cls.__r1_cooldown = True

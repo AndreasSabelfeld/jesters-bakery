@@ -3,7 +3,7 @@ Author: Andreas Sabelfeld
 HOW TO EXPORT A BLENDER MODEL TO USE IT IN THIS ENGINE:
 
 Step 1:
-    File > Export > Wavefront (.obj)
+    File > Export > Wavefront (relatedobj)
 
 Step 2:
     Check the following settings:

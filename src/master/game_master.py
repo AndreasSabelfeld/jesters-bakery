@@ -38,8 +38,14 @@ from src.toolbox.path import PATH
 
 
 class GameMaster:
+    """
+    GameMaster class responsible for setting the entire game up, running it in a loop and finally closing it.
+    """
 
     def __init__(self):
+        """
+        Initializes the GameMaster class and setting up all the needed attributes
+        """
         self.__running = True
         self.__entities = []
         self.__nm_entities = []
@@ -60,8 +66,8 @@ class GameMaster:
         CoffeeContainer.add_loaders(self.__loader, self.__obj_loader)
         TextMaster(self.__loader)
 
-        player_model = self.__obj_loader.load_obj_model("objs/legacy/bunny", self.__loader)
-        static_player_model = TexturedModel(player_model, ModelTexture(self.__loader.load_texture("pngs/machinery/white")))
+        player_model = self.__obj_loader.load_obj_model("", self.__loader)
+        static_player_model = TexturedModel(player_model, ModelTexture(self.__loader.load_texture("")))
 
         self.__audio_master = AudioMaster()
         self.__audio_master.set_listener_data([0, 0, 0], [0, 0, 0])
@@ -118,8 +124,10 @@ class GameMaster:
         self.__load_game()
 
     def __load_game(self):
+        """
+        Loads the game assets and updates the loading screen
+        """
         self.__game_ui.loading_screen(self.__load_terrain())
-        self.__game_ui.loading_screen(self.__load_ui())
         self.__game_ui.loading_screen(self.__load_machines())
         self.__game_ui.loading_screen(self.__load_spawns())
         self.__game_ui.loading_screen(self.__load_entrance_area())
@@ -137,11 +145,13 @@ class GameMaster:
         self.start_game()
 
     def start_game(self):
+        """Starts the game after the main menu was closed"""
         self.__game_ui.main_menu(self.__master_renderer, self.__entities, self.__nm_entities, self.__terrains, self.__lights, self.__shadow_map_entities, self.__sun)
 
         self.restart_game()
 
     def restart_game(self):
+        """Restarts the game"""
         self.__camera.set_position([160.5, 5.18, 180])
         self.__player.set_position([160.5, 5.18, 180])
         self.__player.start_music()
@@ -152,6 +162,7 @@ class GameMaster:
         self.game_loop()
 
     def game_loop(self):
+        """The main game loop responsible for running the game."""
         first_frame = [True]        # to use it like a pointer
         while self.is_running():
             Time.set_current_time(Time.time_current_time())
@@ -167,22 +178,34 @@ class GameMaster:
             glutMainLoopEvent()     # used to run openGL manually in a loop instead of glutMainLoop()
 
     def stop_game(self) -> None:
+        """Sets the __running flag to False"""
         self.set_running(False)
 
     def game_completed(self) -> None:
+        """After all the levels have been beaten, a thank you message is being displayed to the player"""
         self.__game_ui.thx_4_playing()
         self.stop_game()
 
     def is_running(self) -> bool:
+        """Returns the running state."""
         return self.__running
 
     def set_running(self, val: bool) -> None:
+        """Sets the running state.
+
+        :params val: Running state.
+        """
         self.__running = val
 
     def get_display(self) -> DisplayManager:
+        """Returns the display manager."""
         return self.__display
 
     def __move_player(self, first_frame: list[bool]) -> None:
+        """Moves the player based on interactions and frame updates.
+
+        :params first_frame: List indicating if it's the first frame.
+        """
         if not first_frame[0]:
             # in the first frame delta_time is zero
             self.__player.move(self.__collider_entities)
@@ -197,7 +220,8 @@ class GameMaster:
 
         first_frame[0] = False
 
-    def __level_logic(self):
+    def __level_logic(self) -> None:
+        """Updates level state and checks if all orders are fulfilled."""
         self.__level_master.update()
         if self.__level_master.check_if_all_orders_fulfilled():
             points = self.__level_master.calculate_points()
@@ -209,6 +233,7 @@ class GameMaster:
             self.restart_game()
 
     def __update_objects(self) -> None:
+        """Updates the game objects and interactions."""
         self.__key_hints.remove_text()
         self.__game_ui.game_loop()
         self.__object_picker.update(self.__collider_entities)
@@ -226,6 +251,7 @@ class GameMaster:
         self.__work_drawer_os.update(self.__carry)
 
     def __render(self) -> None:
+        """Renders the scene, including objects, UI, and effects."""
         self.__master_renderer.render_shadow_map(self.__shadow_map_entities, self.__sun)
         self.__master_renderer.render_scene(self.__entities, self.__nm_entities, self.__terrains, self.__lights,
                                             self.__camera, self.__display)
@@ -247,6 +273,7 @@ class GameMaster:
             entity.set_position([-999, -999, -999])
 
     def __cache_positions(self) -> None:
+        """Caches the positions of all entities to a file."""
         dictionary = dict()
         for entity in self.__entities:
             dictionary.update({id(entity): entity.get_position()})
@@ -257,6 +284,7 @@ class GameMaster:
 
     @staticmethod
     def __reload_cached_positions() -> None:
+        """Reloads cached positions of entities from a file."""
         cache_file = f"{PATH}/sav/cache.txt"
         with open(cache_file, 'r') as f:
             data = f.read()
@@ -267,6 +295,11 @@ class GameMaster:
             obj.set_position(data_as_dict[key])
 
     def __load_terrain(self) -> float:
+        """
+        Loads all the terrain assets and returns the time it took
+
+        :return: The time it took to load the assets
+        """
         background_texture = TerrainTexture(self.__loader.load_texture("pngs/shop/asphalt"))
         r_texture = TerrainTexture(self.__loader.load_texture("pngs/shop/floor_tiles"))
         g_texture = TerrainTexture(self.__loader.load_texture("pngs/shop/asphalt"))
@@ -280,23 +313,12 @@ class GameMaster:
         self.__terrains.append(terrain)
         return Time.time_current_time()
 
-    def __load_ui(self) -> float:
-        font = FontType(self.__loader.load_texture("fnts/candara"), f"{PATH}/res/fnts/candara.fnt")
-        text1 = GUIText("a sample text!", 15, font, [0, 0.02], 1, False)
-        text1.set_color(1, 0, 0)
-        text1.set_border_width(0.7)
-        text1.set_border_edge(0.1)
-        text2 = GUIText("a sample text!", 20, font, [0, 0.1], 1, False)
-        text2.set_color(1, 0, 0)
-        text2.set_border_width(0.7)
-        text2.set_border_edge(0.1)
-        text3 = GUIText("a sample text!", 20, font, [0, 0.2], 1, False)
-        text3.set_color(1, 0, 0)
-        text3.set_border_width(0.7)
-        text3.set_border_edge(0.1)
-        return Time.time_current_time()
-
     def __load_machines(self) -> float:
+        """
+        Loads all the machine assets and returns the time it took
+
+        :return: The time it took to load the assets
+        """
         size = 1.75
         ice_machine_door = prefabs.ice_machine([179.5, 5.18, 185.5], [0, -90, 0], size, self.__loader,
                                                self.__obj_loader, self.__entities, self.__collider_entities)
@@ -313,6 +335,11 @@ class GameMaster:
         return Time.time_current_time()
 
     def __load_spawns(self) -> float:
+        """
+        Loads all the spawn assets and returns the time it took
+
+        :return: The time it took to load the assets
+        """
         size = 1.75
         small_glass_spawn = prefabs.small_glass_spawn([176, 12.5, 182], [0, -90, 0], 1, self.__loader, self.__obj_loader, self.__entities,
                                                       self.__collider_entities)
@@ -334,6 +361,11 @@ class GameMaster:
         return Time.time_current_time()
 
     def __load_entrance_area(self) -> float:
+        """
+        Loads all the assets of the entrance area of the shop and returns the time it took
+
+        :return: The time it took to load the assets
+        """
         size = 1.75
         front_counter = prefabs.front_counter([179.5, 5.18, 188.75], [0, -90, 0], size, self.__loader, self.__obj_loader)
         back_counter = prefabs.back_counter([146, 5.18, 202], [0, -90, 0], size, self.__loader, self.__obj_loader)
@@ -349,6 +381,11 @@ class GameMaster:
         return Time.time_current_time()
 
     def __load_traiteur_area(self) -> float:
+        """
+        Loads all the assets of the traiteur area of the shop and returns the time it took
+
+        :return: The time it took to load the assets
+        """
         size = 1.75
         traiteur_front_counter = prefabs.traiteur_front_counter([101, 5.18, 242], [0, -90, 0], size, self.__loader, self.__obj_loader)
         traiteur_back_counter = prefabs.traiteur_back_counter([80, 5.18, 244], [0, -90, 0], size, self.__loader, self.__obj_loader)
@@ -365,6 +402,11 @@ class GameMaster:
         return Time.time_current_time()
 
     def __load_working_area(self) -> float:
+        """
+        Loads all the assets of the working area of the shop and returns the time it took
+
+        :return: The time it took to load the assets
+        """
         size = 1.75
         table_12 = prefabs.table_12([217, 5.18, 177], [0, -90, 0], size, self.__loader, self.__obj_loader)
         table_11 = prefabs.table_12([217, 5.18, 141], [0, -90, 0], size, self.__loader, self.__obj_loader)
@@ -378,6 +420,11 @@ class GameMaster:
         return Time.time_current_time()
 
     def __load_kitchen_area(self) -> float:
+        """
+        Loads all the assets of the kitchen area of the shop and returns the time it took
+
+        :return: The time it took to load the assets
+        """
         size = 1.75
         kitchen = prefabs.kitchen([145, 5.18, 149], [0, -90, 0], size, self.__loader, self.__obj_loader)
 
@@ -387,6 +434,11 @@ class GameMaster:
         return Time.time_current_time()
 
     def __load_eating_area(self) -> float:
+        """
+        Loads all the assets of the eating area of the shop and returns the time it took
+
+        :return: The time it took to load the assets
+        """
         size = 1.75
         kommode = prefabs.kommode([207, 5.18, 132], [0, -90, 0], size - 0.15, self.__loader, self.__obj_loader)
         small_table = prefabs.small_table([207, 5.18, 111], [0, -90, 0], size, self.__loader, self.__obj_loader)
@@ -405,6 +457,11 @@ class GameMaster:
         return Time.time_current_time()
 
     def __load_chairs(self) -> float:
+        """
+        Loads all the chair assets and returns the time it took
+
+        :return: The time it took to load the assets
+        """
         chairs = []
         size = 1.75
         for i in range(8):
@@ -431,6 +488,11 @@ class GameMaster:
         return Time.time_current_time()
 
     def __load_food(self) -> float:
+        """
+        Loads all the food assets and returns the time it took
+
+        :return: The time it took to load the assets
+        """
         food_size = 0.5
         prefabs.ham_sandwich([175.5, 11, 203.0], [0, 0, 0], food_size, self.__loader, self.__obj_loader, self.__entities, self.__collider_entities)
         prefabs.ham_sandwich([178.5, 11, 203.0], [0, 0, 0], food_size, self.__loader, self.__obj_loader, self.__entities, self.__collider_entities)
@@ -521,6 +583,11 @@ class GameMaster:
         return Time.time_current_time()
 
     def __load_ingredients(self) -> float:
+        """
+        Loads all the ingredient assets and returns the time it took
+
+        :return: The time it took to load the assets
+        """
         coke_zero = prefabs.coke_zero([72, 10, 50], [0, 0, 0], 1, self.__loader, self.__obj_loader)
         self.__fridge_os.place_in_bottom_drawer(coke_zero)
         sprite = prefabs.sprite([74, 10, 50], [0, 0, 0], 1, self.__loader, self.__obj_loader)
@@ -587,6 +654,11 @@ class GameMaster:
         return Time.time_current_time()
 
     def __load_walls(self) -> float:
+        """
+        Loads all the wall assets and returns the time it took
+
+        :return: The time it took to load the assets
+        """
         size = 1.75
         south_wall_traiteur = prefabs.south_wall_traiteur([80, 5.18, 295], [0, -90, 0], size, self.__loader, self.__obj_loader)
         east_wall_1 = prefabs.east_wall_1([202.5, 5.18, 271.5], [0, -90, 0], size, self.__loader, self.__obj_loader)
@@ -609,6 +681,11 @@ class GameMaster:
         return Time.time_current_time()
 
     def __load_outside_area(self) -> float:
+        """
+        Loads all the assets of the outside area and returns the time it took
+
+        :return: The time it took to load the assets
+        """
         size = 1.75
         outside_essbereich = prefabs.outside_essbereich([87, 3.5, 76], [0, -90, 0], size, self.__loader, self.__obj_loader)
         outside_hecke = prefabs.outside_hecke([220, 3.5, 64], [0, -90, 0], size, self.__loader, self.__obj_loader)
@@ -619,6 +696,11 @@ class GameMaster:
         return Time.time_current_time()
 
     def __load_coffee_machine(self, size: float) -> GameObject:
+        """Loads and returns a coffee machine object.
+
+        :params size: Size of the coffee machine.
+        :return: The coffee machine GameObject.
+        """
         coffee_machine_game_object = prefabs.coffee_machine([150, 12.5, 190], [0, 90, 0], size,
                                                             self.__loader,
                                                             self.__obj_loader,
@@ -631,6 +713,11 @@ class GameMaster:
         return coffee_machine_game_object
 
     def __load_coffee_machine_lactose_free(self, size: float) -> GameObject:
+        """Loads and returns a lactose-free coffee machine object.
+
+        :params size: Size of the lactose-free coffee machine.
+        :return: The lactose-free coffee machine GameObject.
+        """
         coffee_machine_lactose_free_game_object = prefabs.lactose_free_coffee_machine([150, 12.5, 198], [0, 90, 0],
                                                                                       size,
                                                                                       self.__loader,
@@ -644,6 +731,11 @@ class GameMaster:
         return coffee_machine_lactose_free_game_object
 
     def __load_fridge(self, size: float) -> GameObject:
+        """Loads and returns a fridge object.
+
+        :params size: Size of the fridge.
+        :return: The fridge GameObject.
+        """
         fridge_game_object = prefabs.fridge([149.7, 5.18, 187.6], [0, 90, 0], size, self.__loader,
                                             self.__obj_loader, self.__gui_renderer, self.__object_picker)
         self.__entities.append(fridge_game_object)
@@ -652,6 +744,11 @@ class GameMaster:
         return fridge_game_object
 
     def __load_work_drawer(self, size: float) -> GameObject:
+        """Loads and returns a work drawer object.
+
+        :params size: Size of the work drawer.
+        :return: The work drawer GameObject.
+        """
         workplate = prefabs.workplate1([150, 5.18, 173.5], [0, -90, 0], size, self.__loader, self.__obj_loader,
                                        self.__gui_renderer, self.__object_picker)
         workplate.get_child_0().get_attachment().set_top_drawer_offset(-1.45 + 1.21 / 2, 3.66, 4 + 1.16 / 2)
@@ -662,6 +759,10 @@ class GameMaster:
         return workplate
 
     def __load_milk_foamer(self) -> GameObject:
+        """Loads and returns a milk foamer object.
+
+        :return: The milk foamer GameObject.
+        """
         milk_foamer_game_object = prefabs.milk_foamer([150, 12.5, 175], [0, 90, 0], 1, self.__loader, self.__obj_loader,
                                                       self.__gui_renderer, self.__object_picker)
         self.__entities.extend([milk_foamer_game_object, milk_foamer_game_object.get_child_0(), milk_foamer_game_object.get_child_1(),
@@ -671,6 +772,11 @@ class GameMaster:
         return milk_foamer_game_object
 
     def __load_mixer_vessel(self) -> GameObject:
+        """Loads and returns a mixer vessel object.
+
+        :params size: Size of the mixer vessel.
+        :return: The mixer vessel GameObject.
+        """
         mixer_vessel_game_object = prefabs.mixer_vessel([150, 12.5, 183], [0, 90, 0], 0.5, self.__loader,
                                                         self.__obj_loader)
         self.__entities.append(mixer_vessel_game_object)
@@ -679,6 +785,11 @@ class GameMaster:
         return mixer_vessel_game_object
 
     def __load_counter(self, size: float) -> GameObject:
+        """Loads and returns a finished counter object.
+
+        :params size: Size of the counter.
+        :return: The finished counter GameObject.
+        """
         counter = prefabs.finished_counter([179.5, 5.18, 185.5], [0, -90, 0], size, self.__loader, self.__obj_loader)
         self.__entities.append(counter)
         self.__collider_entities.append(counter)
@@ -686,11 +797,20 @@ class GameMaster:
         return counter
 
     def __load_finished_collider(self, size: float) -> GameObject:
+        """Loads and returns a finished collider object.
+
+        :params size: Size of the finished collider.
+        :return: The finished collider GameObject.
+        """
         col = prefabs.finished_collider([179.5, 5.18, 185.5], [0, -90, 0], size, self.__loader, self.__obj_loader)
         self.__collider_entities.append(col)
         return col
 
     def __load_ticket_machine(self) -> GameObject:
+        """Loads and returns a ticket machine object.
+
+        :return: The ticket machine GameObject.
+        """
         ticket_machine = prefabs.ticket_machine([174, 12.5, 198], [0, -90, 0], 1, self.__loader, self.__obj_loader)
         self.__entities.append(ticket_machine)
         self.__collider_entities.append(ticket_machine)
@@ -698,6 +818,10 @@ class GameMaster:
         return ticket_machine
 
     def __load_tap(self) -> Tap:
+        """Loads and returns a tap object.
+
+        :return: The Tap object.
+        """
         textures = [ModelTexture(self.__loader.load_texture("pngs/cups/coke_filling_tex")),
                     ModelTexture(self.__loader.load_texture("pngs/cups/schorle_filling_tex")),
                     ModelTexture(self.__loader.load_texture("pngs/cups/water_filling_tex")),
@@ -711,19 +835,43 @@ class GameMaster:
         return tap
 
     def get_master_order(self) -> MasterOrder:
+        """Returns the master order object.
+
+        :return: The master order object.
+        """
         return self.__master_order
 
     def get_ticket_machine(self) -> GameObject:
+        """Returns the ticket machine object.
+
+        :return: The ticket machine GameObject.
+        """
         return self.__ticket_machine
 
     def get_entities(self) -> list:
+        """Returns the list of entities.
+
+        :return: List of entities.
+        """
         return self.__entities
 
     def get_collider_entities(self) -> list:
+        """Returns the list of collider entities.
+
+        :return: List of collider entities.
+        """
         return self.__collider_entities
 
     def get_shadow_map_entities(self) -> list:
+        """Returns the list of shadow map entities.
+
+        :return: List of shadow map entities.
+        """
         return self.__shadow_map_entities
 
     def get_normal_map_entities(self) -> list:
+        """Returns the list of normal map entities.
+
+        :return: List of normal map entities.
+        """
         return self.__nm_entities

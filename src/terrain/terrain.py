@@ -9,6 +9,10 @@ from math import floor
 
 
 class Terrain:
+    """
+    A terrain model generated from height maps and textures.
+    """
+
     __size = 800
     __vertex_count = 128
     __max_height = 40
@@ -16,6 +20,16 @@ class Terrain:
     __existing_terrains = dict()
 
     def __init__(self, grid_x: float, grid_y: float, loader, texture_pack, blend_map=None, height_map: str = ""):
+        """
+        Initializes the terrain, generates the model, and applies texture packs and blend maps.
+
+        :params grid_x: The x coordinate of the terrain grid.
+        :params grid_y: The y coordinate of the terrain grid.
+        :params loader: The loader instance.
+        :params texture_pack: The texture pack used for the terrain.
+        :params blend_map: Optional blend map for the terrain textures.
+        :params height_map: Optional height map image to generate terrain heights.
+        """
         self.__heights = None
         self.__x = grid_x * self.__size
         self.__z = grid_y * self.__size
@@ -34,6 +48,13 @@ class Terrain:
             self.__blend_map = blend_map
 
     def generate_terrain(self, loader, height_map: str):
+        """
+        Generates the terrain model using a height map to calculate vertices, normals, and texture coordinates.
+
+        :params loader: The loader instance.
+        :params height_map: The height map image used to generate terrain heights.
+        :return: The VAO model of the terrain.
+        """
         try:
             img = Image.open(f"{PATH}/res/{height_map}.png").convert('L')  # greyscale
             img = img.transpose(Image.FLIP_TOP_BOTTOM)  # flip image upside down
@@ -88,38 +109,89 @@ class Terrain:
         return loader.load_to_vao(vertices, texture_coords, normals, indices)
 
     def get_x(self):
+        """
+        Returns the x position of the terrain.
+
+        :return: The x position of the terrain.
+        """
         return self.__x
 
     def get_z(self):
+        """
+        Returns the z position of the terrain.
+
+        :return: The z position of the terrain.
+        """
         return self.__z
 
     @classmethod
     def get_existing_terrains(cls) -> dict:
+        """
+        Returns a dictionary of existing terrains.
+
+        :return: A dictionary containing existing terrains.
+        """
         return cls.__existing_terrains
 
     @classmethod
     def get_size(cls):
+        """
+        Returns the size of the terrain.
+
+        :return: The size of the terrain.
+        """
         return cls.__size
 
     def get_model(self):
+        """
+        Returns the model (VAO) of the terrain.
+
+        :return: The terrain model.
+        """
         return self.__model
 
     def get_texture_pack(self):
+        """
+        Returns the texture pack used by the terrain.
+
+        :return: The texture pack.
+        """
         return self.__texture_pack
 
     def get_blend_map(self):
+        """
+        Returns the blend map used by the terrain.
+
+        :return: The blend map.
+        """
         return self.__blend_map
 
     def calculate_normal(self, x: int, z: int, image) -> list[float]:
-        height_l = self.get_height(x-1, z, image)
-        height_r = self.get_height(x+1, z, image)
-        height_d = self.get_height(x, z-1, image)
-        height_u = self.get_height(x, z+1, image)
+        """
+        Calculates the normal vector for a given vertex based on surrounding heights.
+
+        :params x: The x coordinate of the vertex.
+        :params z: The z coordinate of the vertex.
+        :params image: The height map image.
+        :return: A normalized vector representing the vertex normal.
+        """
+        height_l = self.get_height(x - 1, z, image)
+        height_r = self.get_height(x + 1, z, image)
+        height_d = self.get_height(x, z - 1, image)
+        height_u = self.get_height(x, z + 1, image)
 
         normal = [height_l-height_r, 2, height_d-height_u]
         return Maths.normalise(normal)
 
     def get_height(self, x: int, z: int, image) -> float:
+        """
+        Returns the height of a specific point in the height map.
+
+        :params x: The x coordinate in the height map.
+        :params z: The z coordinate in the height map.
+        :params image: The height map image.
+        :return: The height at the given x, z coordinates.
+        """
         if x < 0 or x >= image.height or z < 0 or z >= image.height:
             return 0
         height = -1 * image.getpixel((x, z))            # greyscale color
@@ -130,6 +202,13 @@ class Terrain:
         return height * -1
 
     def get_height_of_terrain(self, world_x, world_z) -> float:
+        """
+        Returns the height of the terrain at a given world position.
+
+        :params world_x: The x coordinate in the world.
+        :params world_z: The z coordinate in the world.
+        :return: The height of the terrain at the given world coordinates.
+        """
         terrain_x = world_x - self.__x
         terrain_z = world_z - self.__z
         grid_square_size = self.__size / (len(self.__heights) - 1)

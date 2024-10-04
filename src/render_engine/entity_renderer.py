@@ -5,6 +5,11 @@ from src.toolbox.maths import Maths
 class EntityRenderer:
 
     def __init__(self, shader, projection_matrix):
+        """Initializes the entity renderer.
+
+        :params shader: The shader program used for rendering.
+        :params projection_matrix: The projection matrix.
+        """
         self.__shader = shader
         self.__shader.start()
         self.__shader.connect_texture_units()
@@ -12,6 +17,10 @@ class EntityRenderer:
         self.__shader.stop()
 
     def render(self, entities: dict):
+        """Renders the given entities.
+
+        :params entities: A dictionary of models and their corresponding entities.
+        """
         for model in list(entities.keys()):
             self.prepare_textured_model(model)
             batch = entities.get(model)
@@ -21,6 +30,10 @@ class EntityRenderer:
             self.unbind_textured_model()
 
     def prepare_textured_model(self, model):
+        """Prepares the textured model for rendering.
+
+        :params model: The model to be rendered.
+        """
         raw_model = model.get_raw_model()
         glBindVertexArray(raw_model.get_vao_id())  # bind the desired VAO to be able to use it
         glEnableVertexAttribArray(0)  # we have put the indices in the 0th address
@@ -40,6 +53,7 @@ class EntityRenderer:
             glBindTexture(GL_TEXTURE_2D, texture.get_specular_map())
 
     def unbind_textured_model(self):
+        """Unbinds the currently bound textured model."""
         self.enable_culling()
         glDisableVertexAttribArray(0)  # disable the attributeList after using it
         glDisableVertexAttribArray(1)  # disable the attributeList after using it
@@ -47,6 +61,10 @@ class EntityRenderer:
         glBindVertexArray(0)  # unbind the VAO
 
     def prepare_instance(self, entity):
+        """Prepares the entity instance for rendering.
+
+        :params entity: The entity to prepare.
+        """
         transformation_matrix = Maths.create_transformation_matrix(entity.get_position(), entity.get_rot_x(),
                                                                    entity.get_rot_y(), entity.get_rot_z(),
                                                                    entity.get_scale())
@@ -55,10 +73,12 @@ class EntityRenderer:
 
     @staticmethod
     def enable_culling():
+        """Enables face culling."""
         glEnable(GL_CULL_FACE)
         glCullFace(GL_BACK)
 
     @staticmethod
     def disable_culling():
+        """Disables face culling."""
         glDisable(GL_CULL_FACE)
         glCullFace(GL_BACK)

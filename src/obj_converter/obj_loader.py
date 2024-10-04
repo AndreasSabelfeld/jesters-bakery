@@ -7,6 +7,9 @@ from src.obj_converter.vertex import Vertex, VertexNM
 class OBJLoader:
 
     def __init__(self):
+        """
+        Initialize the OBJLoader instance.
+        """
         self._vertices = []
         self._textures = []
         self._normals = []
@@ -18,6 +21,13 @@ class OBJLoader:
         self._indices_array = []
 
     def load_obj_model(self, file_name: str, loader: Loader):
+        """
+        Load an OBJ model from a file.
+
+        :params file_name: The name of the OBJ file to load (without extension).
+        :params loader: The Loader instance
+        :return: A RawModel instance
+        """
         try:
             obj = open(f"{PATH}/res/{file_name}.obj", 'r')
         except Exception as e:
@@ -66,6 +76,11 @@ class OBJLoader:
         return loader.load_to_vao(self._vertices_array, self._textures_array, self._normals_array, self._indices_array)
 
     def process_vertex(self, vertex: list[str]):
+        """
+        Process a vertex line from the OBJ file.
+
+        :params vertex: The vertex data parsed from the OBJ file.
+        """
         index = int(vertex[0]) - 1
         current_vertex = self._vertices[index]
         texture_index = int(vertex[1]) - 1
@@ -78,6 +93,9 @@ class OBJLoader:
             self.deal_with_already_processed_vertex(current_vertex, texture_index, normal_index)
 
     def convert_data_to_arrays(self):
+        """
+        Convert vertex data to arrays for rendering.
+        """
         for i in range(len(self._vertices)):
             current_vertex = self._vertices[i]
             position = current_vertex.get_position()
@@ -93,6 +111,13 @@ class OBJLoader:
             self._normals_array[i * 3 + 2] = float(normal_vector[2])
 
     def deal_with_already_processed_vertex(self, previous_vertex: Vertex, new_texture_index: int, new_normal_index: int):
+        """
+        Handle a vertex that has already been processed
+
+        :params previous_vertex: The previously processed vertex.
+        :params new_texture_index: The texture index of the new vertex.
+        :params new_normal_index: The normal index of the new vertex.
+        """
         if previous_vertex.has_same_texture_and_normal(new_texture_index, new_normal_index):
             self._indices.append(previous_vertex.get_index())
         else:
@@ -109,6 +134,11 @@ class OBJLoader:
 
     @staticmethod
     def remove_unused_vertices(vertices: list[Vertex]):
+        """
+        Remove vertices that are not used
+
+        :params vertices: The list of vertices to process.
+        """
         for vertex in vertices:
             if not vertex.is_set():
                 vertex.set_texture_index(0)
@@ -118,10 +148,20 @@ class OBJLoader:
 class NormalMappedOBJLoader(OBJLoader):
 
     def __init__(self):
+        """
+        Initialize the NormalMappedOBJLoader instance.
+        """
         super().__init__()
         self._tangents_array = []
 
     def load_obj_model(self, file_name: str, loader: Loader):
+        """
+        Load a normal-mapped OBJ model from a file.
+
+        :params file_name: The name of the OBJ file to load (without extension).
+        :params loader: The Loader instance
+        :return: A RawModel instance
+        """
         try:
             obj = open(f"{PATH}/res/{file_name}.obj", 'r')
         except Exception as e:
@@ -169,9 +209,16 @@ class NormalMappedOBJLoader(OBJLoader):
         self._normals = []
         self._indices = []
         return loader.load_tangents_to_vao(self._vertices_array, self._textures_array, self._normals_array,
-                                           self._tangents_array, self._indices_array)
+                                             self._tangents_array, self._indices_array)
 
     def calculate_tangents(self, v0: VertexNM, v1: VertexNM, v2: VertexNM):
+        """
+        Calculate tangents for the given vertices.
+
+        :params v0: The first vertex of the triangle.
+        :params v1: The second vertex of the triangle.
+        :params v2: The third vertex of the triangle.
+        """
         delta_pos_1 = [v1.get_position()[0] - v0.get_position()[0],
                        v1.get_position()[1] - v0.get_position()[1],
                        v1.get_position()[2] - v0.get_position()[2]]
@@ -204,6 +251,12 @@ class NormalMappedOBJLoader(OBJLoader):
         v2.add_tangent(tangent)
 
     def process_vertex(self, vertex: list[str]):
+        """
+        Process a vertex line from the OBJ file.
+
+        :params vertex: The vertex data parsed from the OBJ file.
+        :return: The processed vertex.
+        """
         index = int(vertex[0]) - 1
         current_vertex = self._vertices[index]
         texture_index = int(vertex[1]) - 1
@@ -217,6 +270,9 @@ class NormalMappedOBJLoader(OBJLoader):
             return self.deal_with_already_processed_vertex(current_vertex, texture_index, normal_index)
 
     def convert_data_to_arrays(self):
+        """
+        Convert vertex data to arrays for rendering.
+        """
         for i in range(len(self._vertices)):
             current_vertex = self._vertices[i]
             position = current_vertex.get_position()
@@ -236,6 +292,14 @@ class NormalMappedOBJLoader(OBJLoader):
             self._tangents_array[i * 3 + 2] = float(tangent[2])
 
     def deal_with_already_processed_vertex(self, previous_vertex: VertexNM, new_texture_index: int, new_normal_index: int):
+        """
+        Handle a vertex that has already been processed for normal mapping.
+
+        :params previous_vertex: The previously processed vertex.
+        :params new_texture_index: The texture index of the new vertex.
+        :params new_normal_index: The normal index of the new vertex.
+        :return: The vertex
+        """
         if previous_vertex.has_same_texture_and_normal(new_texture_index, new_normal_index):
             self._indices.append(previous_vertex.get_index())
             return previous_vertex
@@ -254,6 +318,11 @@ class NormalMappedOBJLoader(OBJLoader):
 
     @staticmethod
     def remove_unused_vertices(vertices: list[VertexNM]):
+        """
+        Remove vertices that are not used
+
+        :params vertices: The list of vertices to process.
+        """
         for vertex in vertices:
             vertex.average_tangents()
             if not vertex.is_set():

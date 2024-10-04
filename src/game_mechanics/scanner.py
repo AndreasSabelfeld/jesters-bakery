@@ -10,6 +10,13 @@ from src.toolbox.path import PATH
 class Scanner:
 
     def __init__(self, object_picker: ObjectRaycaster, loader, gui_renderer: GuiRenderer):
+        """
+        Initializes the Scanner with object picker, loader, and GUI renderer.
+
+        :param object_picker: An instance of ObjectRaycaster used to detect objects.
+        :param loader: Loader instance
+        :param gui_renderer: GuiRenderer instance.
+        """
         self.__object_picker = object_picker
         self.__name = str()
         self.__prompt = str()
@@ -28,12 +35,20 @@ class Scanner:
         self.__crosshair_interact = GuiTexture(loader.load_texture("pngs/ui/crosshair187"), [0, 0], [0.033, 0.06])
 
     def render_crosshair(self) -> None:
+        """
+        Renders the crosshair based on interactability.
+        """
         if self.__interactable:
             self.__gui_renderer.render([self.__crosshair_interact])
         else:
             self.__gui_renderer.render([self.__crosshair])
 
-    def update(self, collider_entities: list):
+    def update(self, collider_entities: list) -> None:
+        """
+        Updates the scanner by checking if any objects are in sight and returns information about them.
+
+        :param collider_entities: List of entities that the scanner might detect.
+        """
         look_at = self.__object_picker.update(collider_entities)
         self.__reset()
         if not isinstance(look_at, GameObject):
@@ -55,9 +70,17 @@ class Scanner:
         self.__text.set_text_string(msg)
 
     def get_text(self) -> GUIText:
+        """
+        Returns the GUIText object used to display information.
+
+        :return: The GUIText object.
+        """
         return self.__text
 
-    def __reset(self):
+    def __reset(self) -> None:
+        """
+        Resets the scanner's name, prompt, info, and interactability.
+        """
         self.__name = str()
         self.__prompt = str()
         self.__info = str()

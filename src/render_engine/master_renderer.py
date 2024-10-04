@@ -47,16 +47,25 @@ class MasterRenderer:
 
     @staticmethod
     def enable_culling() -> None:
+        """
+        Enables back face culling.
+        """
         glEnable(GL_CULL_FACE)
         glCullFace(GL_BACK)
 
     @staticmethod
     def disable_culling() -> None:
+        """
+        Disables culling.
+        """
         glDisable(GL_CULL_FACE)
         glCullFace(GL_BACK)
 
     def render_scene(self, entities: list, normal_map_entities: list, terrains: list, lights: list,
                      camera, display, clip_plane: list[float] = (0, 0, 0, 0)) -> None:
+        """
+        Renders the scene with given entities, terrains, lights, and camera.
+        """
         for terrain in terrains:
             self.process_terrain(terrain)
         for entity in entities:
@@ -66,10 +75,16 @@ class MasterRenderer:
         self.render(display, lights, camera, clip_plane)
 
     def prepare(self) -> None:
+        """
+        Prepares for rendering.
+        """
         glActiveTexture(GL_TEXTURE5)
         glBindTexture(GL_TEXTURE_2D, self.get_shadow_map_texture())
 
     def render(self, display, lights: list, camera, clip_plane: list[float]) -> None:
+        """
+        Renders the display with the provided lights, camera, and clipping plane.
+        """
         display.update_display()
 
         glDisable(GL_DEPTH_TEST)
@@ -118,12 +133,18 @@ class MasterRenderer:
         self.__normal_map_entities.clear()
 
     def render_shadow_map(self, entity_list: list, sun) -> None:
+        """
+        Renders the shadow map for the provided entities and sun.
+        """
         for entity in entity_list:
             self.process_entity(entity)
         self.__shadow_map_renderer.render(self.__entities, sun)
         self.__entities.clear()
 
-    def render_outline(self, entity_list):
+    def render_outline(self, entity_list) -> None:
+        """
+        Renders outlines for the provided entities.
+        """
         for entity in entity_list:
             self.process_entity(entity)
         self.__outline_shader.start()
@@ -132,9 +153,15 @@ class MasterRenderer:
         self.__entities.clear()
 
     def process_terrain(self, terrain) -> None:
+        """
+        Processes a terrain for rendering.
+        """
         self.__terrains.append(terrain)
 
     def process_entity(self, entity) -> None:
+        """
+        Processes an entity for rendering.
+        """
         if isinstance(entity, GameObject):
             if entity.has_child_0():
                 self.process_entity(entity.get_child_0())
@@ -149,6 +176,9 @@ class MasterRenderer:
             self.__entities[entity_model] = [entity]
 
     def process_normal_map_entity(self, entity) -> None:
+        """
+        Processes a normal map entity for rendering.
+        """
         if isinstance(entity, GameObject):
             if entity.has_child_0():
                 self.process_entity(entity.get_child_0())
@@ -163,6 +193,9 @@ class MasterRenderer:
             self.__normal_map_entities[entity_model] = [entity]
 
     def create_projection_matrix(self) -> list:
+        """
+        Creates a projection matrix.
+        """
         projection_matrix = mat4()
         aspect_ratio = DisplayManager.get_width() / DisplayManager.get_height()
         y_scale = (1 / math.tan(math.radians(self.get_fov()/2)))
@@ -179,53 +212,92 @@ class MasterRenderer:
         return list(projection_matrix)  # list so OpenGL can use the values
 
     def clean_up(self) -> None:
+        """
+        Cleans up shaders and other resources.
+        """
         self.__entity_shader.clean_up()
         self.__terrain_shader.clean_up()
         self.__normal_map_renderer.clean_up()
         self.__shadow_map_renderer.clean_up()
 
     def get_projection_matrix(self) -> list[list]:
+        """
+        Returns the projection matrix.
+        """
         return self.__projection_matrix
 
     def get_shadow_map_texture(self) -> int:
+        """
+        Returns the shadow map texture ID.
+        """
         return self.__shadow_map_renderer.get_shadow_map()
 
     @classmethod
     def set_fog_density(cls, value) -> None:
+        """
+        Sets the fog density.
+        """
         cls.__fog_density = value
 
     @classmethod
     def get_fog_density(cls) -> float:
+        """
+        Returns the fog density.
+        """
         return cls.__fog_density
 
     @classmethod
     def set_fog_gradient(cls, value) -> None:
+        """
+        Sets the fog gradient.
+        """
         cls.__fog_gradient = value
 
     @classmethod
     def get_fog_gradient(cls) -> float:
+        """
+        Returns the fog gradient.
+        """
         return cls.__fog_gradient
 
     @classmethod
     def set_fov(cls, value) -> None:
+        """
+        Sets the field of view (FOV).
+        """
         cls.__FOV = value
 
     @classmethod
     def get_fov(cls) -> float:
+        """
+        Returns the field of view (FOV).
+        """
         return cls.__FOV
 
     @classmethod
     def set_near_plane(cls, value) -> None:
+        """
+        Sets the near clipping plane distance.
+        """
         cls.__NEAR_PLANE = value
 
     @classmethod
     def get_near_plane(cls) -> float:
+        """
+        Returns the near clipping plane distance.
+        """
         return cls.__NEAR_PLANE
 
     @classmethod
     def set_far_plane(cls, value) -> None:
+        """
+        Sets the far clipping plane distance.
+        """
         cls.__FAR_PLANE = value
 
     @classmethod
     def get_far_plane(cls) -> float:
+        """
+        Returns the far clipping plane distance.
+        """
         return cls.__FAR_PLANE

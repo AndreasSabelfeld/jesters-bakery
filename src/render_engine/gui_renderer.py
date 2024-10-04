@@ -12,16 +12,19 @@ class GuiRenderer:
     __quad = None
 
     def __init__(self, loader):
-        """
-        creates GuiRenderer instance
+        """Creates a GuiRenderer instance.
 
-        :param loader: Loader object
+        :params loader: Loader object.
         """
         if GuiRenderer.__quad is None:
             GuiRenderer.__quad = loader.load_gui_to_vao(GuiRenderer.__positions, 2)
         self.__shader = GuiShader()
 
     def render(self, guis: list):
+        """Renders the given GUI elements.
+
+        :params guis: A list of GUI elements to render.
+        """
         self.__shader.start()
         glBindVertexArray(self.__quad.get_vao_id())
         glEnableVertexAttribArray(0)
@@ -41,4 +44,5 @@ class GuiRenderer:
         self.__shader.stop()
 
     def clean_up(self):
+        """Cleans up the shader resources."""
         self.__shader.clean_up()

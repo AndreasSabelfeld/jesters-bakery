@@ -10,8 +10,22 @@ from src.textures.model_texture import ModelTexture
 
 
 class TapFaucet:
+    """Represents a faucet for a tap that fills glasses with a specified content.
+    """
+
     def __init__(self, obj_loader, loader, pos: list[float], rotation: list[float], size: float, fill_texture, content: str,
                  sign_texture: str):
+        """Initializes the TapFaucet instance.
+
+        :param obj_loader: The object loader
+        :param loader: The texture loader
+        :param pos: The position of the faucet 
+        :param rotation: The rotation of the faucet in degrees.
+        :param size: The size of the faucet.
+        :param fill_texture: The texture used to fill glasses.
+        :param content: The content of the faucet
+        :param sign_texture: The texture for the faucet sign.
+        """
         self.__obj_loader = obj_loader
         self.__loader = loader
         self.__pos = pos
@@ -31,12 +45,20 @@ class TapFaucet:
 
         self.__load_assets(sign_texture)
 
-    def update(self):
+    def update(self) -> None:
+        """Updates the filling process if a glass is placed.
+
+        This method is called to check if the filling process should continue.
+        """
         if self.__timing_buffer:
             self.__fill(self.__placed_glass)
             self.__timing_buffer = False
 
     def start_fill(self, glass: GameObject) -> None:
+        """Starts the filling process for the given glass.
+
+        :param glass: The GameObject of the glass to be filled.
+        """
         self.__filling = True
         glass.set_pickup_able(False)
         glass.set_position([self.__pos[0] + self.__offset[0],
@@ -48,7 +70,11 @@ class TapFaucet:
         process = Thread(target=self.__fill_timing, args=(glass,))
         process.start()
 
-    def __fill_timing(self, glass: GameObject):
+    def __fill_timing(self, glass: GameObject) -> None:
+        """Handles the timing for the filling process.
+
+        :param glass: The GameObject of the glass to be filled.
+        """
         levels = 3
         interval = self.__brewing_length / levels
         for i in range(levels):
@@ -57,10 +83,18 @@ class TapFaucet:
         self.__filling = False
         glass.set_pickup_able(True)
 
-    def __fill(self, glass: GameObject):
+    def __fill(self, glass: GameObject) -> None:
+        """Fills the given glass with the fill texture.
+
+        :param glass: The GameObject of the glass to be filled.
+        """
         glass.get_attachment().fill(self.__fill_texture)
 
     def __load_assets(self, sign_texture: str) -> None:
+        """Loads the faucet model and related textures.
+
+        :param sign_texture: The texture for the faucet sign.
+        """
         tap_tap_model = self.__obj_loader.load_obj_model("objs/machinery/tap_tap", self.__loader)
         tap_tap_texture = ModelTexture(self.__loader.load_texture("pngs/machinery/white"))
         tap_tap_texture.set_reflectivity(5)
@@ -84,16 +118,36 @@ class TapFaucet:
         self.__faucet.set_info(self.__content)
 
     def set_brewing_length(self, length: float) -> None:
+        """Sets the length of time to fill a glass.
+
+        :param length: The length of time in seconds to fill a glass.
+        """
         self.__brewing_length = length
 
     def get_faucet_game_object(self) -> GameObject:
+        """Returns the GameObject of the faucet.
+
+        :return: The GameObject of the faucet.
+        """
         return self.__faucet
 
     def get_position(self) -> list[float]:
+        """Returns the position of the faucet.
+
+        :return: A list of the faucet's position in 3D space.
+        """
         return self.__pos
 
     def is_filling(self) -> bool:
+        """Checks if the faucet is currently filling a glass.
+
+        :return: True if the faucet is filling, False otherwise.
+        """
         return self.__filling
 
     def get_content(self) -> str:
+        """Returns the content dispensed by the faucet.
+
+        :return: A string of the content of the faucet.
+        """
         return self.__content

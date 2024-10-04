@@ -47,7 +47,7 @@ class ShadowMapMasterRenderer:
         to the shadow map, and finishes rendering.
         :param entities:
         the lists of entities to be rendered. Each list is
-        associated with the {@link TexturedModel} that all the
+        connected with the {@link TexturedModel} that all the
         entities in that list use.
         :param sun: the light acting as the sun in the scene.
         :return:

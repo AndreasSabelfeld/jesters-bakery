@@ -23,6 +23,12 @@ class Loader:
         Loader.read_supported_extensions()
 
     def create_empty_vbo(self, float_count: int) -> int:
+        """
+        Creates an empty VBO.
+
+        :params float_count: Number of floats to allocate.
+        :return: The VBO ID.
+        """
         vbo = glGenBuffers(1)
         self.__vbos.append(vbo)
         glBindBuffer(GL_ARRAY_BUFFER, vbo)
@@ -33,6 +39,16 @@ class Loader:
     @staticmethod
     def add_instanced_attribute(vao: int, vbo: int, attribute: int, data_size: int, instanced_data_length: int,
                                 offset: int) -> None:
+        """
+        Adds instanced attribute to a VAO.
+
+        :params vao: VAO ID.
+        :params vbo: VBO ID.
+        :params attribute: Attribute location.
+        :params data_size: Size of the attribute data.
+        :params instanced_data_length: Length of instanced data.
+        :params offset: Offset for attribute data.
+        """
         glBindBuffer(GL_ARRAY_BUFFER, vbo)
         glBindVertexArray(vao)
         glVertexAttribPointer(attribute, data_size, GL_FLOAT, False, instanced_data_length * 4, ctypes.c_void_p(offset * 4))
@@ -42,7 +58,13 @@ class Loader:
 
     @staticmethod
     def update_vbo(vbo: int, data: list[float]) -> None:
-        data = numpy.array(data, dtype='float32')  # convert the data into a float32 array
+        """
+        Updates the data in a VBO.
+
+        :params vbo: VBO ID.
+        :params data: Data to update in the VBO.
+        """
+        data = numpy.array(data, dtype='float32')
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo)
         glBufferData(GL_ARRAY_BUFFER, len(data) * 4, None, GL_STREAM_DRAW)
@@ -50,17 +72,35 @@ class Loader:
         glBindBuffer(GL_ARRAY_BUFFER, 0)
 
     def load_to_vao(self, positions: list[float], texture_coords: list[float], normals: list[float], indices: list[int]):
-        vao_id = self.create_vao()               # creates VAO
-        self.bind_indices_buffer(indices)        # every vertex is given an index for the order
-        self.store_data_in_attribute_list(0, 3, positions)          # binds the positions into the 0th place in the VAO
-        self.store_data_in_attribute_list(1, 2, texture_coords)     # binds the texture coords into 1st place in the VAO
-        self.store_data_in_attribute_list(2, 3, normals)            # binds the normals into 2nd place in the VAO
-        self.unbind_vao()                                           # unbinds the vao
-        return RawModel(vao_id, len(indices), positions, indices.copy())   # returns raw model object
+        """
+        Loads data to a VAO.
+
+        :params positions: Vertex positions.
+        :params texture_coords: Texture coordinates.
+        :params normals: Vertex normals.
+        :params indices: Index data.
+        :return: RawModel object.
+        """
+        vao_id = self.create_vao()
+        self.bind_indices_buffer(indices)
+        self.store_data_in_attribute_list(0, 3, positions)
+        self.store_data_in_attribute_list(1, 2, texture_coords)
+        self.store_data_in_attribute_list(2, 3, normals)
+        self.unbind_vao()
+        return RawModel(vao_id, len(indices), positions, indices.copy())
 
     def load_tangents_to_vao(self, positions: list[float], texture_coords: list[float], normals: list[float],
                              tangents: list[float], indices: list[int]):
+        """
+        Loads tangents to a VAO.
 
+        :params positions: Vertex positions.
+        :params texture_coords: Texture coordinates.
+        :params normals: Vertex normals.
+        :params tangents: Tangent data.
+        :params indices: Index data.
+        :return: RawModel object.
+        """
         vao_id = self.create_vao()
         self.bind_indices_buffer(indices)
         self.store_data_in_attribute_list(0, 3, positions)
@@ -71,20 +111,41 @@ class Loader:
         return RawModel(vao_id, len(indices), positions, indices.copy())
 
     def load_gui_to_vao(self, positions: list[float], dimension: int):
+        """
+        Loads GUI data to a VAO.
+
+        :params positions: Vertex positions.
+        :params dimension: Dimension of the positions.
+        :return: RawModel object.
+        """
         vao_id = self.create_vao()
         self.store_data_in_attribute_list(0, dimension, positions)
         self.unbind_vao()
         return RawModel(vao_id, len(positions) // dimension)
 
     def load_font_to_vao(self, positions: list[float], texture_coords: list[float]) -> int:
-        vao_id = self.create_vao()               # creates VAO
-        self.store_data_in_attribute_list(0, 2, positions)       # binds the positions into the 0th place in the VAO
-        self.store_data_in_attribute_list(1, 2, texture_coords)  # binds the texture coords into 1st place in the VAO
-        self.unbind_vao()                                 # unbinds the vao
+        """
+        Loads font data to a VAO.
+
+        :params positions: Vertex positions.
+        :params texture_coords: Texture coordinates.
+        :return: The VAO ID.
+        """
+        vao_id = self.create_vao()
+        self.store_data_in_attribute_list(0, 2, positions)
+        self.store_data_in_attribute_list(1, 2, texture_coords)
+        self.unbind_vao()
         return vao_id
 
     @classmethod
     def load_texture(cls, file_name: str, bias: float = -0.6):
+        """
+        Loads a texture from file.
+
+        :params file_name: Name of the texture file.
+        :params bias: LOD bias for texture.
+        :return: The texture ID.
+        """
         try:
             img = Image.open(f"{PATH}/res/{file_name}.png").convert('RGBA')
         except Exception as e:
@@ -115,7 +176,12 @@ class Loader:
         return texture_id
 
     def load_cube_map(self, texture_files: list[str]):
-        """Order of the cube map textures has to be: RIGHT, LEFT, TOP, BOTTOM, BACK, FRONT"""
+        """
+        Loads a cube map texture.
+
+        :params texture_files: List of cube map texture file names.
+        :return: The texture ID.
+        """
         texture_id = glGenTextures(1)
         glActiveTexture(GL_TEXTURE0)
         glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id)
@@ -137,6 +203,12 @@ class Loader:
 
     @staticmethod
     def decode_texture_file(file_name: str):
+        """
+        Decodes a texture file.
+
+        :params file_name: Name of the texture file.
+        :return: TextureData object.
+        """
         try:
             img = Image.open(f"{PATH}/res/{file_name}.png").convert('RGBA')
             img = img.transpose(Image.FLIP_TOP_BOTTOM)  # flip image upside down
@@ -151,6 +223,9 @@ class Loader:
 
     @classmethod
     def clean_up(cls):
+        """
+        Cleans up the loaded VAOs, VBOs, and textures.
+        """
         for vao in cls.__vaos:
             glDeleteVertexArrays(1, [vao])
         for vbo in cls.__vbos:
@@ -160,28 +235,48 @@ class Loader:
 
     @classmethod
     def create_vao(cls):
-        vao_id = glGenVertexArrays(1)   # creates 1 vertex array
-        cls.__vaos.append(vao_id)       # appends it to the VAO list in the class
-        glBindVertexArray(vao_id)       # binds the VAO to use it
+        """
+        Creates a VAO.
+
+        :return: The VAO ID.
+        """
+        vao_id = glGenVertexArrays(1)
+        cls.__vaos.append(vao_id)
+        glBindVertexArray(vao_id)
         return vao_id
 
     @classmethod
     def store_data_in_attribute_list(cls, attribute_number: int, coordinate_size: int, data: list[float]):
-        data = numpy.array(data, dtype='float32')   # convert the data into a float32 array
-        vbo_id = glGenBuffers(1)                    # create 1 VBO buffer
-        cls.__vbos.append(vbo_id)                   # appends it to the VBO list in the class
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_id)       # binds the buffer to use it
-        glBufferData(GL_ARRAY_BUFFER, data, GL_STATIC_DRAW)  # specifies the buffer, data and usage
-        glVertexAttribPointer(attribute_number, coordinate_size, GL_FLOAT, False, 0, None)  # put the VBO into a VAO
+        """
+        Stores data in an attribute list.
+
+        :params attribute_number: Attribute index.
+        :params coordinate_size: Size of the coordinates.
+        :params data: Data to store.
+        """
+        data = numpy.array(data, dtype='float32')
+        vbo_id = glGenBuffers(1)
+        cls.__vbos.append(vbo_id)
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_id)
+        glBufferData(GL_ARRAY_BUFFER, data, GL_STATIC_DRAW)
+        glVertexAttribPointer(attribute_number, coordinate_size, GL_FLOAT, False, 0, None)
         glBindBuffer(GL_ARRAY_BUFFER, 0)
 
     @staticmethod
     def unbind_vao():
+        """
+        Unbinds the current VAO.
+        """
         glBindVertexArray(0)
 
     @classmethod
     def bind_indices_buffer(cls, indices: list[int]):
-        indices = numpy.array(indices, dtype=numpy.uint32)  # convert the data into an unsigned integer array
+        """
+        Binds an index buffer.
+
+        :params indices: Index data.
+        """
+        indices = numpy.array(indices, dtype=numpy.uint32)
         vbo_id = glGenBuffers(1)
         cls.__vbos.append(vbo_id)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_id)
@@ -189,6 +284,9 @@ class Loader:
 
     @classmethod
     def read_supported_extensions(cls):
+        """
+        Reads supported OpenGL extensions.
+        """
         num_of_extensions = glGetIntegerv(GL_NUM_EXTENSIONS)
         for i in range(num_of_extensions):
             cls.__extensions_supported.append(glGetStringi(GL_EXTENSIONS, i))

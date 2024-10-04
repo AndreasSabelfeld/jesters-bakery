@@ -10,17 +10,26 @@ from math import sqrt
 
 class Raycaster:
     """Class calculating a ray from the position of the mouse into the world"""
+
     def __init__(self, camera, projection_matrix: list[list]):
+        """
+        Initializes Raycaster with camera and projection matrix.
+
+        :params camera: The camera object used for raycasting.
+        :params projection_matrix: The projection matrix for the camera.
+        """
         self.__camera = camera
         self.__projection_matrix = projection_matrix
         self.__view_matrix = Maths.create_view_matrix(self.__camera)
         self.__current_ray = [0, 0, 0]
 
     def update(self, *args):
+        """Updates the view matrix and current ray."""
         self.__view_matrix = Maths.create_view_matrix(self.__camera)
         self.__current_ray = self.calculate_mouse_ray()
 
     def calculate_mouse_ray(self):
+        """Calculates the ray from mouse position into world coordinates."""
         mouse_x, mouse_y = KeyboardInput.get_mouse_pos()
         normalized_coords = self.get_normalized_device_coords(mouse_x, mouse_y)
         clip_coords = [normalized_coords[0], normalized_coords[1], 1, 1]
@@ -29,6 +38,11 @@ class Raycaster:
         return world_ray
 
     def to_world_coords(self, eye_coords: list[float]):
+        """Transforms eye coordinates to world coordinates.
+
+        :params eye_coords: Eye coordinates.
+        :return: Normalized world ray.
+        """
         inverted_view = Maths.invert_matrix(self.__view_matrix)
         ray_world = Maths.transform_matrix(inverted_view, eye_coords)
         mouse_ray = [ray_world[0], ray_world[1], ray_world[2]]
@@ -36,20 +50,33 @@ class Raycaster:
         return mouse_ray
 
     def to_eye_coords(self, clip_coords: list[float]):
-        inverted_projection = Maths.invert_matrix(self.__projection_matrix)     # inverse matrix gets calculated correctly
+        """Transforms clip coordinates to eye coordinates.
+
+        :params clip_coords: Clip coordinates.
+        :return: Eye coordinates.
+        """
+        inverted_projection = Maths.invert_matrix(self.__projection_matrix)
         eye_coords = Maths.transform_matrix(inverted_projection, clip_coords)
         return [eye_coords[0], eye_coords[1], -1, 0]
 
     @staticmethod
     def get_normalized_device_coords(mouse_x, mouse_y):
+        """Converts mouse coordinates to normalized device coordinates.
+
+        :params mouse_x: Mouse x coordinate.
+        :params mouse_y: Mouse y coordinate.
+        :return: Normalized device coordinates.
+        """
         x = (2 * mouse_x) / DisplayManager.get_width() - 1
         y = (2 * mouse_y) / DisplayManager.get_height() - 1
         return [x, y]
 
     def get_current_ray(self):
+        """Returns the current ray."""
         return self.__current_ray
 
     def get_camera(self):
+        """Returns the camera object."""
         return self.__camera
 
 
@@ -59,10 +86,16 @@ class TerrainRaycaster(Raycaster):
     __RAY_RANGE = 20
 
     def __init__(self, camera, projection_matrix: list[list]):
+        """Initializes TerrainRaycaster with camera and projection matrix.
+
+        :params camera: The camera object used for raycasting.
+        :params projection_matrix: The projection matrix for the camera.
+        """
         super().__init__(camera, projection_matrix)
         self.__current_terrain_point = None
 
     def update(self) -> None:
+        """Updates the terrain point based on ray intersection."""
         super().update()
         if self.intersection_in_range(0, self.__RAY_RANGE, self.get_current_ray()):
             self.__current_terrain_point = self.binary_search(0, 0, self.__RAY_RANGE, self.get_current_ray())
@@ -70,12 +103,26 @@ class TerrainRaycaster(Raycaster):
             self.__current_terrain_point = None
 
     def get_point_on_ray(self, ray: list[float], distance: float) -> list[float]:
+        """Gets the point on the ray at a specific distance.
+
+        :params ray: The ray direction.
+        :params distance: The distance along the ray.
+        :return: Point on the ray.
+        """
         cam_pos = self.get_camera().get_position()
         start = [cam_pos[0], cam_pos[1], cam_pos[2]]
         scaled_ray = [ray[0] * distance, ray[1] * distance, ray[2] * distance]
         return [start[0] + scaled_ray[0], start[1] + scaled_ray[1], start[2] + scaled_ray[2]]
 
     def binary_search(self, count: int, start: float, finish: float, ray: list[float]) -> list[float]:
+        """Performs binary search to find terrain intersection.
+
+        :params count: Current recursion count.
+        :params start: Start distance for the search.
+        :params finish: Finish distance for the search.
+        :params ray: The ray direction.
+        :return: Intersection point or None.
+        """
         half = start + ((finish - start) / 2)
         if count >= self.__RECURSION_COUNT:
             end_point = self.get_point_on_ray(ray, half)
@@ -90,6 +137,13 @@ class TerrainRaycaster(Raycaster):
             return self.binary_search(count+1, half, finish, ray)
 
     def intersection_in_range(self, start: float, finish: float, ray: list[float]) -> bool:
+        """Checks if there is an intersection in the specified range.
+
+        :params start: Start distance.
+        :params finish: Finish distance.
+        :params ray: The ray direction.
+        :return: True if there is an intersection, False otherwise.
+        """
         start_point = self.get_point_on_ray(ray, start)
         end_point = self.get_point_on_ray(ray, finish)
         if not self.is_under_ground(start_point) and self.is_under_ground(end_point):
@@ -98,6 +152,11 @@ class TerrainRaycaster(Raycaster):
             return False
 
     def is_under_ground(self, test_point: list[float]) -> bool:
+        """Checks if a point is below the terrain.
+
+        :params test_point: The point to check.
+        :return: True if the point is below the terrain, False otherwise.
+        """
         terrain = self.get_terrain(test_point[0], test_point[2])
         height = 0
         if terrain is not None:
@@ -109,9 +168,16 @@ class TerrainRaycaster(Raycaster):
 
     @staticmethod
     def get_terrain(world_x: float, world_z: float):
+        """Gets the terrain at the specified world coordinates.
+
+        :params world_x: World x coordinate.
+        :params world_z: World z coordinate.
+        :return: Terrain object or None.
+        """
         return Terrain.get_existing_terrains().get((world_x // Terrain.get_size(), world_z // Terrain.get_size()))
 
     def get_current_terrain_point(self) -> list[float]:
+        """Returns the current terrain point."""
         return self.__current_terrain_point
 
 
@@ -119,11 +185,20 @@ class ObjectRaycaster(Raycaster):
     __RAY_RANGE = 20
 
     def __init__(self, camera, projection_matrix: list[list]):
+        """Initializes ObjectRaycaster with camera and projection matrix.
+
+        :params camera: The camera object used for raycasting.
+        :params projection_matrix: The projection matrix for the camera.
+        """
         super().__init__(camera, projection_matrix)
         self.__collision_detection = Detection(vec3(1))
         self.__current_object_point = None
 
     def update(self, collider_entities: list):
+        """Updates the raycasting for object detection.
+
+        :params collider_entities: List of collider entities to check for intersections.
+        """
         super().update()
         self.__collision_detection.get_packet().r3_position = vec3(self.get_camera().get_position())
         ray = vec3(self.get_current_ray()).normalize() * self.__RAY_RANGE
@@ -149,14 +224,21 @@ class ObjectRaycaster(Raycaster):
                 return entity
 
     def __sort_list(self, collider_entities: list) -> None:
-        collider_entities.sort(key=lambda x: abs(sqrt((x.get_position()[0] - self.get_camera().get_position()[0])**2 +
-                                                      (x.get_position()[1] - self.get_camera().get_position()[1])**2 +
-                                                      (x.get_position()[2] - self.get_camera().get_position()[2])**2)))
+        """Sorts the collider entities based on distance from camera.
+
+        :params collider_entities: List of collider entities.
+        """
+        collider_entities.sort(key=lambda x: abs(sqrt((x.get_position()[0] - self.get_camera().get_position()[0]) ** 2 +
+                                                      (x.get_position()[1] - self.get_camera().get_position()[1]) ** 2 +
+                                                      (x.get_position()[2] - self.get_camera().get_position()[2]) ** 2)))
 
     def __filter_list(self, collider_entities: list) -> list:
         """
         Takes in the sorted collider entity list and creates a new one where the entities have a maximal distance
         from the player
+
+        :params collider_entities: List of collider entities.
+        :return: Filtered list of collider entities.
         """
         new_list = list()
         for i in range(len(collider_entities)):
@@ -170,4 +252,5 @@ class ObjectRaycaster(Raycaster):
             return collider_entities
 
     def get_current_object_point(self) -> list[float]:
+        """Returns the current object point of intersection."""
         return self.__current_object_point

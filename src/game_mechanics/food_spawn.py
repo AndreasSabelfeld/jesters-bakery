@@ -5,7 +5,22 @@ from src.render_engine.input_controller import Binds
 
 
 class FoodSpawn:
-    def __init__(self, food: Food, pos: list[float], rot: list[float], size: float, entity_list: list, collider_list: list):
+    """
+    Handles the spawning of food objects in the game
+    """
+
+    def __init__(self, food: Food, pos: list[float], rot: list[float], size: float, entity_list: list,
+                 collider_list: list):
+        """
+        Initializes the FoodSpawn object and spawns the food entity and its collider to the game.
+
+        :param food: The food object contining models and details for the spawn.
+        :param pos: The position in the game world to spawn the food.
+        :param rot: The rotation of the food object in the game world.
+        :param size: The size scale of the food object.
+        :param entity_list: A list to which the spawned game object will be appended.
+        :param collider_list: A list to which the spawned collider will be appended.
+        """
         self.__food = food
         self.__pos = pos
         self.__rot = rot
@@ -23,9 +38,19 @@ class FoodSpawn:
         self.__collider_list.append(self.__game_object)
 
     def get_game_object(self) -> GameObject:
+        """
+        Returns the GameObject of the spawned food.
+
+        :return: The food GameObject.
+        """
         return self.__game_object
 
     def spawn(self) -> GameObject:
+        """
+        Spawns the food, using an alternate model and collider if available, or the default if not.
+
+        :return: The newly spawned GameObject.
+        """
         if self.__food.get_alt_model():
             model = self.__food.get_alt_model()
             collider = self.__food.get_alt_collider()
@@ -42,4 +67,5 @@ class FoodSpawn:
         game_object.set_prompt(f"Press {Binds.get_bind(Binds.R2)} or {Binds.get_bind(Binds.L2)} to pick up.")
         self.__entity_list.append(game_object)
         self.__collider_list.append(game_object)
+
         return game_object

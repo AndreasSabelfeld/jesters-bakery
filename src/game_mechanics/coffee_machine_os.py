@@ -105,6 +105,7 @@ class CoffeeMachineOS:
         self.__tea_sound = AudioMaster.load_sound(f"{PATH}/res/audio/tea_pouring.wav")
 
     def render_screen(self) -> None:
+        """Renders the coffee machine interface, including products and buttons."""
         self.__update_time_remaining()
         self.__check_bools()
         self.__move_cursor()
@@ -123,6 +124,11 @@ class CoffeeMachineOS:
         self.__render_target.get_model().set_texture(ModelTexture(self.__fbo.get_color_texture()))
 
     def interact(self, player, camera) -> None:
+        """Handles user interaction with the coffee machine, controlling the player and camera movements.
+
+        :param player: The player interacting with the coffee machine.
+        :param camera: The camera used for viewing the coffee machine.
+        """
         if self.__listener.get_interact() or self.__listener.get_deny():
             collision = self.__object_picker.update([self.__render_target])
             if self.__is_interacting:
@@ -135,44 +141,83 @@ class CoffeeMachineOS:
                 self.__move_in_front_screen(camera)
 
     def get_is_interacting(self) -> bool:
+        """Returns whether the user is currently interacting with the coffee machine.
+
+        :return: True if interacting, False otherwise.
+        """
         return self.__is_interacting
 
     def get_page_texts(self) -> list:
+        """returns the texts displayed on the current page of the coffee machine interface.
+
+        :return: A list of texts.
+        """
         self.__product_entries = CoffeePage.get_instances()[self.__current_page].get_products()
         texts = [product.get_text() for product in self.__product_entries]
         texts.append(self.__time_remaining)
         return texts
 
     def get_all_texts(self) -> list:
+        """Returns a list of all texts, including the remaining time.
+
+        :return: A list of all texts.
+        """
         texts = CoffeeProduct.all_texts.copy()
         texts.append(self.__time_remaining)
         return texts
 
     def get_icon_size(self) -> float:
+        """Returns the size of the icons in the coffee machine interface.
+
+        :return: The size of the icons.
+        """
         return self.__icon_size
 
     def get_text_offset(self) -> float:
+        """Returns the offset for positioning texts in the coffee machine interface.
+
+        :return: The text offset.
+        """
         return self.__text_offset
 
     def set_coffee(self, index: int, entity) -> None:
+        """Sets the coffee entity at the specified index and adjusts its position.
+
+        :param index: The index where the coffee entity will be set (0 to 2).
+        :param entity: The coffee entity to set.
+        """
         if index <= 2:
             self.__positioned_coffees[index] = entity
             match index:
-                case 0: entity.set_position(vec3(self.__render_target.get_position()) + self.__offset_positions[index])
-                case 1: entity.set_position(vec3(self.__render_target.get_position()) + self.__offset_positions[index])
+                case 0:
+                    entity.set_position(vec3(self.__render_target.get_position()) + self.__offset_positions[index])
+                case 1:
+                    entity.set_position(vec3(self.__render_target.get_position()) + self.__offset_positions[index])
                 case 2:
                     self.get_coffee(1).set_position(vec3(self.__render_target.get_position()) + self.__offset_positions[index])
                     entity.set_position(vec3(self.__render_target.get_position()) + self.__offset_positions[index + 1])
 
     def get_coffee(self, index: int):
+        """Returns the coffee entity at the specified index.
+
+        :param index: The index of the coffee entity (0 to 2).
+        :return: The coffee entity at the specified index.
+        """
         if index <= 2:
             return self.__positioned_coffees[index]
 
     def get_coffee_list(self) -> list:
-        """Returns a copy of the list of coffees"""
+        """Returns a copy of the list of coffees.
+
+        :return: A copy of the list of positioned coffees.
+        """
         return self.__positioned_coffees.copy()
 
-    def remove_coffee(self, index: int):
+    def remove_coffee(self, index: int) -> None:
+        """Removes the coffee entity at the specified index, adjusting positions if necessary.
+
+        :param index: The index of the coffee entity to remove (0 to 2).
+        """
         if index <= 2:
             self.__positioned_coffees[index] = None
             if self.get_coffee(1) is None and self.get_coffee(2) is not None:
@@ -183,19 +228,35 @@ class CoffeeMachineOS:
 
     @classmethod
     def get_name(cls) -> str:
+        """Returns the name of the class.
+
+        :return: The name of the class.
+        """
         return cls.__NAME
 
     def get_fbo(self):
+        """Returns the framebuffer object connected with the coffee machine.
+
+        :return: The framebuffer object.
+        """
         return self.__fbo
 
     def is_brewing_coffee(self) -> bool:
+        """Checks if the coffee machine is currently brewing coffee.
+
+        :return: True if brewing coffee, False otherwise.
+        """
         return self.__brewing_coffee
 
     def is_brewing_tea(self) -> bool:
+        """Checks if the coffee machine is currently brewing tea.
+
+        :return: True if brewing tea, False otherwise.
+        """
         return self.__brewing_tea
 
     def __move_cursor(self) -> None:
-        """Updates the cursor of the coffee machine. Method is being called from the render_screen method."""
+        """Updates the cursor position based on user input during interaction."""
         if self.__is_interacting:
             if UniversalInput.get_up():
                 self.__ui_sfx_source.play(self.__menu_scroll_sound)
@@ -243,7 +304,7 @@ class CoffeeMachineOS:
         self.__move_deactivated()
 
     def __move_cancel_button(self) -> None:
-        # if the fourth row is selected and any product are in queue, the brewing queue cancel button should appear
+        """Moves the cancel button based on the selected position and brewing queue status."""
         if self.__selected_position[1] == 4 and self.__brewing_queue:
             self.__selected_texture.set_position([-2, -2])  # out of bounds
             self.__cancel_texture.set_position([self.__icon_offset * (self.__selected_position[0] + 1) - 0.95, -0.70])
@@ -252,7 +313,11 @@ class CoffeeMachineOS:
             self.__cancel_texture.set_position([-2, -2])
 
     def __move_start_button(self) -> None:
-        # if the fifth row is selected and any product are in queue, the brewing queue start button should appear
+        """
+        Moves the brewing queue start button to a visible position if
+        the fifth row is selected and there are products in the queue;
+        otherwise, it moves the button out of bounds.
+        """
         if self.__selected_position[1] == 5 and self.__brewing_queue:
             self.__selected_texture.set_position([-2, -2])  # out of bounds
             self.__start_texture.set_position([self.__icon_offset - 0.95, -0.8])
@@ -261,6 +326,10 @@ class CoffeeMachineOS:
             self.__start_texture.set_position([-2, -2])
 
     def __move_selected_texture(self) -> None:
+        """
+        Updates the position of the selected texture based on the current
+        selection, ensuring it wraps correctly within the defined limits.
+        """
         if self.__selected_position[0] == -1:
             self.__selected_texture.set_position([(self.__icon_offset + 1 / (5 + self.__size_adjustment) * 2 * 5) - 1,
                                                   1 - (self.__icon_offset + 1 / (self.__columns + self.__size_adjustment) * 2 * 0)])
@@ -270,13 +339,21 @@ class CoffeeMachineOS:
                                               1 - (self.__icon_offset + 1 / (self.__columns + self.__size_adjustment) * 2 * self.__selected_position[1])])
 
     def __move_deactivated(self) -> None:
+        """
+        Moves the deactivated texture to an out-of-bounds position if
+        decaffeinated coffee is not selected; otherwise, it places it in view.
+        """
         if self.__decaffeinated:
             self.__deactivated_texture.set_position([(self.__icon_offset + 1 / (5 + self.__size_adjustment) * 2 * 5) - 1,
                                                   1 - (self.__icon_offset + 1 / (self.__columns + self.__size_adjustment) * 2 * 0)])
         else:
             self.__deactivated_texture.set_position([-2, -2])
 
-    def __check_bools(self):
+    def __check_bools(self) -> None:
+        """
+        Checks the brewing queue and updates the texture and flags
+        for coffee and tea buffers based on the queue state.
+        """
         if not self.__brewing_queue:
             self.__brewing_coffee = False
             return
@@ -293,6 +370,12 @@ class CoffeeMachineOS:
             self.__tea_buffer = False
 
     def __move_in_front_screen(self, camera) -> None:
+        """
+        Moves the camera to a position in front of the render target
+        based on the target's rotation and scale.
+
+        :param camera: The camera object to be moved.
+        """
         self.__original_camera_pos = camera.get_position()
         self.__original_camera_angles = [camera.get_yaw(), camera.get_pitch(), camera.get_roll()]
         x = 3.5 * math.sin(math.radians(self.__render_target.get_rot_y()))
@@ -307,12 +390,21 @@ class CoffeeMachineOS:
         camera.set_roll(0)
 
     def __move_camera_to_original_pos(self, camera) -> None:
+        """
+        Resets the camera position and orientation to its original state.
+
+        :param camera: The camera object to be reset.
+        """
         camera.set_yaw(self.__original_camera_angles[0])
         camera.set_pitch(self.__original_camera_angles[1])
         camera.set_roll(self.__original_camera_angles[2])
         camera.set_position(self.__original_camera_pos)
 
     def __update_positions_of_products(self) -> None:
+        """
+        Updates the positions of product icons and their connected text
+        based on the current page and layout settings.
+        """
         self.__product_entries = CoffeePage.get_instances()[self.__current_page].get_products()
         for i, product in enumerate(self.__product_entries):
             product.get_icon().set_position([(self.__icon_offset + 1 / (self.__rows + self.__size_adjustment) * 2 * (i % 4)) - 1,
@@ -321,6 +413,12 @@ class CoffeeMachineOS:
                                              (1 - product.get_icon().get_position()[1]) / 2 + self.__text_offset])
 
     def __add_beverage_to_queue(self, beverage: CoffeeProduct) -> None:
+        """
+        Adds a beverage to the brewing queue if it does not exceed the
+        maximum queue length. Starts the brewing process for the beverage.
+
+        :param beverage: The CoffeeProduct to be added to the queue.
+        """
         if len(self.__brewing_queue) >= self.__max_queue_length:
             return
         product = CoffeeProduct(beverage.get_name(),
@@ -336,15 +434,26 @@ class CoffeeMachineOS:
         self.__start_making_coffee()
 
     def __remove_beverage_from_queue(self, index: int = 0) -> None:
+        """
+        Removes a beverage from the brewing queue at the specified index.
+
+        :param index: The index of the beverage to be removed. Defaults to 0.
+        """
         if len(self.__brewing_queue) >= index + 1:
             self.__brewing_queue.pop(index)
             self.__update_queue()
 
     def __update_queue(self) -> None:
+        """
+        Updates the positions of the beverages in the brewing queue based on their order.
+        """
         for i in range(len(self.__brewing_queue)):
             self.__brewing_queue[i].get_icon().set_position([(i * self.__icon_size * 2 + self.__icon_offset) - 1, -0.75])
 
-    def __start_making_coffee(self):
+    def __start_making_coffee(self) -> None:
+        """
+        Starts the coffee brewing process based on the current beverage in the brewing queue.
+        """
         if not self.__brewing_queue:
             return
 
@@ -386,8 +495,10 @@ class CoffeeMachineOS:
                 process = Thread(target=self.__fill_timing, args=(1,))
                 process.start()
                 # both get a half
-                self.__positioned_coffees[1].get_attachment().append_content(self.__brewing_queue[0].get_content()[0] + " half")
-                self.__positioned_coffees[2].get_attachment().append_content(self.__brewing_queue[0].get_content()[0] + " half")
+                self.__positioned_coffees[1].get_attachment().append_content(
+                    self.__brewing_queue[0].get_content()[0] + " half")
+                self.__positioned_coffees[2].get_attachment().append_content(
+                    self.__brewing_queue[0].get_content()[0] + " half")
             # 1 coffee is allowed and 1 is placed
             else:
                 process = Thread(target=self.__fill_timing, args=(self.__max_level,))
@@ -396,11 +507,14 @@ class CoffeeMachineOS:
         self.__time_remaining.set_text_string(f"time remaining: {self.__brewing_queue[0].get_brew_length()}")
         self.__brewing_coffee = True
 
-    def __fill_timing(self, levels: int, is_tea: bool = False):
+    def __fill_timing(self, levels: int, is_tea: bool = False) -> None:
         """
         Method running in a parallel thread for the timing. Sets the __tea_buffer or __coffee_buffer to True, which
         is being checked in the render_screen method. This workaround was made because of issues with multithreading
         OpenGL calls.
+
+        :param levels: The number of levels to fill.
+        :param is_tea: Indicates if the beverage being brewed is tea. Defaults to False.
         """
         self.__time_passed = 0
         waiting_time = self.__brewing_queue[0].get_brew_length() / levels
@@ -418,7 +532,13 @@ class CoffeeMachineOS:
         else:
             self.__brewing_coffee = False
 
-    def __fill_original_thread(self, texture):
+    def __fill_original_thread(self, texture) -> None:
+        """
+        Fills the attachments of positioned coffees with the provided texture,
+        checking for overflow and compatibility with the container type.
+
+        :param texture: The texture to fill the attachments with.
+        """
         if self.__positioned_coffees[1]:
             self.__positioned_coffees[1].get_attachment().fill(texture)
             if self.__positioned_coffees[1].get_attachment().get_level() == self.__max_level:
@@ -433,8 +553,15 @@ class CoffeeMachineOS:
         if not self.__brewing_coffee:
             self.__remove_beverage_from_queue()
 
-    def __check_for_compatibility_of_container(self, container, texture):
-        if self.__brewing_queue[0].is_allow_double() and self.__positioned_coffees[1] and not self.__positioned_coffees[2]:
+    def __check_for_compatibility_of_container(self, container, texture) -> None:
+        """
+        Checks if the given container is compatible with the current brewing beverage.
+
+        :param container: The container to check for compatibility.
+        :param texture: The texture connected with the brewing beverage.
+        """
+        if self.__brewing_queue[0].is_allow_double() and self.__positioned_coffees[1] and not self.__positioned_coffees[
+            2]:
             # two coffees should have been placed, only one is there.
             return  # no action needed, as the logic for overflowing is already in the __start_making_coffee method
         # if the container is smaller than the brewing coffee...
@@ -446,11 +573,19 @@ class CoffeeMachineOS:
             # ... the cup should not be full
             container.set_level(self.__max_level - 1, texture)
 
-    def __fill_tea_original_thread(self, texture):
+    def __fill_tea_original_thread(self, texture) -> None:
+        """
+        Fills the attachment of the tea container with the specified texture.
+
+        :param texture: The texture to fill the tea container with.
+        """
         if self.__positioned_coffees[0]:
             self.__positioned_coffees[0].get_attachment().fill(texture)
 
     def __update_time_remaining(self):
+        """
+        Updates the displayed time remaining for the currently brewing coffee.
+        """
         if self.__brewing_coffee and self.__brewing_queue:
             self.__time_passed += Time.get_delta_time()
             self.__time_remaining.set_text_string(f"time remaining: {self.__brewing_queue[0].get_brew_length() - self.__time_passed:.2f}")
@@ -458,6 +593,10 @@ class CoffeeMachineOS:
             self.__time_remaining.set_text_string("")
 
     def __create_products(self) -> None:
+        """
+        Creates all coffee products for the machine
+        """
+
         CoffeeProduct(f"Espresso",
                       GuiTexture(self.__loader.load_texture("pngs/ui/espresso_icon"),
                                  [0, 0],

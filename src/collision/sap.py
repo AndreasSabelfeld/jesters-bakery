@@ -2,6 +2,16 @@ from src.collision.box import Box
 
 
 class SAP:
+    """
+    A Sweep and Prune (SAP) collision detection algorithm that manages a collection of axis-aligned bounding boxes (AABBs)
+    for efficient collision detection. This class maintains endpoints for each box along the X, Y, and Z axes.
+
+    Attributes:
+        __boxes (list[Box]): A list of all boxes currently being tracked for collisions.
+        __end_points_x (list): A sorted list of endpoint objects for the X-axis.
+        __end_points_y (list): A sorted list of endpoint objects for the Y-axis.
+        __end_points_z (list): A sorted list of endpoint objects for the Z-axis.
+    """
 
     __boxes = []
     __end_points_x = []
@@ -10,6 +20,11 @@ class SAP:
 
     @classmethod
     def add_box(cls, box: Box):
+        """
+        Adds a box to the SAP for collision detection.
+
+        :param box: The Box instance to be added.
+        """
         cls.__end_points_x.extend(box.get_x())
         cls.__end_points_x.sort(key=lambda x: x.value)
         cls.__end_points_y.extend(box.get_y())
@@ -21,6 +36,11 @@ class SAP:
 
     @classmethod
     def batch_insertion(cls, boxes: list[Box]) -> None:
+        """
+        Inserts multiple boxes into the SAP at once, sorting their endpoints.
+
+        :param boxes: A list of Box instances to be inserted.
+        """
         x_values = []
         y_values = []
         z_values = []
@@ -56,6 +76,13 @@ class SAP:
 
     @classmethod
     def update_object(cls, box: Box, min_points: list[float], max_points: list[float]) -> None:
+        """
+        Updates the dimensions of a box in the SAP, adjusting its endpoints accordingly.
+
+        :param box: The Box instance to be updated.
+        :param min_points: The new minimum points of the box.
+        :param max_points: The new maximum points of the box.
+        """
         box.update(min_points, max_points)
         cls.__end_points_x.sort(key=lambda x: x.value)
         cls.__end_points_y.sort(key=lambda x: x.value)
@@ -63,6 +90,12 @@ class SAP:
 
     @classmethod
     def get_colliding_boxes(cls, compare_box: Box) -> list:
+        """
+        Gets a list of boxes that are colliding with the specified box.
+
+        :param compare_box: The Box instance to compare against.
+        :return: A list of Box instances that are colliding with the compare_box.
+        """
         colliding_boxes = []
         for box in cls.__boxes:
             if (box.get_x()[0] < compare_box.get_x()[0] < box.get_x()[1] < compare_box.get_x()[1] or
@@ -77,14 +110,19 @@ class SAP:
 
     @classmethod
     def get_colliding_pairs(cls) -> list[list]:
+        """
+        Identifies pairs of boxes that are colliding based on the current state of the SAP.
+
+        :return: A list of lists, where each inner list contains two colliding Box instances.
+        """
         overlapping_pairs = []
         for box in cls.__boxes:
             if any(box in sl for sl in overlapping_pairs):
                 # box partner was already found, no need for duplicate check
                 continue
-            overlapping_x = [x.owner for x in cls.__end_points_x[cls.__end_points_x.index(box.get_min_x())+1:cls.__end_points_x.index(box.get_max_x())]]
-            overlapping_y = [x.owner for x in cls.__end_points_y[cls.__end_points_y.index(box.get_min_y())+1:cls.__end_points_y.index(box.get_max_y())]]
-            overlapping_z = [x.owner for x in cls.__end_points_z[cls.__end_points_z.index(box.get_min_z())+1:cls.__end_points_z.index(box.get_max_z())]]
+            overlapping_x = [x.owner for x in cls.__end_points_x[cls.__end_points_x.index(box.get_min_x()) + 1:cls.__end_points_x.index(box.get_max_x())]]
+            overlapping_y = [x.owner for x in cls.__end_points_y[cls.__end_points_y.index(box.get_min_y()) + 1:cls.__end_points_y.index(box.get_max_y())]]
+            overlapping_z = [x.owner for x in cls.__end_points_z[cls.__end_points_z.index(box.get_min_z()) + 1:cls.__end_points_z.index(box.get_max_z())]]
 
             overlapping_owners = list(set.intersection(*map(set, [overlapping_x, overlapping_y, overlapping_z])))
             for owner in overlapping_owners:
@@ -94,13 +132,27 @@ class SAP:
 
     @classmethod
     def get_end_points_x(cls) -> list:
+        """
+        Returns the sorted list of endpoint objects for the X-axis.
+
+        :return: A list of endpoint objects for the X-axis.
+        """
         return cls.__end_points_x
 
     @classmethod
     def get_end_points_y(cls) -> list:
+        """
+        Returns the sorted list of endpoint objects for the Y-axis.
+
+        :return: A list of endpoint objects for the Y-axis.
+        """
         return cls.__end_points_y
 
     @classmethod
     def get_end_points_z(cls) -> list:
-        return cls.__end_points_z
+        """
+        Returns the sorted list of endpoint objects for the Z-axis.
 
+        :return: A list of endpoint objects for the Z-axis.
+        """
+        return cls.__end_points_z

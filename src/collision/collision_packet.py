@@ -6,7 +6,15 @@ from src.pycgtypes.vec3 import vec3
 
 
 class CollisionPacket:
+    """
+    A collision detection packet used to track movement and collisions in a 3D space.
+    Contains information about the moving object in 3D space and ellipsoid space.
+    """
+
     def __init__(self):
+        """
+        Initializes a CollisionPacket object.
+        """
         self.e_radius: vec3 = None
 
         # Information about the move being requested: (in R3)
@@ -22,6 +30,13 @@ class CollisionPacket:
         self.intersection_point = None
 
     def check_triangle(self, p1: vec3, p2: vec3, p3: vec3) -> None:
+        """
+        Checks for collisions between the moving object and a triangle defined by three points
+
+        :param p1: The first point of the triangle.
+        :param p2: The second point of the triangle.
+        :param p3: The third point of the triangle.
+        """
         triangle_plane = Plane.from_triangle(p1, p2, p3)
 
         if triangle_plane.is_front_facing_to(self.normalized_velocity):

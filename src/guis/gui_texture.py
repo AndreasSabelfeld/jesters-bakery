@@ -15,14 +15,34 @@ class GuiTexture:
         self.__scale = scale
 
     def get_texture(self) -> int:
+        """
+        Get the texture ID
+
+        :return: Texture ID
+        """
         return self.__texture
 
     def get_position(self) -> list[float]:
+        """
+        Get the position of the texture
+
+        :return: Position as a list of floats
+        """
         return self.__position
 
-    def set_position(self, pos: list[float]):
+    def set_position(self, pos: list[float]) -> None:
+        """
+        Set the position of the texture
+
+        :param pos: New position as a list of floats
+        """
         self.__position = pos
 
     def get_scale(self) -> list[float]:
+        """
+        Get the scale of the texture
+
+        :return: Scale as a list of floats
+        """
         return self.__scale
 

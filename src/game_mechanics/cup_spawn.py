@@ -5,9 +5,25 @@ from src.render_engine.loader import Loader
 
 
 class CupSpawn:
+    """
+    This class is responsible for spawning different types of coffee containers (cups, glasses, etc.)
+    based on the container type provided.
+    """
 
     def __init__(self, container_type: int, pos: list[float], rot: list[float], size: float, loader: Loader, obj_loader: OBJLoader,
                  entities: list, colliders: list):
+        """
+        Initializes the CupSpawn object with the container type, position, rotation, size, loader, and object loader.
+
+        :param container_type: The type of container (e.g., cup, glass, etc.) to spawn.
+        :param pos: The position where the container will be spawned.
+        :param rot: The rotation of the container.
+        :param size: The size of the container.
+        :param loader: The loader used to load textures and models.
+        :param obj_loader: The object loader used to load the 3D model for the container.
+        :param entities: The list to which the spawned game object will be appended.
+        :param colliders: The list to which the spawned game object collider will be appended.
+        """
         self.__container_type = container_type
         self.__pos = pos
         self.__rot = rot
@@ -18,6 +34,11 @@ class CupSpawn:
         self.__colliders = colliders
 
     def spawn(self) -> GameObject:
+        """
+        Spawns the appropriate container (cup, glass, etc.) based on the container type.
+
+        :return: The spawned GameObject instance.
+        """
         import src.master.prefabs as prefabs
 
         match self.__container_type:

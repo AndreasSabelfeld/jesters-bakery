@@ -17,6 +17,16 @@ class Fridge:
     BOTTOM_DRAWER = 2
 
     def __init__(self, top_drawer: GameObject, bottom_drawer: GameObject, object_picker, loader, gui_renderer, camera_offset: list[float]):
+        """
+        Initializes the Fridge object with specified top and bottom drawers.
+
+        :param top_drawer: The GameObject of the top drawer.
+        :param bottom_drawer: The GameObject of the bottom drawer.
+        :param object_picker: The object picker for managing interactions.
+        :param loader: The loader for textures and models.
+        :param gui_renderer: The renderer for the GUI.
+        :param camera_offset: The offset for the camera position during interactions.
+        """
         self.__top_drawer = top_drawer
         self.__top_drawer_is_open = False
         self.__top_drawer_inventory = [[None] * 4 for _ in range(5)]
@@ -48,7 +58,12 @@ class Fridge:
         self.__open_sound = AudioMaster.load_sound(f"{PATH}/res/audio/drawer_open.wav")
         self.__close_sound = AudioMaster.load_sound(f"{PATH}/res/audio/drawer_close.wav")
 
-    def update(self, pick_up: Carry):
+    def update(self, pick_up: Carry) -> None:
+        """
+        Updates the fridge state based on player interactions and inputs.
+
+        :param pick_up: The Carry object of the player's hands.
+        """
         if self.__is_interacting:
             self.__move_cursor()
             self.place(pick_up)
@@ -62,10 +77,16 @@ class Fridge:
                         pick_up.get_carrying_object(Carry.LEFT).get_attachment().rotate()
 
     def render_selected_texture(self) -> None:
+        """
+        Renders the selected texture on the GUI if the fridge is being interacted with.
+        """
         if self.__is_interacting:
             self.__gui_renderer.render([self.__selected_texture])
 
-    def move_top_drawer(self):
+    def move_top_drawer(self) -> None:
+        """
+        Toggles the opening and closing of the top drawer
+        """
         if self.__top_drawer_is_open:
             self.__top_drawer.get_sfx_source().play(self.__close_sound)
             self.__top_drawer.set_position(vec3(self.__top_drawer.get_position()) + self.__opening_offset)
@@ -77,7 +98,10 @@ class Fridge:
             [x.increase_position(-self.__opening_offset.x, 0, -self.__opening_offset.z) for x in set([x for xs in self.__top_drawer_inventory for x in xs if x is not None])]
             self.__top_drawer_is_open = True
 
-    def move_bottom_drawer(self):
+    def move_bottom_drawer(self) -> None:
+        """
+        Toggles the opening and closing of the bottom drawer,
+        """
         if self.__bottom_drawer_is_open:
             self.__bottom_drawer.get_sfx_source().play(self.__close_sound)
             self.__bottom_drawer.set_position(vec3(self.__bottom_drawer.get_position()) + self.__opening_offset)
@@ -90,6 +114,12 @@ class Fridge:
             self.__bottom_drawer_is_open = True
 
     def interact(self, player, camera) -> None:
+        """
+        Handles player interaction with the fridge
+
+        :param player: The player object interacting with the fridge.
+        :param camera: The camera object used for rendering.
+        """
         if self.__listener.get_interact():
             collision = self.__object_picker.update([self.__top_drawer.get_collider(), self.__bottom_drawer.get_collider()])
             if self.__is_interacting:
@@ -111,9 +141,20 @@ class Fridge:
                 self.__move_on_top_drawer(camera, collision)
 
     def get_is_interacting(self) -> bool:
+        """
+        Checks if the fridge is currently being interacted with.
+
+        :return: True if the fridge is being interacted with, otherwise False.
+        """
         return bool(self.__is_interacting)
 
-    def place(self, hands: Carry, side=None):
+    def place(self, hands: Carry, side=None) -> None:
+        """
+        Places an object into the fridge drawers.
+
+        :param hands: The Carry object of the player's hands.
+        :param side: The side from which the object is being carried.
+        """
         if self.__listener.get_r2() or side == Carry.RIGHT:
             entity = hands.get_carrying_object(Carry.RIGHT)
             if not entity:
@@ -141,7 +182,13 @@ class Fridge:
                     self.place_in_bottom_drawer(entity)
                     hands.movable_entities.remove(entity)
 
-    def take(self, side: int, hands: Carry):
+    def take(self, side: int, hands: Carry) -> None:
+        """
+        returns an object from the selected drawer and places it in the player's hands.
+
+        :param side: The side (left or right) to carry the object.
+        :param hands: The Carry object of the player's hands.
+        """
         if self.__is_interacting == self.TOP_DRAWER:
             entity = self.__top_drawer_inventory[self.__selected_pos[1]][self.__selected_pos[0]]
             if not entity:
@@ -159,6 +206,11 @@ class Fridge:
             self.__sort_out_inventory(entity, self.__bottom_drawer_inventory)
 
     def place_in_top_drawer(self, entity) -> None:
+        """
+        Places an object into the top drawer of the fridge at the selected position.
+
+        :param entity: The entity to place in the top drawer.
+        """
         entity.set_rot_y(self.__top_drawer.get_rot_y())
 
         # the position is 'hard coded' to fit into the rotation of the fridge in the shop level, due to time
@@ -173,6 +225,11 @@ class Fridge:
         entity.set_rot_z(0)
 
     def place_in_bottom_drawer(self, entity) -> None:
+        """
+        Places an object into the bottom drawer of the fridge at the selected position.
+
+        :param entity: The entity to place in the bottom drawer.
+        """
         entity.set_rot_y(self.__bottom_drawer.get_rot_y())
 
         # the position is 'hard coded' to fit into the rotation of the fridge in the shop level, due to time
@@ -187,18 +244,50 @@ class Fridge:
         entity.set_rot_z(0)
 
     def set_selected_pos(self, x: int, y: int) -> None:
+        """
+        Sets the currently selected position in the fridge drawers.
+
+        :param x: The x-coordinate of the selected position.
+        :param y: The y-coordinate of the selected position.
+        """
         self.__selected_pos = [x, y]
 
     def set_is_interacting(self, interacting: bool) -> None:
+        """
+        Sets the interaction state of the fridge.
+
+        :param interacting: True if the player is interacting with the fridge, otherwise False.
+        """
         self.__is_interacting = interacting
 
     def set_top_drawer_offset(self, x: float, y: float, z: float) -> None:
+        """
+        Sets the position offset for the top drawer.
+
+        :param x: The x offset for the top drawer.
+        :param y: The y offset for the top drawer.
+        :param z: The z offset for the top drawer.
+        """
         self.__top_drawer_offset = [x, y, z]
 
     def set_bottom_drawer_offset(self, x: float, y: float, z: float) -> None:
+        """
+        Sets the position offset for the bottom drawer.
+
+        :param x: The x offset for the bottom drawer.
+        :param y: The y offset for the bottom drawer.
+        :param z: The z offset for the bottom drawer.
+        """
         self.__bottom_drawer_offset = [x, y, z]
 
     def __check_for_room(self, entity, inventory) -> bool:
+        """
+        Checks if there is enough room in the selected inventory position for the given entity.
+
+        :param entity: The entity
+        :param inventory: The inventory to check against.
+        :return: True if there is enough room, otherwise False.
+        """
         if not isinstance(entity.get_attachment(), FridgeObject):
             if inventory[self.__selected_pos[1]][self.__selected_pos[0]]:
                 return False
@@ -220,7 +309,13 @@ class Fridge:
                     return False
         return True
 
-    def __sort_in_inventory(self, entity, inventory):
+    def __sort_in_inventory(self, entity, inventory) -> None:
+        """
+        Sorts an entity into the specified inventory, placing it at the selected position.
+
+        :param entity: The entity to place in the inventory.
+        :param inventory: The inventory (top or bottom drawer) to sort into.
+        """
         if isinstance(entity.get_attachment(), FridgeObject):
             if entity.get_attachment().get_orientation() == 0:
                 x = entity.get_attachment().get_size()[0]
@@ -234,13 +329,25 @@ class Fridge:
         else:
             inventory[self.__selected_pos[1]][self.__selected_pos[0]] = entity
 
-    def __sort_out_inventory(self, entity, inventory):
+    def __sort_out_inventory(self, entity, inventory) -> None:
+        """
+        Removes an entity from the specified inventory.
+
+        :param entity: The entity to remove from the inventory.
+        :param inventory: The inventory (top or bottom drawer) to sort out of.
+        """
         if isinstance(entity.get_attachment(), FridgeObject):
             self.__nestrepl(inventory, entity, None)
         else:
             inventory[self.__selected_pos[1]][self.__selected_pos[0]] = None
 
     def __move_on_top_drawer(self, camera, drawer) -> None:
+        """
+        Adjusts the camera position and angle when the player interacts with the top drawer.
+
+        :param camera: The camera object
+        :param drawer: The drawer being interacted with.
+        """
         self.__original_camera_pos = camera.get_position()
         self.__original_camera_angles = [camera.get_yaw(), camera.get_pitch(), camera.get_roll()]
 
@@ -260,12 +367,20 @@ class Fridge:
         camera.set_roll(0)
 
     def __move_camera_to_original_pos(self, camera) -> None:
+        """
+        Restores the camera to its original position and angles.
+
+        :param camera: The camera object
+        """
         camera.set_yaw(self.__original_camera_angles[0])
         camera.set_pitch(self.__original_camera_angles[1])
         camera.set_roll(self.__original_camera_angles[2])
         camera.set_position(self.__original_camera_pos)
 
-    def __move_cursor(self):
+    def __move_cursor(self) -> None:
+        """
+        Updates the selected position in the fridge inventory based on player input.
+        """
         if self.__listener.get_up():
             if self.__selected_pos[1] > 0:
                 self.__selected_pos[1] -= 1
@@ -280,7 +395,10 @@ class Fridge:
                 self.__selected_pos[0] += 1
         self.__move_selected_texture()
 
-    def __move_selected_texture(self):
+    def __move_selected_texture(self) -> None:
+        """
+        Moves the indicator for the selected position in the inventory.
+        """
         x_tile_size = 0.184
         y_tile_size = 0.334
 

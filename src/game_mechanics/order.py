@@ -21,6 +21,15 @@ from src.textures.model_texture import ModelTexture
 
 class Possibility:
     def __init__(self, name: str, wishes: list, time: float, vessel=None, content=None):
+        """
+        Initializes a Possibility object.
+
+        :param name: The name of the possibility.
+        :param wishes: A list of wishes with the possibility.
+        :param time: The time for this possibility.
+        :param vessel: An optional vessel type for the possibility.
+        :param content: Optional content for the possibility.
+        """
         self.__name = name
         self.__wishes = wishes
         self.__time = time
@@ -28,21 +37,51 @@ class Possibility:
         self.__content = content
 
     def get_name(self) -> str:
+        """
+        gets the name of the possibility.
+
+        :return: The name of the possibility.
+        """
         return self.__name
 
     def get_wishes(self) -> list:
+        """
+        gets a copy of the wishes of the possibility.
+
+        :return: A list of wishes.
+        """
         return self.__wishes.copy()
 
     def get_time(self) -> float:
+        """
+        gets the time needed for the possibility.
+
+        :return: The time connected with the possibility.
+        """
         return self.__time
 
     def set_content(self, content: list[str]) -> None:
+        """
+        Sets the content for the possibility.
+
+        :param content: A list of content items to associate with the possibility.
+        """
         self.__content = content
 
     def get_content(self) -> list[str]:
+        """
+        gets the content og the possibility.
+
+        :return: A list of content items.
+        """
         return self.__content
 
     def get_vessel(self) -> int:
+        """
+        gets the vessel type of the possibility.
+
+        :return: The vessel type.
+        """
         return self.__vessel
 
 
@@ -51,6 +90,12 @@ class Order:
     __unpicked_game_objects = list()
 
     def __init__(self, master: 'MasterOrder', amount_of_orders: int):
+        """
+        Initializes an Order object.
+
+        :param master: The master order handler.
+        :param amount_of_orders: The number of orders to create.
+        """
         self.__master = master
         self.__current_order = master.create_order(amount_of_orders)
         self.__initial_time = master.calculate_time(self.__current_order)
@@ -65,15 +110,35 @@ class Order:
         self.__ticket_height = 0
 
     def get_order(self) -> list:
+        """
+        gets the current order.
+
+        :return: A copy of the current order list.
+        """
         return self.__current_order.copy()
 
     def get_time(self) -> float:
+        """
+        gets the remaining time for the current order.
+
+        :return: The remaining time for the order.
+        """
         return self.__time
 
     def get_initial_time(self) -> float:
+        """
+        gets the initial time of the order.
+
+        :return: The initial time for the order.
+        """
         return self.__initial_time
 
     def get_order_string(self) -> str:
+        """
+        Generates a string representation of the current order.
+
+        :return: A string detailing the current order.
+        """
         string = ""
         for element in self.get_order():
             name = element[0].get_name()
@@ -83,19 +148,30 @@ class Order:
         return string
 
     def get_gui_text(self) -> GUIText:
+        """
+        gets the GUI text object of the order.
+
+        :return: The GUIText object for the order.
+        """
         return self.__text
 
     def get_all_contents(self) -> list[list]:
+        """
+        gets the contents of all items in the current order.
+
+        :return: A list of contents for each order item.
+        """
         l = list()
         for order in self.get_order():
             l.append(order[0].get_content())
         return l
 
-    @staticmethod
-    def create_fbo(x: int, y: int) -> FBO:
-        return FBO(x, y, multi_target=False, depth_buffer_type=FBO.DEPTH_TEXTURE)
-
     def __get_texture(self) -> ModelTexture:
+        """
+        Returns the texture for the order's GUI representation.
+
+        :return: The ModelTexture object for the GUI.
+        """
         x = 1920
         y = 1080
         fbo = FBO(x, y, multi_target=False, depth_buffer_type=FBO.DEPTH_TEXTURE)
@@ -107,6 +183,11 @@ class Order:
         return ModelTexture(fbo.get_color_texture())
 
     def __get_model(self) -> RawModel:
+        """
+        Creates and returns the model for the order's ticket.
+
+        :return: The RawModel object of the ticket.
+        """
         file_name = "ticket"
         obj = open(f"{PATH}/res/objs/machinery/{file_name}.obj", 'w')
         x = 0.075
@@ -128,6 +209,14 @@ class Order:
         return self.__master.get_obj_loader().load_obj_model(f"objs/machinery/{file_name}", self.__master.get_loader())
 
     def __get_game_object(self, pos: list[float], rot: list[float], size: float) -> GameObject:
+        """
+        Creates a GameObject of the order ticket.
+
+        :param pos: The position for the GameObject.
+        :param rot: The rotation for the GameObject.
+        :param size: The size for the GameObject.
+        :return: The created GameObject for the order ticket.
+        """
         static_model = TexturedModel(self.__get_model(), self.__get_texture())
         ticket_entity = Entity(static_model, pos, *rot, size)
 
@@ -145,6 +234,12 @@ class Order:
         return game_object
 
     def spawn_ticket(self, ticket_machine: GameObject) -> GameObject:
+        """
+        Spawns a ticket GameObject based on the specified ticket machine.
+
+        :param ticket_machine: The GameObject of the ticket machine.
+        :return: The created GameObject of the ticket.
+        """
         x = 0.3 * math.sin(math.radians(ticket_machine.get_rot_y())) * ticket_machine.get_scale()
         y = 1.8 * ticket_machine.get_scale()
         z = 0.3 * math.cos(math.radians(ticket_machine.get_rot_y())) * ticket_machine.get_scale()
@@ -164,6 +259,11 @@ class Order:
         return game_object
 
     def check_if_fulfilled(self) -> None:
+        """
+        Checks if the current order has been fulfilled by the placed products.
+
+        If the order is fulfilled, it updates the fulfilled status and the right/wrong order counts.
+        """
         if self.__current_order:
             self.__time -= Time.get_delta_time()
         else:
@@ -191,19 +291,43 @@ class Order:
                     self.__master.get_placed_products().remove(product)
 
     def calculate_points(self) -> int:
+        """
+        Calculates and returns the total points based on the orders fulfilled.
+
+        :return: The calculated points.
+        """
         self.__points = (10 * self.__right_orders) - (5 * self.__wrong_orders) + int(self.__time)
         return self.__points
 
     def is_fulfilled(self) -> bool:
+        """
+        Checks if the current order has been fulfilled.
+
+        :return: True if the order is fulfilled, False otherwise.
+        """
         return self.__fulfilled
 
     def remove_game_object_from_list(self, game_object: GameObject) -> None:
+        """
+        Removes the specified GameObject from the unpicked game objects list.
+
+        :param game_object: The GameObject to be removed.
+        """
         if game_object in self.__unpicked_game_objects:
             self.__unpicked_game_objects.remove(game_object)
 
 
+
 class MasterOrder:
     def __init__(self, loader, obj_loader, gui_renderer, parent_object: GameObject):
+        """
+        Initializes a MasterOrder object.
+
+        :param loader: The  loader.
+        :param obj_loader: The object loader
+        :param gui_renderer: The GUI renderer
+        :param parent_object: The parent GameObject
+        """
         self.__chance_for_wish = 0.25
         self.__placed_products = []
 
@@ -221,6 +345,12 @@ class MasterOrder:
         self.__i = 0
 
     def create_order(self, amount_of_orders: int) -> list:
+        """
+        Creates a list of orders based on possibilities and wishes.
+
+        :param amount_of_orders: The number of orders to create
+        :return: A list of orders containing a product, an optional wish, and the total time
+        """
         order = list()
         for _ in range(amount_of_orders):
             prod = self.__possibilities[random.randint(0, len(self.__possibilities)-1)]
@@ -239,6 +369,11 @@ class MasterOrder:
         return order
 
     def load_content(self, prod: Possibility, wish: str) -> str | None:
+        """
+        :param prod: The product to load content into.
+        :param wish: The wish connected with the product.
+        :return: The loaded wish if applicable, otherwise None.
+        """
         if not wish:
             if not prod.get_content():
                 prod.set_content([prod.get_name()])
@@ -276,6 +411,11 @@ class MasterOrder:
                 prod.get_content().append(wish)
 
     def place(self, product: GameObject):
+        """
+        Places a product in the order
+
+        :param product: The GameObject of the product to place.
+        """
         self.__placed_products.append(product.get_attachment())
         left_corner_offset = [4 * self.__parent_object.get_scale(),
                               4.3 * self.__parent_object.get_scale(),
@@ -305,7 +445,13 @@ class MasterOrder:
         self.__i += 1
 
     @staticmethod
-    def calculate_time(order: list):
+    def calculate_time(order: list) -> float:
+        """
+        Calculates the total time required for fulfilling the order
+
+        :param order: The list of products in the order.
+        :return: The total calculated time.
+        """
         time = 0
         grace_factor = 4
         for element in order:
@@ -314,26 +460,57 @@ class MasterOrder:
         return time
 
     def get_font(self) -> FontType:
+        """
+        Returns the font
+
+        :return: The FontType object of the receipt.
+        """
         return self.__font
 
     def get_loader(self):
+        """
+        Returns the resource loader used by the MasterOrder.
+
+        :return: The loader object.
+        """
         return self.__loader
 
     def get_obj_loader(self):
+        """
+        Returns the object loader.
+
+        :return: The object loader.
+        """
         return self.__obj_loader
 
     def get_gui_renderer(self):
+        """
+        Returns the GUI renderer.
+
+        :return: The GUI renderer object.
+        """
         return self.__gui_renderer
 
-    def get_placed_products(self):
+    def get_placed_products(self) -> list:
+        """
+        Returns the list of placed products.
+
+        :return: A list of GameObjects of the placed products.
+        """
         return self.__placed_products
 
     def __load_coffee_products(self) -> None:
+        """
+        Loads available coffee products into the coffee dictionary.
+        """
         for instance in CoffeePage.get_instances():
             for product in instance.get_products():
                 self.__coffee_dict[product.get_name()] = product
 
     def __load_possibilities(self) -> None:
+        """
+        Loads possible products into the possibilities list.
+        """
         poss = list()
         poss.append(Possibility("Espresso", ["Decaffeinated"],
                                 self.__coffee_dict["Espresso"].get_brew_length(),
