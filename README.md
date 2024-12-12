@@ -11,8 +11,8 @@ A Python-based tool that detects changes to your Valheim world save files and au
 ## Requirements
 
 - Python 3.10 or higher (recommended)
-- Dropbox account and API keys (follow the `HOW_TO_GET_KEYS.md` file under `*\get_dropbox_keys\`!)
-- Have Valheim installed
+- Dropbox account and API keys
+- Valheim installed
 
 ## Installation
 
@@ -21,11 +21,10 @@ A Python-based tool that detects changes to your Valheim world save files and au
    git clone https://github.com/yourusername/valheim-save-sync.git
    cd valheim-save-sync
    ```
-2. Run the installer file:
+2. Install the required Python packages:
    ```bash
-   installer.bat
+   pip install -r requirements.txt
    ```
-3. A file will be created inside the working directory and a shortcut is being made to the desktop.
 
 ## Usage
 
@@ -33,18 +32,13 @@ A Python-based tool that detects changes to your Valheim world save files and au
    ```bash
    python __main__.py
    ```
-   Or run the created executables:
-   ```bash
-   valheim-sync.exe
-   ```
-2. The tool will automatically detect changes to the local Valheim save files and synchronize them across all shared users via Dropbox.
+2. The tool will automatically detect changes to Valheim save files and synchronize them across all shared users via Dropbox.
 
 ## How It Works
 
-1. The program monitors the directory where the lcoal Valheim save files are stored.
+1. The program monitors the directory where Valheim save files are stored.
 2. When a change is detected, the updated files are uploaded to a shared Dropbox folder.
 3. Shared users automatically download the updated save files to their local computers on startup of Valheim.
-4. This only works with the local world save files. So in order for the worlds to be uploaded, you need to save them locally
 
 ## Contributing
 
