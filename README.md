@@ -11,7 +11,7 @@ A Python-based tool that detects changes to your Valheim world save files and au
 ## Requirements
 
 - Python 3.10 or higher (recommended)
-- Dropbox account and API keys (follow the `HOW_TO_GET_KEYS.md` file under `*\get_dropbox_keys\`!)
+- Dropbox account and API keys (follow the [HOW_TO_GET_KEYS](get_dropbox_keys\HOW_TO_GET_KEYS.md) file under `*\get_dropbox_keys\`!)
 - Have Valheim installed
 
 ## Installation
