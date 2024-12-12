@@ -44,7 +44,7 @@ class ValheimDetector:
         try:
             if "valheim.exe" in (p.name() for p in psutil.process_iter()) and not self.previously_run:
                 self.previously_run = True
-                self.toaster.show_toast("Game start has been detected.", " ")
+                self.toaster.show_toast("Game start has been detected.", " ", icon_path="valheim_sync.ico")
                 return True
             elif not "valheim.exe" in (p.name() for p in psutil.process_iter()):
                 self.previously_run = False
@@ -70,14 +70,14 @@ class ValheimDetector:
                 new_hex = hashlib.md5(f.read()).hexdigest()
                 if self.prev_hex.db != new_hex:
                     changed = True
-                    self.toaster.show_toast("files changed.", " ")
+                    self.toaster.show_toast("files changed.", " ", icon_path="valheim_sync.ico")
                     self.prev_hex.db = new_hex
                 f.close()
             with open(f"{self.path}\\{self.world_name}.fwl", "rb") as f:
                 new_hex = hashlib.md5(f.read()).hexdigest()
                 if self.prev_hex.fwl != new_hex:
                     changed = True
-                    self.toaster.show_toast("files changed.", " ")
+                    self.toaster.show_toast("files changed.", " ", icon_path="valheim_sync.ico")
                     self.prev_hex.fwl = new_hex
                 f.close()
         except FileNotFoundError:

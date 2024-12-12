@@ -19,10 +19,11 @@ def main():
 
     toaster = ToastNotifier()
 
-    toaster.show_toast("running... ", "Valheim-Sync has been started.")
+    toaster.show_toast("running... ", "Valheim-Sync has been started.", icon_path="valheim_sync.ico")
     dropbox = DBoxHandler(os.getenv("APP_KEY"), os.getenv("APP_SECRET"), os.getenv("REFRESH_TOKEN"), toaster)
     valheim = ValheimDetector(WORLD_NAME, dropbox, toaster)
     running = True
+
     while running:
         if valheim.game_started():
             dropbox.download_save_files(valheim.path, WORLD_NAME)

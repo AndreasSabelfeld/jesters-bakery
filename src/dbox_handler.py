@@ -22,7 +22,7 @@ class DBoxHandler:
         with open(f"{local_path}\\{world_name}.fwl", 'rb') as f:
             self.dbx.files_upload(f.read(), f"/{world_name}.fwl", mode=dropbox.files.WriteMode.overwrite)
             f.close()
-        self.toaster.show_toast("files uploaded!", " ")
+        self.toaster.show_toast("files uploaded!", " ", icon_path="valheim_sync.ico")
 
     def download_save_files(self, local_path: str, world_name: str) -> None:
         try:
@@ -36,8 +36,8 @@ class DBoxHandler:
                 f.write(res.content)
                 f.close()
                 os.replace("tmp.fwl", f"{local_path}\\{world_name}.fwl")
-            self.toaster.show_toast("files downloaded!", " ")
+            self.toaster.show_toast("files downloaded!", " ", icon_path="valheim_sync.ico")
 
         except dropbox.exceptions.ApiError:
-            self.toaster.show_toast("Error:", "No such file in Dropbox directory.")
+            self.toaster.show_toast("Error:", "No such file in Dropbox directory.", icon_path="valheim_sync.ico")
             self.upload_save_files(local_path, world_name)
